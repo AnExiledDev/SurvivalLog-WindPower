@@ -78,6 +78,9 @@ internal static class WindPatches
         return _weatherId;
     }
 
+    /// <summary>The weather now, for the test buttons: its id (-1 when there is none) and its name.</summary>
+    internal static (int Id, string Name) Weather() => (WeatherId(), _weatherName);
+
     /// <summary>The wind as a whole percent of the rating, for the weather tooltip; -1 when there is no weather.</summary>
     public static int WindPercent() => WeatherId() < 0 ? -1 : WindOutput.Percent(Wind());
 

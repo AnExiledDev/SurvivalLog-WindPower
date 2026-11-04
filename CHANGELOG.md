@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- With Cheat Menu installed, its Mod tests tab has two Wind Power buttons: Show turbines (the wind now and what each turbine makes) and Show both recipes now.
+
 ## 0.4.0
 
 - New: a Medium Wind Turbine. Its upright rotor of two half drums catches the wind from any side, and it fits a medium furniture spot in the yard outside or on the 2F terrace.

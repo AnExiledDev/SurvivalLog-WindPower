@@ -13,6 +13,7 @@ Each turbine has its own model and icon. The rotor speeds up and slows down smoo
 - The Large Wind Turbine's recipe shows up with the Lead-Acid Battery Pack's, when [Main Quest] Store the Electricity begins. Its package takes 5 Scrap Metal, 3 Wire, 3 Electronic Components and 1 Stainless Steel Plate.
 - A save that is already past those quests gets the recipes when it loads.
 - Before the disaster, the Classic Furniture shop sells 2 of each: the Medium Wind Turbine for 60 and the Large for 120.
+- **Test buttons**: with Cheat Menu installed, its Mod tests tab shows the wind now and what each turbine makes, or shows both recipes right away.
 
 ## Power
 
