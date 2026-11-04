@@ -57,6 +57,8 @@ internal sealed class TurbineTables
 
         if (config == null || english == null || chinese == null) return;
 
+        KeepDyeable(config);
+
         var tables = new Tables(config);
 
         if (!tables.HasRows) return;
@@ -152,6 +154,36 @@ internal sealed class TurbineTables
 
             _log($"{kind.Name} added: item {ids.Item}, furniture {ids.Furniture}, recipe {ids.Recipe}, power row {ids.Electrical}; rated {wanted.RatedPower}, materials {MaterialText(materials)}, price {wanted.ShopPrice}, stock {wanted.ShopStock}");
         }
+    }
+
+    /// <summary>
+    /// Puts the turbines' prefab names on the game's list of furniture that can be dyed, which it loads once a run
+    /// starts, and makes the game rebuild its lookup from it. Three lookups a second while they are there.
+    /// </summary>
+    private void KeepDyeable(ConfigManager config)
+    {
+        var names = config._dyeableResNames;
+
+        if (names == null) return;
+
+        var stale = false;
+
+        foreach (var kind in TurbineRows.All)
+            if (!names.Contains(kind.ResName)) stale |= names.Add(kind.ResName);
+
+        // A lookup built before our rows were written lacks them too.
+        var ids = config._dyeableFurnitureIds;
+        var furniture = config._Config_Furniture_Dict;
+
+        if (ids != null && furniture != null && config._dyeableSourceDict?.Pointer == furniture.Pointer)
+            foreach (var kind in TurbineRows.All)
+                if (furniture.ContainsKey(kind.Ids.Furniture) && !ids.Contains(kind.Ids.Furniture)) stale = true;
+
+        if (!stale) return;
+
+        // The game rebuilds its list of dyeable ids when this no longer points at the furniture table.
+        config._dyeableSourceDict = null;
+        _log("the turbines can be dyed");
     }
 
     /// <summary>Adds each turbine's recipe to the quest rewards that show its solar panel or battery.</summary>

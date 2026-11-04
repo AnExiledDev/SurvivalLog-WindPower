@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0
+
+- The turbines can be dyed, like the game's own furniture, in any of its 8 colours. The olive paint takes the colour; the orange stripes, the blades and the rust stay as they are.
+- Made for Survival Log 1.1.20151.
+
 ## 0.5.0
 
 - New: a Small Wind Turbine. Three blades and a tail vane on a pole, for a small furniture spot in the yard outside or on the 2F terrace. Its head turns to face the wind.

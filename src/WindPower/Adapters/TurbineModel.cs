@@ -21,7 +21,8 @@ namespace WindPower.Adapters;
 /// it, it gets a copy of the prefab of the solar panel the turbine copies (so every part the game looks for is there:
 /// the head bar, the collider, the animator) with the panel's meshes swapped for the turbine's, built from the model
 /// file inside the DLL. The rotor's speed follows the turbine's output, and on the large turbine the whole top swings
-/// round into gusts (<see cref="TurbineMotion"/>). If a model cannot be built, the game gets the solar panel's own
+/// round into gusts (<see cref="TurbineMotion"/>). The panel's dye palette gets the turbine's own painted materials,
+/// so the game's dyes recolour it. If a model cannot be built, the game gets the solar panel's own
 /// prefab, so the turbine still works, looking like a panel.
 /// </summary>
 internal static class TurbineModel
@@ -247,9 +248,7 @@ internal static class TurbineModel
             _log("the solar panel's prefab has no model animator; the turbine may not light up when picked");
         }
 
-        var dye = copy.GetComponent<FurnitureDyePalette>();
-
-        if (dye != null) dye.Targets = new Il2CppReferenceArray<Renderer>(0);
+        SetDyes(copy, look.Kind, model, materials, made);
 
         _log($"{look.Kind.Name} model built: {model.TriangleCount} triangles, {made.Count} meshes, {model.Materials.Count} materials");
     }
@@ -303,6 +302,80 @@ internal static class TurbineModel
         renderer.sharedMaterial = material;
 
         return renderer;
+    }
+
+    /// <summary>
+    /// Fills the solar panel's dye palette with the turbine's own: each painted material gets eight copies, one per game
+    /// dye, with the paint recoloured (<see cref="Paint"/>). The game swaps them in when the player dyes the turbine.
+    /// The colours come from the panel's own palette, so they follow the game's.
+    /// </summary>
+    private static void SetDyes(GameObject copy, TurbineKind kind, Model model, Material[] materials, List<MeshRenderer> made)
+    {
+        var palette = copy.GetComponent<FurnitureDyePalette>();
+
+        if (palette == null)
+        {
+            _log($"the solar panel's prefab has no dye palette, so the {kind.Name} cannot be dyed");
+
+            return;
+        }
+
+        var colours = GameColours(palette);
+        var entries = new List<FurnitureDyePalette.DyeEntry>();
+
+        for (var m = 0; m < model.Materials.Count; m++)
+        {
+            if (model.Materials[m].Image is not int image) continue;
+
+            var picture = Png.Decode(model.Images[image]);
+
+            if (Paint.PaintShare(picture) < Paint.MinimumShare) continue;
+
+            var variants = new Il2CppReferenceArray<Material>(colours.Count);
+
+            for (var slot = 0; slot < colours.Count; slot++)
+            {
+                var variant = new Material(materials[m]) { name = $"{materials[m].name}_Dye{slot + 1:00}" };
+                var texture = MakeTexture($"{model.Materials[m].Name}_Dye{slot + 1:00}", Paint.Recolour(picture, colours[slot]));
+
+                foreach (var map in new[] { "_BaseMap", "_MainTex" })
+                    if (variant.HasProperty(map)) variant.SetTexture(map, texture);
+
+                variants[slot] = variant;
+            }
+
+            entries.Add(new FurnitureDyePalette.DyeEntry { BaseMaterial = materials[m], Variants = variants });
+        }
+
+        palette.Entries = new Il2CppReferenceArray<FurnitureDyePalette.DyeEntry>(entries.ToArray());
+        palette.Targets = new Il2CppReferenceArray<Renderer>(made.Count);
+
+        for (var i = 0; i < made.Count; i++) palette.Targets[i] = made[i];
+
+        _log($"{kind.Name} dyes: {entries.Count} painted materials, {colours.Count} colours each");
+    }
+
+    /// <summary>The dye colours on the panel's own palette, in slot order; the known ones if it has none.</summary>
+    private static IReadOnlyList<DyeColour> GameColours(FurnitureDyePalette palette)
+    {
+        var variants = palette.Entries != null && palette.Entries.Length > 0 ? palette.Entries[0]?.Variants : null;
+
+        if (variants == null || variants.Length != Paint.GameDyes.Count) return Paint.GameDyes;
+
+        var colours = new List<DyeColour>();
+
+        for (var i = 0; i < variants.Length; i++)
+        {
+            var material = variants[i];
+
+            if (material == null || !material.HasProperty("_DyeColor")) return Paint.GameDyes;
+
+            var colour = material.GetColor("_DyeColor");
+
+            colours.Add(new DyeColour(colour.r, colour.g, colour.b));
+        }
+
+        return colours;
     }
 
     private static Material MakeMaterial(Material stock, ModelMaterial source, IReadOnlyList<byte[]> images)

@@ -6,7 +6,7 @@ Adds three wind turbines to Survival Log. They make power day and night, more th
 - **Medium Wind Turbine**: an upright rotor of two half drums that catches the wind from any side. It fits a medium furniture spot.
 - **Large Wind Turbine**: three blades on a mast. Every so often a gust comes through, and the whole top swings round to meet it. It fits a large furniture spot.
 
-Each turbine has its own model and icon. The rotor speeds up and slows down smoothly with the wind and stands still in Heavy Smog. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The weather box on the screen shows the wind too, as a Wind Intensity line.
+Each turbine has its own model and icon, and can be dyed like the game's own furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. The rotor speeds up and slows down smoothly with the wind and stands still in Heavy Smog. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The weather box on the screen shows the wind too, as a Wind Intensity line.
 
 ## Getting them
 
