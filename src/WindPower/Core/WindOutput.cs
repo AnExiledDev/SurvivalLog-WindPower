@@ -6,31 +6,59 @@ using System.Text;
 namespace WindPower.Core;
 
 /// <summary>
-/// How much power the Large Wind Turbine makes. The game gives every weather a wind value (0 for frost and storms, 0.1
-/// on sunny days, up to 0.6 in the worst cold snaps). The turbine turns day and night, so even calm air gives a quarter
-/// of its rated power, and each 0.1 of wind adds a quarter more.
+/// How much power the Large Wind Turbine makes. It turns day and night at a share of its rating that the weather sets:
+/// none in smog (smog forms in still air), a light breeze on clear days, more as fronts bring rain, and the most in cold
+/// snaps. In Heavy Rain the tail furls to turn the rotor out of the storm, so it stops short of full. The game's own
+/// Config_Weather.WindValue is read by nothing in the game, so the mod keeps its own table here.
 /// </summary>
 public static class WindOutput
 {
-    /// <summary>The same rating as the Large Solar Panel, which makes 24 at noon in full sun.</summary>
-    public const float Rated = 24f;
+    /// <summary>The Large Solar Panel's output outdoors on a Clear day.</summary>
+    public const float Rated = 48f;
 
-    private const float Calm = 0.25f;
-    private const float PerWind = 2.5f;
+    /// <summary>The 2F terrace stands higher and more open than the yard.</summary>
+    public const float TerraceBonus = 1.2f;
 
-    public static float Power(float wind) => Rated * (Calm + PerWind * Math.Max(0f, wind));
+    /// <summary>A weather the table does not know (one a game update adds) gets a cloudy day's wind.</summary>
+    public const float UnknownShare = 0.2f;
+
+    /// <summary>The share of the rating each weather gives, by Config_Weather id.</summary>
+    public static float Share(int weatherId) => weatherId switch
+    {
+        12 => 0f,
+        1 => 0.12f,
+        7 or 8 or 9 => 0.10f,
+        2 => 0.20f,
+        3 => 0.35f,
+        11 or 14 => 0.45f,
+        10 or 13 => 0.75f,
+        4 or 15 => 0.55f,
+        5 or 16 => 0.80f,
+        6 or 17 => 1.0f,
+        _ => UnknownShare,
+    };
+
+    /// <summary>Heavy Rain: the tail turns side-on so the storm cannot overspeed the rotor.</summary>
+    public static bool IsFurled(int weatherId) => weatherId is 10 or 13;
+
+    public static float Power(float share, bool isOnTerrace) => Rated * Math.Max(0f, share) * (isOnTerrace ? TerraceBonus : 1f);
 
     /// <summary>The whole number the game's power panel shows and adds up, rounded the way the game rounds.</summary>
     public static int Shown(float power) => (int)Math.Round(power);
 
-    public static int Percent(float power) => (int)Math.Round(power / Rated * 100f);
+    public static int Percent(float share) => (int)Math.Round(Math.Max(0f, share) * 100f);
 
     /// <summary>
     /// The line under the turbine's output in the power hover, built like the solar panel's: the game's own
-    /// "Rated {0}" text, then the weather and how hard the wind blows as a share of the rating.
+    /// "Rated {0}" text, the weather and how hard the wind blows as a share of the rating, then the terrace's bonus
+    /// when the turbine stands there.
     /// </summary>
-    public static string Note(string ratedFormat, string windFormat, string weatherName, float power) =>
-        string.Format(CultureInfo.InvariantCulture, ratedFormat, Shown(Rated)) + ", " + string.Format(CultureInfo.InvariantCulture, windFormat, weatherName, Percent(power) + "%");
+    public static string Note(string ratedFormat, string windFormat, string terraceText, string weatherName, float share, bool isOnTerrace)
+    {
+        var note = string.Format(CultureInfo.InvariantCulture, ratedFormat, Shown(Rated)) + ", " + string.Format(CultureInfo.InvariantCulture, windFormat, weatherName, Percent(share) + "%");
+
+        return isOnTerrace ? note + ", " + terraceText : note;
+    }
 
     /// <summary>
     /// Rewrites the turbines' rows in the power panel's facility list. The game builds each row the way it builds a

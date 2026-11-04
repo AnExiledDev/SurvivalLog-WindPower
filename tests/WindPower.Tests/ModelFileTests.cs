@@ -9,13 +9,44 @@ public class ModelFileTests
 {
     private static byte[] Asset(string name) => File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "assets", name));
 
-    private static readonly Model Turbine = Glb.Read(Asset("WindTurbineLarge.glb"), new[] { "Rotor" });
+    private static readonly Dictionary<string, Vector3> Movers = new()
+    {
+        ["Head"] = Vector3.UnitY,
+        ["Rotor"] = Vector3.UnitX,
+        ["Tail"] = Vector3.UnitY,
+    };
+
+    private static readonly Model Turbine = Glb.Read(Asset("WindTurbineLarge.glb"), Movers);
+
+    private static ModelPart Part(string name) => Turbine.Parts.Single(part => part.Name == name);
 
     [Fact]
-    public void TheTurbineSplitsIntoTheStillBodyAndTheSpinningRotor()
+    public void TheTurbineSplitsIntoTheStillBodyAndItsThreeMovingParts()
     {
-        Assert.Equal(new[] { Glb.BodyName, "Rotor" }, Turbine.Parts.Select(part => part.Name).OrderBy(name => name, StringComparer.Ordinal));
+        Assert.Equal(new[] { Glb.BodyName, "Head", "Rotor", "Tail" }, Turbine.Parts.Select(part => part.Name).OrderBy(name => name, StringComparer.Ordinal));
         Assert.All(Turbine.Parts, part => Assert.NotEmpty(part.Meshes));
+    }
+
+    // The rotor and tail ride on the head, so when the head swings into the wind they swing with it.
+    [Fact]
+    public void TheRotorAndTailRideOnTheHead()
+    {
+        Assert.Equal("Head", Part("Rotor").Parent);
+        Assert.Equal("Head", Part("Tail").Parent);
+        Assert.Null(Part("Head").Parent);
+    }
+
+    [Fact]
+    public void TheHeadAndTailTurnAboutTheUprightAtopTheMast()
+    {
+        var head = Part("Head");
+        var tail = Part("Tail");
+
+        Assert.InRange(head.Pivot.Y, 3.8f, 4.7f);
+        Assert.InRange(Math.Abs(head.Pivot.X) + Math.Abs(head.Pivot.Z), 0f, 0.05f);
+        Assert.InRange(head.Axis.Y, 0.99f, 1.01f);
+        Assert.InRange(Math.Abs(tail.Axis.Y), 0.99f, 1.01f);
+        Assert.InRange(tail.Pivot.Y, head.Pivot.Y, head.Pivot.Y + 0.6f);
     }
 
     // The rotor hub sits on top of the mast, a blade's length below the tips (the export scales the model to about
@@ -23,7 +54,7 @@ public class ModelFileTests
     [Fact]
     public void TheRotorTurnsAboutALevelAxisAtTheTopOfTheMast()
     {
-        var rotor = Turbine.Parts.Single(part => part.Name == "Rotor");
+        var rotor = Part("Rotor");
 
         Assert.InRange(rotor.Pivot.Y, 4.0f, 5.0f);
         Assert.InRange(Turbine.Bounds().Max.Y - rotor.Pivot.Y, 1.2f, 2.0f);
@@ -91,7 +122,7 @@ public class ModelFileTests
     [Fact]
     public void ANonGlbFileIsRefused()
     {
-        Assert.Throws<FormatException>(() => Glb.Read(new byte[40], new[] { "Rotor" }));
+        Assert.Throws<FormatException>(() => Glb.Read(new byte[40], Movers));
     }
 
     // A 3x2 picture whose rows use filters 1 (left), 2 (up), so the decoder must undo each against the right neighbour.

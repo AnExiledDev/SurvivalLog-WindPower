@@ -9,11 +9,12 @@ namespace WindPower;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.2.0";
+    private const string Version = "0.3.0";
 
     public override void Load()
     {
         var tables = new TurbineTables(message => Log.LogInfo(message));
+        var weatherPage = new WeatherPage(message => Log.LogInfo(message));
         var harmony = new Harmony(Guid);
         var iconPlaced = false;
 
@@ -31,7 +32,8 @@ public sealed class Plugin : BasePlugin
             }
 
             tables.Tick(now);
-            TurbineModel.Spin();
+            TurbineModel.Animate();
+            weatherPage.Tick(now);
         };
         AddComponent<WindTicker>();
         Log.LogInfo($"Wind Power {Version} loaded");

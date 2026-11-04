@@ -1,15 +1,16 @@
 Name: Wind Power
-Summary: Adds a Large Wind Turbine with its own model, icon and recipe. Install it outdoors and it makes power day and night from the wind: the windier the weather, the more it makes. Hover over it to see its output and the wind. Remove the mod and your save still loads, with each placed turbine turned into a Large Solar Panel. Early test build.
+Summary: Adds a Large Wind Turbine with its own animated model, icon and recipe. Install it outdoors and it makes power day and night from the wind, from nothing in Heavy Smog to 48 in Severe Cold, more on the 2F terrace. The weather box shows the wind, and hovering over the turbine shows its output at its base. Remove the mod and your save still loads. Early test build.
 
 Description (BBCode):
 Wind Power adds a Large Wind Turbine to Survival Log.
 
 [size=5]Main features[/size]
 [list]
-[*][b]Its own item[/b]: the Large Wind Turbine has its own model, with blades that turn faster in stronger wind, and its own icon.[/*]
+[*][b]Its own item[/b]: the Large Wind Turbine has its own model and icon. Its blades speed up and slow down with the wind, its head turns gently into the wind, and in Heavy Rain its tail swings to the side to protect the rotor.[/*]
 [*][b]Craft it[/b]: the Large Wind Turbine Package takes 6 Scrap Metal, 4 Electrical Wire, 4 Stainless Steel Plate and 3 Electronic Components.[/*]
-[*][b]Power from the wind[/b]: it makes power day and night. 12 on Clear or Cloudy days, 18 in rain, and up to 42 in Severe Cold.[/*]
-[*][b]See what it makes[/b]: hover over the turbine to see its output now and how strong the wind is.[/*]
+[*][b]Power from the wind[/b]: it makes power day and night, more the windier the weather is. Nothing in Heavy Smog, 6 on a Clear day, 17 in rain, 36 in Heavy Rain and up to 48 in Severe Cold.[/*]
+[*][b]Higher is windier[/b]: a turbine on the 2F terrace makes a fifth more than one in the yard, up to 58.[/*]
+[*][b]See the wind[/b]: the weather box on the screen shows a Wind Intensity line, and hovering over the turbine shows its output and the wind at its base.[/*]
 [*][b]Outdoors only[/b]: it fits a large furniture spot in the yard outside or on the 2F terrace, and nowhere indoors.[/*]
 [*][b]Safe to remove[/b]: the game saves each turbine as a Large Solar Panel, so a save still loads without the mod.[/*]
 [*][b]English and Chinese[/b]: every name and description comes in both.[/*]
@@ -17,8 +18,6 @@ Wind Power adds a Large Wind Turbine to Survival Log.
 
 [size=5]Known issues[/size]
 This is an early test build.
-
-The game counts Heavy Rain and the cold clear days (Frosty/Clear, Cold/Clear, Chilly/Clear) as still air, so the turbine makes its least power then, 6.
 
 A turbine package still in your bag or in storage is lost when the mod is removed. Install it first.
 
@@ -34,10 +33,11 @@ A turbine package still in your bag or in storage is lost when the mod is remove
 
 [size=5]主要功能[/size]
 [list]
-[*][b]独立物品[/b]：大型风力发电机有自己的模型和图标，风越大，叶片转得越快。[/*]
+[*][b]独立物品[/b]：大型风力发电机有自己的模型和图标。叶片随风力加速或减速，机头会轻轻转向来风，遇到「暴雨」时尾翼会转到侧面，保护风轮。[/*]
 [*][b]可以制作[/b]：大型风力发电机包裹需要 6 个铁皮、4 个电线、4 个不锈钢板和 3 个电器元件。[/*]
-[*][b]靠风发电[/b]：白天黑夜都能发电。晴天和阴天 12，雨天 18，「重度寒潮」中最高 42。[/*]
-[*][b]随时查看[/b]：鼠标悬停在风力发电机上，可以看到当前发电量和风力大小。[/*]
+[*][b]靠风发电[/b]：白天黑夜都能发电，风越大发电越多。「大雾霾天」不发电，晴天 6，雨天 17，「暴雨」36，「重度寒潮」中最高 48。[/*]
+[*][b]越高风越大[/b]：装在二楼露台的风力发电机比屋外空地多发两成电，最高 58。[/*]
+[*][b]看得到风[/b]：屏幕上的天气框会多一行「风力强度」，鼠标悬停在风力发电机上，会在它的底座旁显示当前发电量和风力。[/*]
 [*][b]只能装在户外[/b]：需要屋外空地或二楼露台的大型家具位，室内无法安装。[/*]
 [*][b]可以放心移除[/b]：游戏会把每台风力发电机存成大型太阳能板，所以移除本模组后存档仍能读取。[/*]
 [*][b]中英双语[/b]：所有名称和说明都有中文和英文。[/*]
@@ -45,8 +45,6 @@ A turbine package still in your bag or in storage is lost when the mod is remove
 
 [size=5]已知问题[/size]
 这是早期测试版。
-
-游戏把「暴雨」和「霜晴」「寒晴」「凛晴」都算作无风，所以这时发电量最低，只有 6。
 
 仍在背包或储物箱里的风力发电机包裹，在移除本模组后会消失。请先把它安装好。
 

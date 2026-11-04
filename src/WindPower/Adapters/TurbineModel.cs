@@ -20,7 +20,8 @@ namespace WindPower.Adapters;
 /// Gives the turbine its own model. Its furniture row names a prefab the game does not have; when the game asks for
 /// it, it gets a copy of the Large Solar Panel's prefab (so every part the game looks for is there: the head bar, the
 /// collider, the animator) with the panel's meshes swapped for the turbine's, built from the model file inside the
-/// DLL. The rotor turns faster the harder the wind blows. If the model cannot be built, the game gets the solar panel's
+/// DLL. The rotor's speed follows the turbine's output, the head hunts gently as the wind shifts, and the tail swings
+/// side-on in Heavy Rain (<see cref="TurbineMotion"/>). If the model cannot be built, the game gets the solar panel's
 /// own prefab, so the turbine still works, looking like a panel.
 /// </summary>
 internal static class TurbineModel
@@ -29,19 +30,26 @@ internal static class TurbineModel
     private const string Path = Folder + TurbineRows.ResName;
     private const string StockPath = Folder + "P_RoofEquipment_009_S1_M02_Large";
     private const string ModelName = "WindTurbine";
+    private const string HeadName = "Head";
     private const string RotorName = "Rotor";
+    private const string TailName = "Tail";
     private const float HeadBarAboveTop = 0.2f;
 
-    /// <summary>Degrees a second: a slow turn in still air, about one turn a second in the worst cold snap.</summary>
-    private const float CalmSpin = 40f;
-    private const float SpinPerWind = 500f;
+    /// <summary>The model's moving parts and the axis of each node's own space it turns about: three.js spins a rotor about X.</summary>
+    private static readonly Dictionary<string, Numerics.Vector3> Movers = new()
+    {
+        [HeadName] = Numerics.Vector3.UnitY,
+        [RotorName] = Numerics.Vector3.UnitX,
+        [TailName] = Numerics.Vector3.UnitY,
+    };
 
-    private static readonly Dictionary<IntPtr, Transform> Rotors = new();
+    private static readonly Dictionary<IntPtr, Rig> Rigs = new();
+    private static readonly Dictionary<string, UnityEngine.Vector3> Axes = new();
+    private static readonly System.Random Phases = new();
     private static Action<string> _log = _ => { };
     private static GameObject? _holder;
     private static GameObject? _template;
     private static Model? _model;
-    private static UnityEngine.Vector3 _rotorAxis = UnityEngine.Vector3.right;
     private static bool _hasFailed;
 
     public static void Apply(Harmony harmony, Action<string> log)
@@ -54,31 +62,40 @@ internal static class TurbineModel
         Patch(harmony, AccessTools.Method(typeof(BattleResource), "LoadGameObject", new[] { typeof(string), typeof(GameObject), typeof(bool) }), postfix: nameof(FindRotorParented));
     }
 
-    /// <summary>Called every frame on the main thread: turns every turbine's rotor that is still in the world.</summary>
-    public static void Spin()
+    /// <summary>Called every frame on the main thread: moves every turbine that is still in the world.</summary>
+    public static void Animate()
     {
-        if (Rotors.Count == 0) return;
+        if (Rigs.Count == 0) return;
 
-        var step = (CalmSpin + SpinPerWind * Math.Max(0f, WindPatches.Wind(out _))) * Time.deltaTime;
-
-        if (step == 0f) return;
-
+        var (share, isFurled) = WindPatches.Wind();
+        var seconds = Time.deltaTime;
+        var time = Time.time;
         List<IntPtr>? gone = null;
 
-        foreach (var pair in Rotors)
+        foreach (var pair in Rigs)
         {
-            if (pair.Value == null || pair.Value.WasCollected)
+            var rig = pair.Value;
+
+            if (rig.Head == null || rig.Head.WasCollected)
             {
                 (gone ??= new List<IntPtr>()).Add(pair.Key);
 
                 continue;
             }
 
-            pair.Value.Rotate(_rotorAxis, step, Space.Self);
+            rig.Motion.Step(seconds, time, share, isFurled);
+            Turn(rig.Head, HeadName, rig.Motion.HeadYaw);
+            Turn(rig.Rotor, RotorName, rig.Motion.RotorAngle);
+            Turn(rig.Tail, TailName, rig.Motion.TailAngle);
         }
 
         if (gone != null)
-            foreach (var key in gone) Rotors.Remove(key);
+            foreach (var key in gone) Rigs.Remove(key);
+    }
+
+    private static void Turn(Transform? part, string name, float degrees)
+    {
+        if (part != null && Axes.TryGetValue(name, out var axis)) part.localRotation = Quaternion.AngleAxis(degrees, axis);
     }
 
     private static bool GiveOurModel(string __0, ref GameObject __result)
@@ -111,9 +128,14 @@ internal static class TurbineModel
     {
         if (path != Path || model == null) return;
 
-        var rotor = model.transform.Find(ModelName + "/" + RotorName);
+        var head = model.transform.Find(ModelName + "/" + HeadName);
 
-        if (rotor != null) Rotors[rotor.Pointer] = rotor;
+        if (head == null) return;
+
+        // Each turbine gets its own head start on the gusts, so a row of them never turns in step.
+        var motion = new TurbineMotion((float)Phases.NextDouble() * 600f);
+
+        Rigs[head.Pointer] = new Rig(head, head.Find(RotorName), head.Find(TailName), motion);
     }
 
     private static GameObject? Template()
@@ -132,7 +154,7 @@ internal static class TurbineModel
             return null;
         }
 
-        _model ??= Glb.Read(Resource("WindTurbineLarge.glb"), new[] { RotorName });
+        _model ??= Glb.Read(Resource("WindTurbineLarge.glb"), Movers);
 
         if (_holder == null || _holder.WasCollected)
         {
@@ -179,23 +201,10 @@ internal static class TurbineModel
         ours.transform.localScale = new UnityEngine.Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
 
         var made = new List<MeshRenderer>();
+        var holders = Pivots(ours.transform, model, layer);
 
         foreach (var part in model.Parts)
-        {
-            var holder = ours.transform;
-
-            if (part.Name != Glb.BodyName)
-            {
-                var pivot = new GameObject(part.Name) { layer = layer };
-
-                pivot.transform.SetParent(ours.transform, false);
-                pivot.transform.localPosition = Unity(part.Pivot);
-                holder = pivot.transform;
-                _rotorAxis = Unity(part.Axis);
-            }
-
-            for (var i = 0; i < part.Meshes.Count; i++) made.Add(MakeMesh(holder, $"{part.Name}_{i}", part.Meshes[i], materials[part.Meshes[i].Material], layer));
-        }
+            for (var i = 0; i < part.Meshes.Count; i++) made.Add(MakeMesh(holders[part.Name], $"{part.Name}_{i}", part.Meshes[i], materials[part.Meshes[i].Material], layer));
 
         // Stand the turbine where the panel stood: centred on the panel's footprint, its foot at the panel's foot.
         var (min, max) = model.Bounds();
@@ -237,6 +246,31 @@ internal static class TurbineModel
         if (dye != null) dye.Targets = new Il2CppReferenceArray<Renderer>(0);
 
         _log($"Large Wind Turbine model built: {model.TriangleCount} triangles, {made.Count} meshes, {model.Materials.Count} materials");
+    }
+
+    /// <summary>
+    /// A pivot for each moving part at its turning point, each hung on the part it rides on (the rotor and the tail on
+    /// the head, so they turn with it). Every pivot starts unturned, so each axis, read with the model at rest, holds
+    /// in its pivot's own space. The body's meshes hang straight on the model.
+    /// </summary>
+    private static Dictionary<string, Transform> Pivots(Transform model, Model source, int layer)
+    {
+        var holders = new Dictionary<string, Transform> { [Glb.BodyName] = model };
+
+        foreach (var part in source.Parts.Where(part => part.Name != Glb.BodyName))
+        {
+            var pivot = new GameObject(part.Name) { layer = layer };
+
+            pivot.transform.SetParent(model, false);
+            pivot.transform.localPosition = Unity(part.Pivot);
+            holders[part.Name] = pivot.transform;
+            Axes[part.Name] = Unity(part.Axis);
+        }
+
+        foreach (var part in source.Parts)
+            if (part.Parent != null && holders.TryGetValue(part.Parent, out var parent)) holders[part.Name].SetParent(parent, true);
+
+        return holders;
     }
 
     private static MeshRenderer MakeMesh(Transform parent, string name, ModelMesh source, Material material, int layer)
@@ -375,6 +409,8 @@ internal static class TurbineModel
     private static UnityEngine.Vector3 Divide(UnityEngine.Vector3 v, UnityEngine.Vector3 by) => new(v.x / by.x, v.y / by.y, v.z / by.z);
 
     private static UnityEngine.Vector3 Unity(Numerics.Vector3 v) => new(v.X, v.Y, v.Z);
+
+    private sealed record Rig(Transform Head, Transform? Rotor, Transform? Tail, TurbineMotion Motion);
 
     internal static byte[] Resource(string name)
     {

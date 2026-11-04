@@ -14,10 +14,11 @@ public sealed record ModelMaterial(string Name, Vector4 BaseColor, float Metalli
 public sealed record ModelMesh(int Material, Vector3[] Positions, Vector3[] Normals, Vector2[] Uvs, int[] Triangles);
 
 /// <summary>
-/// A piece of the model that moves as one. The body has a zero pivot and axis. A spinning part's vertices are relative
-/// to <see cref="Pivot"/>, and it turns about <see cref="Axis"/>, both in model space.
+/// A piece of the model that moves as one. The body has a zero pivot and axis. A moving part's vertices are relative
+/// to <see cref="Pivot"/>, and it turns about <see cref="Axis"/>, both in model space as the model stands at rest.
+/// <see cref="Parent"/> names the moving part it rides on, if any (the rotor and the tail ride on the head).
 /// </summary>
-public sealed record ModelPart(string Name, Vector3 Pivot, Vector3 Axis, IReadOnlyList<ModelMesh> Meshes);
+public sealed record ModelPart(string Name, Vector3 Pivot, Vector3 Axis, string? Parent, IReadOnlyList<ModelMesh> Meshes);
 
 /// <summary>A model in Unity's axes: +Y up, left-handed, 1 unit = 1 m. <see cref="Images"/> are the png files as stored.</summary>
 public sealed record Model(IReadOnlyList<ModelPart> Parts, IReadOnlyList<ModelMaterial> Materials, IReadOnlyList<byte[]> Images)
@@ -57,9 +58,10 @@ public static class Glb
 
     /// <summary>
     /// The model in <paramref name="bytes"/>, split into the body and one part for each node named in
-    /// <paramref name="spinners"/>. A spinner turns about its node's own X axis, the way three.js turns a rotor.
+    /// <paramref name="movers"/>, each turning about the given axis of its node's own space (three.js turns a rotor
+    /// about its X, a head about its Y).
     /// </summary>
-    public static Model Read(byte[] bytes, IReadOnlyCollection<string> spinners)
+    public static Model Read(byte[] bytes, IReadOnlyDictionary<string, Vector3> movers)
     {
         var (json, bin) = Chunks(bytes);
 
@@ -67,11 +69,11 @@ public static class Glb
         var root = document.RootElement;
         var file = new GltfFile(root, bin);
 
-        var groups = new Dictionary<string, PartBuilder> { [BodyName] = new PartBuilder(Matrix4x4.Identity, spins: false) };
+        var groups = new Dictionary<string, PartBuilder> { [BodyName] = new PartBuilder(Matrix4x4.Identity, null, null) { Name = BodyName } };
         var scene = root.TryGetProperty("scene", out var sceneIndex) ? sceneIndex.GetInt32() : 0;
 
         foreach (var node in root.GetProperty("scenes")[scene].GetProperty("nodes").EnumerateArray())
-            Walk(file, node.GetInt32(), Matrix4x4.Identity, groups[BodyName], groups, spinners);
+            Walk(file, node.GetInt32(), Matrix4x4.Identity, groups[BodyName], groups, movers);
 
         var parts = groups.Select(pair => pair.Value.Build(pair.Key)).Where(part => part.Meshes.Count > 0).ToList();
 
@@ -102,22 +104,23 @@ public static class Glb
         return (json ?? throw new FormatException("glb has no JSON chunk"), bin ?? Array.Empty<byte>());
     }
 
-    private static void Walk(GltfFile file, int index, Matrix4x4 parentWorld, PartBuilder part, Dictionary<string, PartBuilder> groups, IReadOnlyCollection<string> spinners)
+    private static void Walk(GltfFile file, int index, Matrix4x4 parentWorld, PartBuilder part, Dictionary<string, PartBuilder> groups, IReadOnlyDictionary<string, Vector3> movers)
     {
         var node = file.Root.GetProperty("nodes")[index];
         var world = LocalMatrix(node) * parentWorld;
+        var name = node.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "";
 
-        if (node.TryGetProperty("name", out var name) && spinners.Contains(name.GetString() ?? "") && !groups.ContainsKey(name.GetString()!))
+        if (movers.TryGetValue(name, out var axis) && !groups.ContainsKey(name))
         {
-            part = new PartBuilder(world, spins: true);
-            groups[name.GetString()!] = part;
+            part = new PartBuilder(world, axis, part.Name) { Name = name };
+            groups[name] = part;
         }
 
         if (node.TryGetProperty("mesh", out var mesh)) part.Add(file, mesh.GetInt32(), world);
 
         if (node.TryGetProperty("children", out var children))
             foreach (var child in children.EnumerateArray())
-                Walk(file, child.GetInt32(), world, part, groups, spinners);
+                Walk(file, child.GetInt32(), world, part, groups, movers);
     }
 
     /// <summary>
@@ -272,11 +275,18 @@ public static class Glb
         private readonly Vector3 _axis;
         private readonly Dictionary<int, (List<Vector3> Positions, List<Vector3> Normals, List<Vector2> Uvs, List<int> Triangles)> _byMaterial = new();
 
-        public PartBuilder(Matrix4x4 world, bool spins)
+        private readonly string? _parent;
+
+        /// <param name="axis">The axis in the node's own space, or null for the body, which does not move.</param>
+        /// <param name="parent">The part the node sits in: the body, or a moving part it rides on.</param>
+        public PartBuilder(Matrix4x4 world, Vector3? axis, string? parent)
         {
-            _pivot = spins ? ToUnity(world.Translation) : Vector3.Zero;
-            _axis = spins ? Vector3.Normalize(ToUnity(Vector3.TransformNormal(Vector3.UnitX, world))) : Vector3.Zero;
+            _pivot = axis == null ? Vector3.Zero : ToUnity(world.Translation);
+            _axis = axis is { } local ? Vector3.Normalize(ToUnity(Vector3.TransformNormal(local, world))) : Vector3.Zero;
+            _parent = parent == BodyName ? null : parent;
         }
+
+        public string Name { get; init; } = "";
 
         public void Add(GltfFile file, int meshIndex, Matrix4x4 world)
         {
@@ -325,6 +335,6 @@ public static class Glb
             }
         }
 
-        public ModelPart Build(string name) => new(name, _pivot, _axis, _byMaterial.OrderBy(pair => pair.Key).Select(pair => new ModelMesh(pair.Key, pair.Value.Positions.ToArray(), pair.Value.Normals.ToArray(), pair.Value.Uvs.ToArray(), pair.Value.Triangles.ToArray())).ToList());
+        public ModelPart Build(string name) => new(name, _pivot, _axis, _parent, _byMaterial.OrderBy(pair => pair.Key).Select(pair => new ModelMesh(pair.Key, pair.Value.Positions.ToArray(), pair.Value.Normals.ToArray(), pair.Value.Uvs.ToArray(), pair.Value.Triangles.ToArray())).ToList());
     }
 }

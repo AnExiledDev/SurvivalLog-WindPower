@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
+using GameCore.HotUpdate.Battle.Show;
 using HarmonyLib;
 using WindPower.Core;
 using Il2CppFurnitures = Il2CppSystem.Collections.Generic.List<GameCore.HotUpdate.Battle.Logic.Furniture>;
@@ -11,7 +12,8 @@ namespace WindPower.Adapters;
 /// <summary>
 /// Makes the turbine's power come from the wind. Its power row is a solar row with no power of its own, so the game
 /// lists it, saves it and draws it like a panel; these hooks add its wind power to the city's supply and show it in
-/// the power panel, the power hover and the name hover. The game's sunlight sum (CalcSolarOutput) is left alone, since
+/// the power panel, the power hover and the name hover. The power hover is moved down to the turbine's foot, since the
+/// game puts it over the top, which is off screen when zoomed in on a six-metre turbine. The game's sunlight sum (CalcSolarOutput) is left alone, since
 /// Power Manager already hooks it. Every target was checked in GameAssembly.dll: no relative jump or call in its first
 /// 14 bytes. A hook that fails reports once and lets the game's own answer through.
 /// </summary>
@@ -20,9 +22,16 @@ internal static class WindPatches
     private const float WindCheckSeconds = 1f;
     private const string RatedKey = "ConstantText_Text_SR_Web_GeneratorFloatPopup_1";
 
+    /// <summary>How far above the turbine's foot the power hover points: about a person's chest.</summary>
+    private const float HoverAboveFoot = 1.2f;
+
     private static readonly HashSet<string> Failed = new();
+
+    /// <summary>Whether each turbine stands on the 2F terrace, by instance id; emptied with every weather read.</summary>
+    private static readonly Dictionary<long, bool> OnTerrace = new();
+
     private static Action<string> _log = _ => { };
-    private static float _wind;
+    private static int _weatherId = -1;
     private static string _weatherName = "";
     private static float _windReadAt = float.MinValue;
 
@@ -36,33 +45,59 @@ internal static class WindPatches
         Hook(harmony, typeof(Furniture), "GetElectricalHoverText", nameof(ShowWindInNameHover));
     }
 
-    /// <summary>The wind the game's weather gives now, read at most once a second, and the weather's name.</summary>
-    public static float Wind(out string weatherName)
+    /// <summary>The wind's share of the rating now and whether the tail is furled. With no weather (the main menu) it is still.</summary>
+    public static (float Share, bool IsFurled) Wind()
+    {
+        var id = WeatherId();
+
+        return id < 0 ? (0f, false) : (WindOutput.Share(id), WindOutput.IsFurled(id));
+    }
+
+    /// <summary>The weather's Config_Weather id, read at most once a second; -1 when there is none.</summary>
+    private static int WeatherId()
     {
         var now = UnityEngine.Time.realtimeSinceStartup;
 
-        if (now - _windReadAt >= WindCheckSeconds || now < _windReadAt)
-        {
-            _windReadAt = now;
-            _wind = 0f;
-            _weatherName = "";
+        if (now - _windReadAt < WindCheckSeconds && now >= _windReadAt) return _weatherId;
 
-            var weather = GameSingleton.Existing<BattleLogicWorld>()?._WeatherManager;
-            var row = weather == null ? null : GameSingleton.Existing<ConfigManager>()?.Get_Config_Weather(weather.GetWeatherConfigId());
+        _windReadAt = now;
+        _weatherId = -1;
+        _weatherName = "";
+        OnTerrace.Clear();
 
-            if (row != null)
-            {
-                _wind = row.WindValue;
-                _weatherName = Local(row.Name, row.Name_Local ?? "");
-            }
-        }
+        var weather = GameSingleton.Existing<BattleLogicWorld>()?._WeatherManager;
 
-        weatherName = _weatherName;
+        if (weather == null) return _weatherId;
 
-        return _wind;
+        _weatherId = weather.GetWeatherConfigId();
+
+        var row = GameSingleton.Existing<ConfigManager>()?.Get_Config_Weather(_weatherId);
+
+        if (row != null) _weatherName = Local(row.Name, row.Name_Local ?? "");
+
+        return _weatherId;
     }
 
-    private static float Power() => WindOutput.Power(Wind(out _));
+    /// <summary>The wind as a whole percent of the rating, for the weather tooltip; -1 when there is no weather.</summary>
+    public static int WindPercent() => WeatherId() < 0 ? -1 : WindOutput.Percent(Wind().Share);
+
+    private static float Power(Furniture furniture) => WindOutput.Power(Wind().Share, IsOnTerrace(furniture));
+
+    /// <summary>Whether the turbine's furniture spot is on the 2F terrace, asked once a second at most per turbine.</summary>
+    private static bool IsOnTerrace(Furniture furniture)
+    {
+        var id = furniture.InstanceId;
+
+        if (OnTerrace.TryGetValue(id, out var isOnTerrace)) return isOnTerrace;
+
+        var slot = AgentTools.GetAgentComponent<SlotComponent>(furniture)?.SlotName;
+        var config = GameSingleton.Existing<ConfigManager>();
+
+        isOnTerrace = !string.IsNullOrEmpty(slot) && config != null && config.GetMapSlotRoomByName(slot) == TurbineRows.TerraceRoom;
+        OnTerrace[id] = isOnTerrace;
+
+        return isOnTerrace;
+    }
 
     private static bool IsTurbine(Config_FurnitureElectrical? row) => row != null && row.ID == TurbineRows.Ids.Electrical;
 
@@ -72,12 +107,8 @@ internal static class WindPatches
         {
             if (__0 == null) return;
 
-            var turbines = 0;
-
             for (var i = 0; i < __0.Count; i++)
-                if (__0[i]?.AgentConfigId == TurbineRows.Ids.Furniture) turbines++;
-
-            if (turbines > 0) __result += turbines * Power();
+                if (__0[i] is { } furniture && furniture.AgentConfigId == TurbineRows.Ids.Furniture) __result += Power(furniture);
         }
         catch (Exception ex)
         {
@@ -85,23 +116,50 @@ internal static class WindPatches
         }
     }
 
-    private static void ShowWindInPowerHover(Config_FurnitureElectrical __2, SolarFloatData __result)
+    private static void ShowWindInPowerHover(Furniture __0, Config_FurnitureElectrical __2, SolarFloatData __result)
     {
         try
         {
-            if (!IsTurbine(__2) || __result == null) return;
+            if (!IsTurbine(__2) || __result == null || __0 == null) return;
 
-            var wind = Wind(out var weatherName);
-            var power = WindOutput.Power(wind);
+            var share = Wind().Share;
+            var isOnTerrace = IsOnTerrace(__0);
+            var note = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0} wind {1}"), Local(TurbineRows.TerraceNoteKey, "2F terrace +20%"), _weatherName, share, isOnTerrace);
 
-            __result.PowerCur = WindOutput.Shown(power);
-            __result.NoteText = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0} wind {1}"), weatherName, power);
+            __result.PowerCur = WindOutput.Shown(WindOutput.Power(share, isOnTerrace));
+            __result.NoteText = note;
             __result.IsIdle = false;
         }
         catch (Exception ex)
         {
             Fail("power hover", ex);
         }
+
+        try
+        {
+            if (IsTurbine(__2) && __result != null && __0 != null) PointHoverAtFoot(__0, __result);
+        }
+        catch (Exception ex)
+        {
+            Fail("power hover's position", ex);
+        }
+    }
+
+    /// <summary>Where the game's own sum puts the hover, measured from the turbine's foot instead of its head bar.</summary>
+    private static void PointHoverAtFoot(Furniture furniture, SolarFloatData hover)
+    {
+        var model = GameSingleton.Existing<BattleShowWorld>()?._AgentModelManager?.GetAgentModelByLogicInstanceId(furniture.InstanceId);
+        var foot = model?.Obj;
+        var camera = UnityEngine.Camera.main;
+
+        if (foot == null || camera == null) return;
+
+        var point = camera.WorldToViewportPoint(foot.transform.position + UnityEngine.Vector3.up * HoverAboveFoot);
+
+        if (point.z <= 0f) return;
+
+        hover.ScreenX = Math.Clamp(point.x, 0f, 1f);
+        hover.ScreenY = Math.Clamp(1f - point.y, 0f, 1f);
     }
 
     private static void ShowWindInPowerPanel(ref int __0, ref string __result)
@@ -114,11 +172,10 @@ internal static class WindPatches
 
             if (turbines == null || turbines.Count == 0) return;
 
-            var shown = WindOutput.Shown(Power());
             var powerById = new Dictionary<string, int>();
 
             for (var i = 0; i < turbines.Count; i++)
-                if (turbines[i] != null) powerById[turbines[i].InstanceId.ToString()] = shown;
+                if (turbines[i] is { } turbine) powerById[turbine.InstanceId.ToString()] = WindOutput.Shown(Power(turbine));
 
             var (json, added) = WindOutput.Rewrite(__result, powerById);
 
@@ -131,13 +188,13 @@ internal static class WindPatches
         }
     }
 
-    private static void ShowWindInNameHover(Config_FurnitureElectrical __0, ref string __result)
+    private static void ShowWindInNameHover(Furniture __instance, Config_FurnitureElectrical __0, ref string __result)
     {
         try
         {
-            if (!IsTurbine(__0)) return;
+            if (!IsTurbine(__0) || __instance == null) return;
 
-            __result = string.Format(GameKey.Text_Power_HoverGeneration, (float)WindOutput.Shown(Power()));
+            __result = string.Format(GameKey.Text_Power_HoverGeneration, (float)WindOutput.Shown(Power(__instance)));
         }
         catch (Exception ex)
         {
@@ -146,7 +203,7 @@ internal static class WindPatches
     }
 
     /// <summary>The game's text for <paramref name="key"/> in the player's language, or <paramref name="fallback"/> when it has none.</summary>
-    private static string Local(string key, string fallback)
+    internal static string Local(string key, string fallback)
     {
         var text = string.IsNullOrEmpty(key) ? null : ConstantTextTools.GetLocalText(key);
 

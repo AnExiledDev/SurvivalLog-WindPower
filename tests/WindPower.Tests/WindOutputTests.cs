@@ -5,27 +5,66 @@ namespace WindPower.Tests;
 
 public class WindOutputTests
 {
-    // The wind values are the game's own, from Config_Weather: 0 frost and storms, 0.1 sunny, 0.2 rain, 0.6 the worst cold snap.
+    // Weather ids from Config_Weather. The table is the mod's own: the game's WindValue is read by nothing.
     [Theory]
-    [InlineData(0f, 6)]
-    [InlineData(0.1f, 12)]
-    [InlineData(0.2f, 18)]
-    [InlineData(0.6f, 42)]
-    public void MoreWindMakesMorePowerAndCalmAirStillTurnsIt(float wind, int power)
+    [InlineData(12, 0)]   // Heavy Smog: still air
+    [InlineData(1, 6)]    // Clear
+    [InlineData(8, 5)]    // frost-clear
+    [InlineData(2, 10)]   // Cloudy
+    [InlineData(3, 17)]   // Rainy
+    [InlineData(11, 22)]  // Continuous Rain
+    [InlineData(10, 36)]  // Heavy Rain, tail furled
+    [InlineData(4, 26)]   // Mild Cold
+    [InlineData(16, 38)]  // Moderate Cold Rain
+    [InlineData(6, 48)]   // Severe Cold: the full rating
+    public void EachWeatherGivesItsShareOfTheRatingInTheYard(int weatherId, int power)
     {
-        Assert.Equal(power, WindOutput.Shown(WindOutput.Power(wind)));
+        Assert.Equal(power, WindOutput.Shown(WindOutput.Power(WindOutput.Share(weatherId), isOnTerrace: false)));
+    }
+
+    // Severe Cold on the terrace is 48 x 1.2, more than the rating: the terrace is the better spot, not a cap.
+    [Theory]
+    [InlineData(6, 58)]
+    [InlineData(3, 20)]
+    [InlineData(12, 0)]
+    public void TheTerraceGivesAFifthMoreThanTheYard(int weatherId, int power)
+    {
+        Assert.Equal(power, WindOutput.Shown(WindOutput.Power(WindOutput.Share(weatherId), isOnTerrace: true)));
     }
 
     [Fact]
-    public void ABadWindValueCountsAsCalm()
+    public void AWeatherAGameUpdateAddsGetsACloudyDaysWind()
     {
-        Assert.Equal(WindOutput.Power(0f), WindOutput.Power(-1f));
+        Assert.Equal(WindOutput.Share(2), WindOutput.Share(99));
+    }
+
+    [Theory]
+    [InlineData(10, true)]
+    [InlineData(13, true)]
+    [InlineData(6, false)]
+    [InlineData(11, false)]
+    public void OnlyHeavyRainFurlsTheTail(int weatherId, bool isFurled)
+    {
+        Assert.Equal(isFurled, WindOutput.IsFurled(weatherId));
     }
 
     [Fact]
-    public void TheNoteShowsTheRatingTheWeatherAndTheShareOfTheRating()
+    public void ABadShareCountsAsStill()
     {
-        Assert.Equal("Rated 24, Sunny wind 50%", WindOutput.Note("Rated {0}", "{0} wind {1}", "Sunny", WindOutput.Power(0.1f)));
+        Assert.Equal(0f, WindOutput.Power(-1f, isOnTerrace: true));
+        Assert.Equal(0, WindOutput.Percent(-1f));
+    }
+
+    [Fact]
+    public void TheNoteShowsTheRatingTheWeatherAndTheWindsShare()
+    {
+        Assert.Equal("Rated 48, Rainy wind 35%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", WindOutput.Share(3), isOnTerrace: false));
+    }
+
+    [Fact]
+    public void ATerraceTurbinesNoteAddsTheTerracesBonus()
+    {
+        Assert.Equal("Rated 48, Rainy wind 35%, 2F terrace +20%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", WindOutput.Share(3), isOnTerrace: true));
     }
 
     private const string Panel =

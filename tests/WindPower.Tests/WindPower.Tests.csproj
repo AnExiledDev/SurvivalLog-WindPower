@@ -14,7 +14,14 @@
     <None Include="..\..\assets\*" Link="assets\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- The page script, as the plugin ships it, run in Jint against a fake page. -->
   <ItemGroup>
+    <EmbeddedResource Include="..\..\src\WindPower\windpower.js" LogicalName="WindPower.windpower.js" Link="windpower.js" />
+    <EmbeddedResource Include="FakePage.js" LogicalName="WindPower.Tests.FakePage.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jint" Version="4.17.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />

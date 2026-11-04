@@ -2,7 +2,23 @@
 
 Adds a Large Wind Turbine to Survival Log. Craft the Large Wind Turbine Package from 6 Scrap Metal, 4 Electrical Wire, 4 Stainless Steel Plate and 3 Electronic Components, unpack it, and install it in a large furniture spot outdoors: in the yard outside or on the 2F terrace.
 
-The turbine has its own model and icon, and its blades turn faster in stronger wind. It makes power day and night, more the windier the weather is: 12 on Clear or Cloudy days, 18 in rain and up to 42 in Severe Cold. The game counts Heavy Rain and the cold clear days (Frosty/Clear, Cold/Clear, Chilly/Clear) as still air, so the turbine makes its least then, 6. Hover over it to see what it makes now and how strong the wind is.
+The turbine has its own model and icon. It makes power day and night, more the windier the weather is:
+
+| Weather | Power in the yard |
+| --- | --- |
+| Heavy Smog | 0 |
+| Clear, and the cold clear days | 5 to 6 |
+| Cloudy | 10 |
+| Rainy | 17 |
+| Continuous Rain | 22 |
+| Mild Cold | 26 |
+| Heavy Rain | 36 |
+| Moderate Cold | 38 |
+| Severe Cold | 48 |
+
+A turbine on the 2F terrace stands higher in the wind and makes a fifth more, up to 58.
+
+The blades speed up and slow down smoothly with the wind and stand still in Heavy Smog. The head turns gently into the wind, and in Heavy Rain the tail swings to the side to protect the rotor. Hover over the turbine to see, at its base, what it makes now and how strong the wind is. The weather box on the screen shows the wind too, as a Wind Intensity line.
 
 This is an early test build.
 

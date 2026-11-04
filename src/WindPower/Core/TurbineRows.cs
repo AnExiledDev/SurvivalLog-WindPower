@@ -92,6 +92,15 @@ public static class TurbineRows
     /// <summary>The wind part of the power hover's note: {0} the weather, {1} the output as a share of the rating.</summary>
     public const string WindNoteKey = "WindPower_WindNote";
 
+    /// <summary>Added to the power hover's note for a turbine on the 2F terrace.</summary>
+    public const string TerraceNoteKey = "WindPower_TerraceNote";
+
+    /// <summary>The wind row's label in the HUD's weather tooltip, next to the game's own Light Intensity.</summary>
+    public const string WindLabelKey = "WindPower_WindLabel";
+
+    /// <summary>Config_MapSlot room ids: the 2F terrace and the yard outside.</summary>
+    public const int TerraceRoom = 4;
+
     public static TurbinePlan Large()
     {
         var texts = new[]
@@ -104,6 +113,8 @@ public static class TurbineRows
             new Text(UnpackKey, "Unpack Large Wind Turbine Package", "拆封 大型风力发电机包裹"),
             new Text(UnpackingKey, "Unpacking Large Wind Turbine Package...", "拆封 大型风力发电机包裹中…"),
             new Text(WindNoteKey, "{0} wind {1}", "{0}风力 {1}"),
+            new Text(TerraceNoteKey, "2F terrace +20%", "二楼露台 +20%"),
+            new Text(WindLabelKey, "Wind Intensity", "风力强度"),
         };
 
         string Zh(string key) => texts.First(text => text.Key == key).Zh;
