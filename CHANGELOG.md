@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1
+
+- Dyed turbines are coloured the way the game colours its own furniture, so they match a dyed solar panel next to them.
+- Made for Survival Log 1.1.20151.
+
 ## 0.6.0
 
 - The turbines can be dyed, like the game's own furniture, in any of its 8 colours. The olive paint takes the colour; the orange stripes, the blades and the rust stay as they are.

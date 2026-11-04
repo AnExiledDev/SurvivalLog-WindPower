@@ -21,8 +21,8 @@ namespace WindPower.Adapters;
 /// it, it gets a copy of the prefab of the solar panel the turbine copies (so every part the game looks for is there:
 /// the head bar, the collider, the animator) with the panel's meshes swapped for the turbine's, built from the model
 /// file inside the DLL. The rotor's speed follows the turbine's output, and on the large turbine the whole top swings
-/// round into gusts (<see cref="TurbineMotion"/>). The panel's dye palette gets the turbine's own painted materials,
-/// so the game's dyes recolour it. If a model cannot be built, the game gets the solar panel's own
+/// round into gusts (<see cref="TurbineMotion"/>). The panel's dye palette gets the turbine's own painted materials
+/// on the game's dye shader, so the game's dyes recolour it. If a model cannot be built, the game gets the solar panel's own
 /// prefab, so the turbine still works, looking like a panel.
 /// </summary>
 internal static class TurbineModel
@@ -305,22 +305,40 @@ internal static class TurbineModel
     }
 
     /// <summary>
-    /// Fills the solar panel's dye palette with the turbine's own: each painted material gets eight copies, one per game
-    /// dye, with the paint recoloured (<see cref="Paint"/>). The game swaps them in when the player dyes the turbine.
-    /// The colours come from the panel's own palette, so they follow the game's.
+    /// Fills the solar panel's dye palette with the turbine's own. Each painted material gets eight copies on the
+    /// game's dye shader (SL/LitDye, taken from the panel's own dyed materials), one per dye, sharing one grey base map
+    /// and one mask (<see cref="Paint"/>), so the game colours the turbine the way it colours its own furniture. The
+    /// game swaps them in when the player dyes the turbine. The colours come from the panel's own palette.
     /// </summary>
     private static void SetDyes(GameObject copy, TurbineKind kind, Model model, Material[] materials, List<MeshRenderer> made)
     {
         var palette = copy.GetComponent<FurnitureDyePalette>();
+        var stock = palette?.Entries != null && palette.Entries.Length > 0 ? palette.Entries[0]?.Variants : null;
+        var shader = stock != null && stock.Length > 0 ? stock[0]?.shader : null;
 
-        if (palette == null)
+        if (palette == null || stock == null || shader == null)
         {
-            _log($"the solar panel's prefab has no dye palette, so the {kind.Name} cannot be dyed");
+            _log($"the solar panel's prefab has no dyed materials, so the {kind.Name} cannot be dyed");
 
             return;
         }
 
-        var colours = GameColours(palette);
+        var colours = new List<Color>();
+
+        for (var i = 0; i < stock.Length; i++)
+        {
+            var dyed = stock[i];
+
+            if (dyed == null || !dyed.HasProperty("_DyeColor"))
+            {
+                _log($"the solar panel's dye {i + 1} has no colour, so the {kind.Name} cannot be dyed");
+
+                return;
+            }
+
+            colours.Add(dyed.GetColor("_DyeColor"));
+        }
+
         var entries = new List<FurnitureDyePalette.DyeEntry>();
 
         for (var m = 0; m < model.Materials.Count; m++)
@@ -331,16 +349,21 @@ internal static class TurbineModel
 
             if (Paint.PaintShare(picture) < Paint.MinimumShare) continue;
 
+            var name = model.Materials[m].Name;
+            var greyBase = MakeTexture(name + "_DyeBase", Paint.DyeBase(picture));
+            var mask = MakeTexture(name + "_DyeMask", Paint.Mask(picture), linear: true);
             var variants = new Il2CppReferenceArray<Material>(colours.Count);
 
             for (var slot = 0; slot < colours.Count; slot++)
             {
-                var variant = new Material(materials[m]) { name = $"{materials[m].name}_Dye{slot + 1:00}" };
-                var texture = MakeTexture($"{model.Materials[m].Name}_Dye{slot + 1:00}", Paint.Recolour(picture, colours[slot]));
+                // Swapping the shader keeps every property both shaders share: our maps, colours and keywords.
+                var variant = new Material(materials[m]) { name = $"{materials[m].name}_Dye{slot + 1:00}", shader = shader };
 
                 foreach (var map in new[] { "_BaseMap", "_MainTex" })
-                    if (variant.HasProperty(map)) variant.SetTexture(map, texture);
+                    if (variant.HasProperty(map)) variant.SetTexture(map, greyBase);
 
+                variant.SetTexture("_DyeMask", mask);
+                variant.SetColor("_DyeColor", colours[slot]);
                 variants[slot] = variant;
             }
 
@@ -352,30 +375,7 @@ internal static class TurbineModel
 
         for (var i = 0; i < made.Count; i++) palette.Targets[i] = made[i];
 
-        _log($"{kind.Name} dyes: {entries.Count} painted materials, {colours.Count} colours each");
-    }
-
-    /// <summary>The dye colours on the panel's own palette, in slot order; the known ones if it has none.</summary>
-    private static IReadOnlyList<DyeColour> GameColours(FurnitureDyePalette palette)
-    {
-        var variants = palette.Entries != null && palette.Entries.Length > 0 ? palette.Entries[0]?.Variants : null;
-
-        if (variants == null || variants.Length != Paint.GameDyes.Count) return Paint.GameDyes;
-
-        var colours = new List<DyeColour>();
-
-        for (var i = 0; i < variants.Length; i++)
-        {
-            var material = variants[i];
-
-            if (material == null || !material.HasProperty("_DyeColor")) return Paint.GameDyes;
-
-            var colour = material.GetColor("_DyeColor");
-
-            colours.Add(new DyeColour(colour.r, colour.g, colour.b));
-        }
-
-        return colours;
+        _log($"{kind.Name} dyes: {entries.Count} painted materials on {shader.name}, {colours.Count} colours each");
     }
 
     private static Material MakeMaterial(Material stock, ModelMaterial source, IReadOnlyList<byte[]> images)
@@ -416,9 +416,10 @@ internal static class TurbineModel
     /// Png rows run from the top down and Unity's from the bottom up, and glTF's uvs start at the top while Unity's
     /// start at the bottom: the two flips cancel, so the rows go in as they are.
     /// </summary>
-    private static Texture2D MakeTexture(string name, Picture picture)
+    private static Texture2D MakeTexture(string name, Picture picture, bool linear = false)
     {
-        var texture = new Texture2D(picture.Width, picture.Height, TextureFormat.RGBA32, true)
+        // A mask is data, not colour, so it is stored linear; colour maps are sRGB.
+        var texture = new Texture2D(picture.Width, picture.Height, TextureFormat.RGBA32, true, linear)
         {
             name = ModelName + "_" + name,
             wrapMode = TextureWrapMode.Repeat,

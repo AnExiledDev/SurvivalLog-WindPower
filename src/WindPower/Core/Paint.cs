@@ -7,9 +7,12 @@ namespace WindPower.Core;
 public readonly record struct DyeColour(float R, float G, float B);
 
 /// <summary>
-/// Recolours a turbine's olive paint for the game's furniture dyes. Only the paint changes: the orange stripes, the
-/// rust and the pale chips are other colours, so they stay as they are. The paint's light and shade are kept, scaled
-/// so its average sits where the game's own dyed solar panel frames do.
+/// Gets a turbine's olive paint ready for the game's own dye shader, SL/LitDye (game 1.1.20151). That shader takes the
+/// albedo (base map times base colour, in linear light), a mask (its red channel, 1 = dyed) and the dye colour, and
+/// draws <c>lerp(albedo, saturate(2 * luma(albedo)) * dye, mask * dye.a)</c>, where luma weighs red, green and blue
+/// 0.299, 0.587 and 0.114. So a dyed part needs a grey base: its brightness, doubled, is how bright the dye shows.
+/// <see cref="Mask"/> marks the paint; <see cref="DyeBase"/> turns the paint grey, keeping its light and shade. The
+/// orange stripes, the rust and the pale chips are other colours, so they stay as they are.
 /// </summary>
 public static class Paint
 {
@@ -29,8 +32,12 @@ public static class Paint
     /// <summary>A picture with less paint than this share has no dyed look; the dye leaves that part alone.</summary>
     public const float MinimumShare = 0.05f;
 
-    // The light grey under the solar panel's dye mask averages 193 of 255; a dyed part is about that bright.
-    private const float Brightness = 193f / 255f;
+    /// <summary>
+    /// How bright the dye shows on average, as the shader's <c>saturate(2 * luma)</c>. Under the solar panel's mask
+    /// half the pixels show the dye at full strength and the grime brings the average to 0.78; the turbine's paint is
+    /// cleaner, so 0.9 keeps it as bright with room for its shading.
+    /// </summary>
+    public const float DyeLevel = 0.9f;
 
     /// <summary>How much of a pixel is olive paint, from 0 (none) to 1: yellow-green hues with some colour in them.</summary>
     public static float PaintWeight(byte r, byte g, byte b)
@@ -54,27 +61,47 @@ public static class Paint
         return total / pixels;
     }
 
-    /// <summary>The picture with its paint in the dye's colour. Alpha and everything that is not paint stay as they were.</summary>
-    public static Picture Recolour(Picture picture, DyeColour dye)
+    /// <summary>The dye mask for the shader: each pixel's paint weight in red, green and blue, alpha 255. Stored linear.</summary>
+    public static Picture Mask(Picture picture)
+    {
+        var pixels = picture.Width * picture.Height;
+        var mask = new byte[pixels * 4];
+
+        for (var p = 0; p < pixels; p++)
+        {
+            var value = (byte)Math.Clamp((int)MathF.Round(Weight(picture.Rgba, p) * 255f), 0, 255);
+
+            mask[p * 4] = mask[p * 4 + 1] = mask[p * 4 + 2] = value;
+            mask[p * 4 + 3] = 255;
+        }
+
+        return picture with { Rgba = mask };
+    }
+
+    /// <summary>
+    /// The base map for the dyed materials: the paint turned grey, as bright as <see cref="DyeLevel"/> asks on
+    /// average and lighter or darker where the paint was, and partly-paint pixels only partly grey. Everything else,
+    /// and alpha, stays as it was. The picture is sRGB, as the game reads base maps.
+    /// </summary>
+    public static Picture DyeBase(Picture picture)
     {
         var pixels = picture.Width * picture.Height;
         var source = picture.Rgba;
         var weights = new float[pixels];
-        double weighted = 0, lightTotal = 0;
+        double weighted = 0, lumaTotal = 0;
 
         for (var p = 0; p < pixels; p++)
         {
             weights[p] = Weight(source, p);
             weighted += weights[p];
-            lightTotal += Light(source, p) * weights[p];
+            lumaTotal += Luma(source, p) * weights[p];
         }
 
         var result = (byte[])source.Clone();
 
         if (weighted <= 0) return picture with { Rgba = result };
 
-        var average = (float)(lightTotal / weighted);
-        var channels = new[] { dye.R, dye.G, dye.B };
+        var average = (float)(lumaTotal / weighted);
 
         for (var p = 0; p < pixels; p++)
         {
@@ -82,23 +109,46 @@ public static class Paint
 
             if (weight <= 0f) continue;
 
-            var shade = average > 0f ? Math.Min(1f, Light(source, p) / average * Brightness) : Brightness;
+            // The shader shows the dye at 2 * luma, so a grey of linear value level / 2 shows it at that level.
+            var level = average > 0f ? Math.Min(1f, Luma(source, p) / average * DyeLevel) : DyeLevel;
+            var grey = ToSrgb(level / 2f) * 255f;
 
             for (var c = 0; c < 3; c++)
             {
                 var from = source[p * 4 + c];
-                var to = channels[c] * shade * 255f;
 
-                result[p * 4 + c] = (byte)Math.Clamp((int)MathF.Round(from + (to - from) * weight), 0, 255);
+                result[p * 4 + c] = (byte)Math.Clamp((int)MathF.Round(from + (grey - from) * weight), 0, 255);
             }
         }
 
         return picture with { Rgba = result };
     }
 
+    /// <summary>
+    /// What SL/LitDye draws for one pixel before lighting, in sRGB bytes: the base pixel, the mask byte and the dye,
+    /// at full strength. It is the shader's formula, here so the tests can check the look the game will give.
+    /// </summary>
+    public static (byte R, byte G, byte B) Shaded(byte r, byte g, byte b, byte mask, DyeColour dye)
+    {
+        float red = ToLinear(r / 255f), green = ToLinear(g / 255f), blue = ToLinear(b / 255f);
+        var level = Math.Clamp(2f * (0.299f * red + 0.587f * green + 0.114f * blue), 0f, 1f);
+        var k = mask / 255f;
+
+        static byte Out(float from, float to, float k) => (byte)Math.Clamp((int)MathF.Round(ToSrgb(from + (to - from) * k) * 255f), 0, 255);
+
+        // The dye colour is a material colour, which Unity turns from sRGB to linear before the shader sees it.
+        return (Out(red, level * ToLinear(dye.R), k), Out(green, level * ToLinear(dye.G), k), Out(blue, level * ToLinear(dye.B), k));
+    }
+
     private static float Weight(byte[] rgba, int p) => PaintWeight(rgba[p * 4], rgba[p * 4 + 1], rgba[p * 4 + 2]);
 
-    private static float Light(byte[] rgba, int p) => 0.299f * rgba[p * 4] + 0.587f * rgba[p * 4 + 1] + 0.114f * rgba[p * 4 + 2];
+    // Brightness in linear light, as the shader measures it.
+    private static float Luma(byte[] rgba, int p) =>
+        0.299f * ToLinear(rgba[p * 4] / 255f) + 0.587f * ToLinear(rgba[p * 4 + 1] / 255f) + 0.114f * ToLinear(rgba[p * 4 + 2] / 255f);
+
+    private static float ToLinear(float c) => c <= 0.04045f ? c / 12.92f : MathF.Pow((c + 0.055f) / 1.055f, 2.4f);
+
+    private static float ToSrgb(float c) => c <= 0.0031308f ? c * 12.92f : 1.055f * MathF.Pow(c, 1f / 2.4f) - 0.055f;
 
     private static (float Hue, float Saturation) HueAndSaturation(byte r, byte g, byte b)
     {
