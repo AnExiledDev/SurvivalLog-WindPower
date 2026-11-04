@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>WindPower</AssemblyName>
+    <RootNamespace>WindPower</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GameDir Condition="'$(GameDir)' == ''">D:\SteamLibrary\steamapps\common\Survival Log</GameDir>
+    <BepInExCore>$(GameDir)\BepInEx\core</BepInExCore>
+    <Interop>$(GameDir)\BepInEx\interop</Interop>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="$(BepInExCore)\BepInEx.Core.dll" Private="false" />
+    <Reference Include="$(BepInExCore)\BepInEx.Unity.IL2CPP.dll" Private="false" />
+    <Reference Include="$(BepInExCore)\0Harmony.dll" Private="false" />
+    <Reference Include="$(BepInExCore)\Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="$(BepInExCore)\Il2CppInterop.Common.dll" Private="false" />
+    <Reference Include="$(Interop)\HotUpdate.dll" Private="false" />
+    <Reference Include="$(Interop)\Il2Cppmscorlib.dll" Private="false" />
+    <Reference Include="$(Interop)\UnityEngine.CoreModule.dll" Private="false" />
+  </ItemGroup>
+
+  <!-- What the Mod Manager's Mods screen shows about this mod. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="ModManager.Name" Value="Wind Power&#10;风力发电" />
+    <AssemblyMetadata Include="ModManager.Description" Value="Adds a craftable Large Wind Turbine that makes power outdoors.&#10;新增可制作的大型风力发电机，装在户外发电。" />
+    <AssemblyMetadata Include="ModManager.Author" Value="AnExiledDev" />
+    <AssemblyMetadata Include="ModManager.Category" Value="Gameplay" />
+    <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.20151" />
+  </ItemGroup>
+
+</Project>
