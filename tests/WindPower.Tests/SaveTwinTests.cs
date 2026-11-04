@@ -15,6 +15,7 @@ public class SaveTwinTests
     [Theory]
     [InlineData("Medium", 40001)]
     [InlineData("Large", 40002)]
+    [InlineData("Small", 40000)]
     public void APlacedTurbineIsSavedAsTheSolarPanelOfItsSize(string size, int solarPanel)
     {
         var kind = Kind(size);
@@ -29,6 +30,7 @@ public class SaveTwinTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void LoadingWithTheModTurnsItBackIntoTheSameTurbine(string size)
     {
         var kind = Kind(size);
@@ -44,6 +46,7 @@ public class SaveTwinTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void APackedTurbineSwapsItsPackedIdToo(string size)
     {
         var kind = Kind(size);
@@ -71,6 +74,18 @@ public class SaveTwinTests
 
     // The large marker is the start of the medium's text up to "Turbine", so a loose match would read one as the other.
     [Fact]
+    public void ASmallTurbinesMarkerIsNeverReadAsAnotherOne()
+    {
+        foreach (var kinds in new[] { Kinds, Kinds.Reverse().ToList() })
+        {
+            var save = new SaveTwin.Fields { AgentConfigId = TurbineRows.Small.Stock.Furniture, Name = TurbineRows.Small.SaveMarker + "a" };
+
+            Assert.True(SaveTwin.FromStock(ref save, kinds));
+            Assert.Equal(TurbineRows.Small.Ids.Furniture, save.AgentConfigId);
+        }
+    }
+
+    [Fact]
     public void AMediumTurbinesMarkerIsNeverReadAsALargeOne()
     {
         foreach (var kinds in new[] { Kinds, Kinds.Reverse().ToList() })
@@ -84,6 +99,7 @@ public class SaveTwinTests
 
     // A real solar panel has no marker, so loading must never turn it into a turbine.
     [Theory]
+    [InlineData(40000)]
     [InlineData(40001)]
     [InlineData(40002)]
     public void ARealSolarPanelStaysASolarPanel(int solarPanel)

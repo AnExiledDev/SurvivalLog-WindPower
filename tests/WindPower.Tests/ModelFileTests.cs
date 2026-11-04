@@ -15,7 +15,9 @@ public class ModelFileTests
 
     private static readonly Model Medium = Glb.Read(Asset(TurbineRows.Medium.ModelFile), TurbineRows.Medium.Movers);
 
-    private static Model Load(string size) => size == "Medium" ? Medium : Turbine;
+    private static readonly Model Small = Glb.Read(Asset(TurbineRows.Small.ModelFile), TurbineRows.Small.Movers);
+
+    private static Model Load(string size) => size switch { "Medium" => Medium, "Small" => Small, _ => Turbine };
 
     private static ModelPart Part(string name) => Turbine.Parts.Single(part => part.Name == name);
 
@@ -100,6 +102,27 @@ public class ModelFileTests
 
     // The Medium Solar Panel's spot is 2 m by 1 m, and the turbine stands about 3 m tall in it.
     [Fact]
+    public void TheSmallTurbineStandsOnTheGroundUnderTheSmallSpotsHeight()
+    {
+        var (min, max) = Small.Bounds();
+
+        Assert.InRange(min.Y, -0.01f, 0.01f);
+        Assert.InRange(max.Y, 2.6f, 3.3f);
+        Assert.InRange(max.X - min.X, 0.5f, 1.3f);
+        Assert.InRange(max.Z - min.Z, 0.5f, 1.4f);
+    }
+
+    [Fact]
+    public void TheSmallTurbinesHeadTurnsAboutTheUprightAndCarriesTheRotor()
+    {
+        var head = Small.Parts.Single(part => part.Name == "Head");
+        var rotor = Small.Parts.Single(part => part.Name == "Rotor");
+
+        Assert.InRange(head.Axis.Y, 0.99f, 1.01f);
+        Assert.Equal("Head", rotor.Parent);
+    }
+
+    [Fact]
     public void TheMediumTurbineStandsOnTheGroundAndFitsTheMediumSpot()
     {
         var (min, max) = Medium.Bounds();
@@ -113,6 +136,7 @@ public class ModelFileTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void EveryMeshIsWholeAndPointsAtARealMaterial(string size)
     {
         var model = Load(size);
@@ -132,6 +156,7 @@ public class ModelFileTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void EveryTextureInTheModelDecodes(string size)
     {
         var model = Load(size);
@@ -151,6 +176,7 @@ public class ModelFileTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void TheIconIsTheSameSizeAsTheGamesOwn(string size)
     {
         var icon = Png.Decode(Asset(TurbineRows.All.Single(kind => kind.Size == size).IconFile));

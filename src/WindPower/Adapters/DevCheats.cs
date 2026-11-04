@@ -40,9 +40,9 @@ public static class DevCheats
         return string.Join("\n", lines);
     }
 
-    [DisplayName("Show both recipes now\n立即显示两种配方")]
-    [Description("Shows both turbines' recipes at the workbench now, without the quests.\n不做任务，立即在工作台显示两种风力发电机的配方。")]
-    public static string ShowBothRecipes()
+    [DisplayName("Show all recipes now\n立即显示所有配方")]
+    [Description("Shows every turbine's recipe at the workbench now, without the quests.\n不做任务，立即在工作台显示所有风力发电机的配方。")]
+    public static string ShowAllRecipes()
     {
         var tool = GameSingleton.Existing<BattleLogicWorld>()?._ToolTableManager;
         var recipes = GameSingleton.Existing<ConfigManager>()?._Config_ProductionList_Dict;

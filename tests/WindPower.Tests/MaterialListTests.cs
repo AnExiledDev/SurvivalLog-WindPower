@@ -107,8 +107,37 @@ public class MaterialListTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void EachTurbinesDefaultParses(string size)
     {
         Assert.NotEmpty(MaterialList.Standard(TurbineRows.All.Single(kind => kind.Size == size).Defaults.Materials));
+    }
+
+    // Taking a turbine down gives back about half of its materials, like the game's furniture: half of each, rounded
+    // down, then the odd ones one more each until half the pieces are back.
+    [Theory]
+    [InlineData("20004:3, 20104:1, 20210:1", "20004:2")]
+    [InlineData("20004:4, 20104:2, 20210:2", "20004:2, 20104:1, 20210:1")]
+    [InlineData("20004:5, 20104:3, 20210:3, 20373:1", "20004:3, 20104:2, 20210:1")]
+    public void TakingATurbineDownGivesBackAboutHalf(string made, string back)
+    {
+        Assert.Equal(MaterialList.Standard(back), MaterialList.GivenBack(MaterialList.Standard(made)));
+    }
+
+    [Fact]
+    public void ARecipeOfOnePieceStillGivesThatPieceBack()
+    {
+        Assert.Equal(new[] { 20004 }, MaterialList.GivenBack(new[] { 20004 }));
+    }
+
+    [Fact]
+    public void NothingComesBackMoreThanItWentIn()
+    {
+        var materials = new[] { 1, 2, 3, 4, 5, 6, 7 };
+        var back = MaterialList.GivenBack(materials);
+
+        Assert.Equal(3, back.Length);
+        Assert.Equal(back.Length, back.Distinct().Count());
+        Assert.All(back, id => Assert.Contains(id, materials));
     }
 }

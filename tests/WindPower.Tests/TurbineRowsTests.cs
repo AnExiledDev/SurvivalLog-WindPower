@@ -18,6 +18,7 @@ public class TurbineRowsTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void EveryLinkPointsAtTheTurbinesOwnRows(string size)
     {
         var plan = Plan(Kind(size));
@@ -32,6 +33,7 @@ public class TurbineRowsTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void EachRowSetsItsOwnIdField(string size)
     {
         var plan = Plan(Kind(size));
@@ -42,6 +44,7 @@ public class TurbineRowsTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void ItCanOnlyBeInstalledInTheYardOrOnTheTerrace(string size)
     {
         Assert.Equal(new[] { 4, 8 }, ((int[])Field(Plan(Kind(size)), Table.Electrical, "AllowedRooms")).OrderBy(room => room));
@@ -50,6 +53,7 @@ public class TurbineRowsTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void EveryRowIsACopyOfItsSolarPanelsChainUnderANewId(string size)
     {
         var kind = Kind(size);
@@ -64,18 +68,18 @@ public class TurbineRowsTests
         Assert.All(Plan(kind).Rows, row => Assert.NotEqual(row.CopyFrom, row.Id));
     }
 
-    // The copy decides the slot the turbine fits: the medium turbine takes a Medium Solar Panel's spot, the large one a
-    // Large Solar Panel's.
+    // The copy decides the slot the turbine fits: each turbine takes the spot of the solar panel of its size.
     [Fact]
     public void EachTurbineCopiesTheSolarPanelOfItsSize()
     {
+        Assert.Equal(40000, TurbineRows.Small.Stock.Furniture);
         Assert.Equal(40001, TurbineRows.Medium.Stock.Furniture);
         Assert.Equal(40002, TurbineRows.Large.Stock.Furniture);
     }
 
     // Two turbines writing to one id would leave only one of them in the game.
     [Fact]
-    public void TheTwoTurbinesShareNoIdInAnyTable()
+    public void NoTwoTurbinesShareAnIdInAnyTable()
     {
         var rows = TurbineRows.All.SelectMany(kind => Plan(kind).Rows).Select(row => (row.Table, row.Id)).ToList();
 
@@ -86,6 +90,7 @@ public class TurbineRowsTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void EveryTextKeyHasEnglishAndChineseAndEachLocalFieldMatchesItsKey(string size)
     {
         var plan = Plan(Kind(size));
@@ -121,6 +126,7 @@ public class TurbineRowsTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void TheRecipeIsShownByItsQuestAndCraftableFromProductionOne(string size)
     {
         var plan = Plan(Kind(size));
@@ -150,15 +156,18 @@ public class TurbineRowsTests
     {
         Assert.Equal(new TurbineSettings(18f, "20004:4, 20104:2, 20210:2", 60, 2), TurbineRows.Medium.Defaults);
         Assert.Equal(new TurbineSettings(36f, "20004:5, 20104:3, 20210:3, 20373:1", 120, 2), TurbineRows.Large.Defaults);
+        Assert.Equal(new TurbineSettings(9f, "20004:3, 20104:1, 20210:1", 30, 2), TurbineRows.Small.Defaults);
     }
 
-    // The medium turbine comes with the solar quest, the large one with the storage quest that follows it.
+    // The medium and small turbines come with the solar quest, the large one with the storage quest that follows it.
     [Fact]
     public void EachTurbineIsShownByItsOwnQuest()
     {
         Assert.Equal((40421, 6237, 309), (TurbineRows.Medium.Quest, TurbineRows.Medium.RewardSets[0], TurbineRows.Medium.RevealedWith));
         Assert.Equal((40422, 6238, 311), (TurbineRows.Large.Quest, TurbineRows.Large.RewardSets[0], TurbineRows.Large.RevealedWith));
+        Assert.Equal((40421, 6237, 308), (TurbineRows.Small.Quest, TurbineRows.Small.RewardSets[0], TurbineRows.Small.RevealedWith));
         Assert.Equal("Event_EventDes_40421", TurbineRows.Medium.QuestLine.Key);
+        Assert.Equal("Event_EventDes_40421", TurbineRows.Small.QuestLine.Key);
         Assert.Equal("Event_EventDes_40422", TurbineRows.Large.QuestLine.Key);
     }
 
@@ -196,10 +205,11 @@ public class TurbineRowsTests
         Assert.Equal(new[] { $"Electrical {kind.Stock.Electrical}, the row to copy, is missing" }, problems);
     }
 
-    // The solar panels' materials, as recipes 309 and 310 list them in 1.1.20151. The first build copied the large
+    // The solar panels' materials, as recipes 308, 309 and 310 list them in 1.1.20151. The first build copied the large
     // panel's and the game filed both recipes under one key, so the turbine never showed in the crafting menu.
     private static readonly int[][] SolarMaterials =
     {
+        new[] { 20002, 20002, 20002, 20004, 20004 },
         new[] { 20002, 20002, 20002, 20002, 20002, 20004, 20004, 20004, 20210, 20210 },
         new[] { 20002, 20002, 20002, 20002, 20002, 20002, 20002, 20002, 20004, 20004, 20004, 20004, 20210, 20210, 20210 },
     };
@@ -207,6 +217,7 @@ public class TurbineRowsTests
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]
+    [InlineData("Small")]
     public void TheDefaultRecipeIsNotFiledUnderASolarPanelsMaterials(string size)
     {
         var materials = (int[])Field(Plan(Kind(size)), Table.Recipe, "MaterialList");
@@ -215,9 +226,25 @@ public class TurbineRowsTests
     }
 
     [Fact]
-    public void TheTwoDefaultRecipesAreNotFiledUnderOneKey()
+    public void NoTwoDefaultRecipesAreFiledUnderOneKey()
     {
-        Assert.NotEqual(TurbineRows.MaterialKey(MaterialList.Standard(TurbineRows.Medium.Defaults.Materials)), TurbineRows.MaterialKey(MaterialList.Standard(TurbineRows.Large.Defaults.Materials)));
+        var keys = TurbineRows.All.Select(kind => TurbineRows.MaterialKey(MaterialList.Standard(kind.Defaults.Materials))).ToList();
+
+        Assert.Equal(keys.Count, keys.Distinct().Count());
+    }
+
+    // Taking a turbine down gives back about half of what it was made from, like the game's own furniture, so the
+    // solar panel's leftovers never come out of a turbine.
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    [InlineData("Small")]
+    public void TakingATurbineDownGivesBackHalfOfItsOwnMaterials(string size)
+    {
+        var materials = new[] { 20004, 20004, 20004, 20104, 20373, 20373 };
+        var plan = TurbineRows.Plan(Kind(size), materials, 50);
+
+        Assert.Equal(new[] { 20004, 20004, 20373 }, (int[])Field(plan, Table.Furniture, "RemoveGet"));
     }
 
     [Fact]

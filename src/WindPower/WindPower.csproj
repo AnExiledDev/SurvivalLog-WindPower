@@ -36,13 +36,15 @@
     <EmbeddedResource Include="..\..\assets\UI_Item_Icon_WindTurbine_M.png" LogicalName="UI_Item_Icon_WindTurbine_M.png" />
     <EmbeddedResource Include="..\..\assets\WindTurbineLarge.glb" LogicalName="WindTurbineLarge.glb" />
     <EmbeddedResource Include="..\..\assets\UI_Item_Icon_WindTurbine_L.png" LogicalName="UI_Item_Icon_WindTurbine_L.png" />
+    <EmbeddedResource Include="..\..\assets\WindTurbineSmall.glb" LogicalName="WindTurbineSmall.glb" />
+    <EmbeddedResource Include="..\..\assets\UI_Item_Icon_WindTurbine_S.png" LogicalName="UI_Item_Icon_WindTurbine_S.png" />
     <EmbeddedResource Include="windpower.js" LogicalName="WindPower.windpower.js" />
   </ItemGroup>
 
   <!-- What the Mod Manager's Mods screen shows about this mod. -->
   <ItemGroup>
     <AssemblyMetadata Include="ModManager.Name" Value="Wind Power&#10;风力发电" />
-    <AssemblyMetadata Include="ModManager.Description" Value="Adds craftable Medium and Large Wind Turbines that make power outdoors, day and night.&#10;新增可制作的中型和大型风力发电机，装在户外，昼夜发电。" />
+    <AssemblyMetadata Include="ModManager.Description" Value="Adds craftable Small, Medium and Large Wind Turbines that make power outdoors, day and night.&#10;新增可制作的小型、中型和大型风力发电机，装在户外，昼夜发电。" />
     <AssemblyMetadata Include="ModManager.Author" Value="AnExiledDev" />
     <AssemblyMetadata Include="ModManager.Category" Value="Gameplay" />
     <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.20151" />

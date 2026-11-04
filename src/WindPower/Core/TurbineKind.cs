@@ -19,7 +19,7 @@ public sealed record TurbineKind
     /// <summary>The English name, for the log.</summary>
     public string Name { get; init; } = "";
 
-    /// <summary>"Medium" or "Large": the middle of each text key, WindPower_Medium_Name.</summary>
+    /// <summary>"Small", "Medium" or "Large": the middle of each text key, WindPower_Medium_Name.</summary>
     public string Size { get; init; } = "";
 
     public RowIds Ids { get; init; } = new(0, 0, 0, 0, 0, 0);

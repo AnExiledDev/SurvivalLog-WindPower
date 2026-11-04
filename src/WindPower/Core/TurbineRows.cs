@@ -34,10 +34,10 @@ public enum Slot
 }
 
 /// <summary>
-/// The two turbines and the table rows that make each one: the recipe, the package it crafts, the unpack action and its
-/// effect, the furniture, and its power row. Each is a copy of a solar panel's row (the Medium Solar Panel's for the
-/// medium turbine, the Large Solar Panel's for the large) with its links and text changed, so everything the panel
-/// does that is not named here (install time, slot size, what removing it gives back) the turbine does too.
+/// The three turbines and the table rows that make each one: the recipe, the package it crafts, the unpack action and
+/// its effect, the furniture, and its power row. Each is a copy of the solar panel of its size's row with its links,
+/// text and parts given back changed, so everything the panel does that is not named here (install time, slot size)
+/// the turbine does too.
 /// </summary>
 public static class TurbineRows
 {
@@ -143,7 +143,46 @@ public static class TurbineRows
         },
     };
 
-    public static readonly IReadOnlyList<TurbineKind> All = new[] { Medium, Large };
+    /// <summary>
+    /// A small three-blade rotor on a guyed pole, with a tail that turns it into the wind. It fits the yard's Small
+    /// spots (the terrace has none) and is revealed with the Small Solar Panel, from the solar quest on.
+    /// </summary>
+    public static readonly TurbineKind Small = new()
+    {
+        Name = "Small Wind Turbine",
+        Size = "Small",
+        Ids = new RowIds(Item: 910003, Furniture: 910003, Electrical: 912, Recipe: 9103, Action: 100910003, Effect: 100910003),
+        Stock = new RowIds(Item: 14009, Furniture: 40000, Electrical: 1, Recipe: 308, Action: 100014009, Effect: 100014009),
+        ResName = "Mod_WindTurbine_S",
+        StockPrefab = "P_RoofEquipment_009_S1_M03",
+        ModelFile = "WindTurbineSmall.glb",
+        IconFile = "UI_Item_Icon_WindTurbine_S.png",
+        Movers = new Dictionary<string, Vector3> { ["Head"] = Vector3.UnitY, ["Rotor"] = Vector3.UnitX },
+        TurnsIntoGusts = true,
+        // A small rotor turns faster than a big one in the same wind.
+        SpinScale = 1.4f,
+        RevealedWith = 308,
+        RewardSets = new[] { 6237, 66011, 48000 },
+        Quest = 40421,
+        QuestLine = new Text("Event_EventDes_40421",
+            "A smaller one would do for the yard's small spots: three blades and a tail on a pole, a Small Wind Turbine.",
+            "屋外空地的小位置也能用上：杆子上装三片叶片和一个尾翼，就是一台小型风力发电机。"),
+        SaveMarker = "WindPower.Turbine.Small:",
+        Defaults = new TurbineSettings(RatedPower: 9f, Materials: "20004:3, 20104:1, 20210:1", ShopPrice: 30, ShopStock: 2),
+        Texts = new[]
+        {
+            new Text("WindPower_Small_Package", "Small Wind Turbine Package", "小型风力发电机包裹"),
+            new Text("WindPower_Small_Name", "Small Wind Turbine", "小型风力发电机"),
+            new Text("WindPower_Small_Des",
+                "Small wind turbine. Its tail keeps it facing the wind, so it turns day and night and makes more power the stronger the wind blows. It can only be installed in a small spot in the yard outside.",
+                "小型风力发电机，尾翼让它始终迎着风，昼夜都能转动，风越大发电越多。只能装在屋外空地的小型位置上。"),
+            new Text("WindPower_Small_Unpack", "Unpack Small Wind Turbine Package", "拆封 小型风力发电机包裹"),
+            new Text("WindPower_Small_Unpacking", "Unpacking Small Wind Turbine Package...", "拆封 小型风力发电机包裹中…"),
+        },
+    };
+
+    // The small one last, so its line in the solar quest comes after the medium one's and older settings keep their place.
+    public static readonly IReadOnlyList<TurbineKind> All = new[] { Medium, Large, Small };
 
     /// <summary>The key the game files a recipe under: its materials, sorted.</summary>
     public static string MaterialKey(IEnumerable<int> materials) => string.Join(",", materials.OrderBy(id => id));
@@ -209,6 +248,8 @@ public static class TurbineRows
                 new RowField("ResName", kind.ResName),
                 new RowField("ICON", kind.WebIcon),
                 new RowField("FurniturePrice", price),
+                // What taking it down gives back. The copied row would give the solar panel's parts.
+                new RowField("RemoveGet", MaterialList.GivenBack(materials)),
             }),
             new RowPlan(Table.Electrical, ids.Electrical, kind.Stock.Electrical, new[]
             {

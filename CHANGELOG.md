@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- New: a Small Wind Turbine. Three blades and a tail vane on a pole, for a small furniture spot in the yard outside or on the 2F terrace. Its head turns to face the wind.
+- The Small Wind Turbine makes up to 9 power. Its recipe shows up with the Medium Solar Panel's, when [Main Quest] Assemble Solar Panels begins, and its package takes 3 Scrap Metal, 1 Wire and 1 Electronic Components. The Classic Furniture shop sells 2 before the disaster, for 30 each.
+- Taking a turbine down now gives back about half of what its package took, following its Materials setting. Before, it gave back the solar panel's parts.
+- New setting: UninstallPrep, under Uninstall. Turn it on before you remove the mod and load your save: turbine packages in bags, in storage and on the floor become solar panel packages of the same size, and the shops stop selling turbines. Then save, quit and remove WindPower.dll, and nothing is lost.
+- The Cheat Menu button Show both recipes now is now Show all recipes now.
+- Made for Survival Log 1.1.20151.
+
 ## 0.4.1
 
 - With Cheat Menu installed, its Mod tests tab has two Wind Power buttons: Show turbines (the wind now and what each turbine makes) and Show both recipes now.

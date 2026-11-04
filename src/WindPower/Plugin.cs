@@ -13,14 +13,24 @@ namespace WindPower;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.4.1";
+    private const string Version = "0.5.0";
 
     public override void Load()
     {
         if (!OptionalLive.IsToolkitInstalled) Log.LogInfo(OptionalLive.MissingNote);
 
+        _uninstallPrep = Config.Bind("Uninstall", "UninstallPrep", false,
+            "Turn this on before you remove Wind Power. Once a save is loaded, every Wind Turbine Package becomes the Solar Panel Package of its size, in your bags, in storage and on the floor, in every place the save holds, and the shops stop selling the turbines. Placed and packed turbines are always saved as solar panels, so they need nothing. Then save the game, quit, and remove WindPower.dll. LogOutput.log lists what was changed. Turning this off again does not turn the packages back.\n" +
+            "移除风力发电模组之前请先打开此项。读取存档后，背包、储物和地上的每个风力发电机包裹都会变成同尺寸的太阳能发电板包裹，存档里的每个地点都一样，商店也不再出售风力发电机。已安装和已打包的风力发电机本来就按太阳能发电板保存，不受影响。然后存档、退出游戏，再删除 WindPower.dll。改了哪些东西写在 LogOutput.log 里。再关掉此项，包裹也不会变回来。");
+
+        BindSettings(TurbineRows.Small, "Small Solar Panel", "小型太阳能发电板", 20);
         BindSettings(TurbineRows.Medium, "Medium Solar Panel", "中型太阳能发电板", 40);
         BindSettings(TurbineRows.Large, "Large Solar Panel", "大型太阳能发电板", 80);
+        OptionalLive.Watch(_uninstallPrep, isOn =>
+        {
+            UninstallPrep.Set(isOn);
+            if (isOn) Log.LogInfo("Uninstall prep is on: load a save to turn the turbine packages into solar panel packages");
+        });
 
         var tables = new TurbineTables(message => Log.LogInfo(message));
         var weatherPage = new WeatherPage(message => Log.LogInfo(message));
@@ -33,6 +43,7 @@ public sealed class Plugin : BasePlugin
         TurbineModel.Apply(harmony, message => Log.LogInfo(message));
 
         WindTicker.Log = message => Log.LogError(message);
+        UninstallPrep.Log = message => Log.LogInfo(message);
         WindTicker.Check = now =>
         {
             if (!iconPlaced)
@@ -42,6 +53,7 @@ public sealed class Plugin : BasePlugin
             }
 
             tables.Tick(now);
+            UninstallPrep.Tick(now);
             TurbineModel.Animate();
             weatherPage.Tick(now);
         };
@@ -73,6 +85,9 @@ public sealed class Plugin : BasePlugin
             $"灾难前「经典家具综合」商店有几台{chinese}出售。0 表示不卖。已有更多存货时会减到这个数；已经买下的不受影响。",
             new AcceptableValueRange<int>(0, 20)));
 
-        OptionalLive.Watch(() => WindSettings.Set(kind, new TurbineSettings(rated.Value, materials.Value, price.Value, stock.Value)), rated, materials, price, stock);
+        // Uninstall prep holds the stock at 0, so the shops stop listing the turbine.
+        OptionalLive.Watch(() => WindSettings.Set(kind, new TurbineSettings(rated.Value, materials.Value, price.Value, _uninstallPrep!.Value ? 0 : stock.Value)), rated, materials, price, stock, _uninstallPrep!);
     }
+
+    private ConfigEntry<bool>? _uninstallPrep;
 }

@@ -74,6 +74,34 @@ internal static class ShopStock
         }
     }
 
+    /// <summary>
+    /// Takes the turbines out of every open shop's stock altogether, not just down to none, so a save holds no id a game
+    /// without the mod does not know. Returns how many entries went.
+    /// </summary>
+    public static int RemoveTurbines()
+    {
+        var removed = 0;
+
+        foreach (var shop in Live.Values)
+        {
+            if (shop.buildShopConfigId == 0 || shop.StockDict is not { } stock) continue;
+
+            var isChanged = false;
+
+            foreach (var kind in TurbineRows.All)
+            {
+                if (!stock.Remove(kind.Ids.Furniture)) continue;
+
+                isChanged = true;
+                removed++;
+            }
+
+            if (isChanged) shop.SyncStockSnapshot();
+        }
+
+        return removed;
+    }
+
     private static void Fill(BuildShopComponent __instance)
     {
         try

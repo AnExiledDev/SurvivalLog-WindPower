@@ -79,7 +79,7 @@ public static class MaterialList
     /// <summary>
     /// The materials to use: the player's, or the default when theirs cannot be used, with why. Theirs cannot be used
     /// when the text cannot be read, names an item the game does not have, or matches another recipe's materials (a
-    /// stock recipe's, or one already <paramref name="taken"/> by the other turbine), since the game files recipes by
+    /// stock recipe's, or one already <paramref name="taken"/> by another turbine), since the game files recipes by
     /// their materials and only one of two alike could be crafted.
     /// </summary>
     public static (int[] Materials, string? Problem) Choose(string? text, string fallback, Func<int, bool> isItem, Func<IReadOnlyList<int>, int?> recipeUsing, IEnumerable<IReadOnlyList<int>> taken)
@@ -94,9 +94,43 @@ public static class MaterialList
 
         var key = TurbineRows.MaterialKey(materials);
 
-        if (taken.Any(list => TurbineRows.MaterialKey(list) == key)) return (standard, $"the materials '{text}' cannot be used: the other wind turbine already uses them");
+        if (taken.Any(list => TurbineRows.MaterialKey(list) == key)) return (standard, $"the materials '{text}' cannot be used: another wind turbine already uses them");
 
         return (materials, null);
+    }
+
+    /// <summary>
+    /// What taking a turbine down gives back: about half of what it was made from, like the game's own furniture. Each
+    /// material gives back half its count rounded down, then ones with an odd count give one more, in the order
+    /// listed, until half the pieces (at least one) are back. No material comes back more than it went in.
+    /// </summary>
+    public static int[] GivenBack(IReadOnlyList<int> materials)
+    {
+        var order = new List<int>();
+        var counts = new Dictionary<int, int>();
+
+        foreach (var id in materials)
+        {
+            if (!counts.ContainsKey(id)) order.Add(id);
+
+            counts[id] = counts.TryGetValue(id, out var had) ? had + 1 : 1;
+        }
+
+        var back = order.ToDictionary(id => id, id => counts[id] / 2);
+        var wanted = Math.Max(1, materials.Count / 2);
+        var total = back.Values.Sum();
+
+        foreach (var id in order)
+        {
+            if (total >= wanted) break;
+
+            if (counts[id] % 2 == 0) continue;
+
+            back[id]++;
+            total++;
+        }
+
+        return order.SelectMany(id => Enumerable.Repeat(id, back[id])).ToArray();
     }
 
     /// <summary>A turbine's default materials, which the mod itself writes, so one that does not parse is the mod's own mistake.</summary>
