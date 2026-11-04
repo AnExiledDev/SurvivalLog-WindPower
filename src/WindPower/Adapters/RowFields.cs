@@ -49,7 +49,7 @@ internal static class RowFields
         return null;
     }
 
-    private static Il2CppInts ToList(IReadOnlyList<int> values)
+    internal static Il2CppInts ToList(IReadOnlyList<int> values)
     {
         var list = new Il2CppInts();
 

@@ -5,66 +5,104 @@ namespace WindPower.Tests;
 
 public class TurbineRowsTests
 {
-    private static readonly TurbinePlan Plan = TurbineRows.Large();
+    private static TurbineKind Kind(string size) => TurbineRows.All.Single(kind => kind.Size == size);
 
-    private static RowPlan Row(Table table) => Plan.Rows.Single(row => row.Table == table);
+    private static TurbinePlan Plan(TurbineKind kind) => TurbineRows.Plan(kind, MaterialList.Standard(kind.Defaults.Materials), kind.Defaults.ShopPrice);
 
-    private static object Field(Table table, string name) => Row(table).Fields.Single(field => field.Name == name).Value;
+    private static RowPlan Row(TurbinePlan plan, Table table) => plan.Rows.Single(row => row.Table == table);
+
+    private static object Field(TurbinePlan plan, Table table, string name) => Row(plan, table).Fields.Single(field => field.Name == name).Value;
 
     // The game follows recipe -> package -> unpack action -> effect, and furniture -> power row. One wrong link makes a
     // recipe that crafts a solar panel, or a package that unpacks into nothing.
-    [Fact]
-    public void EveryLinkPointsAtTheTurbinesOwnRows()
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void EveryLinkPointsAtTheTurbinesOwnRows(string size)
     {
-        Assert.Equal(new[] { Row(Table.Item).Id }, (int[])Field(Table.Recipe, "ProductID"));
-        Assert.Equal(Row(Table.Furniture).Id, Field(Table.Item, "TargetFurnitureID"));
-        Assert.Equal(Row(Table.Action).Id, Field(Table.Item, "UseAction"));
-        Assert.Equal(Row(Table.Effect).Id, Field(Table.Action, "EffectConfigID"));
-        Assert.Equal(Row(Table.Electrical).Id, Field(Table.Furniture, "ElectricalFurnitureID"));
+        var plan = Plan(Kind(size));
+
+        Assert.Equal(new[] { Row(plan, Table.Item).Id }, (int[])Field(plan, Table.Recipe, "ProductID"));
+        Assert.Equal(Row(plan, Table.Furniture).Id, Field(plan, Table.Item, "TargetFurnitureID"));
+        Assert.Equal(Row(plan, Table.Action).Id, Field(plan, Table.Item, "UseAction"));
+        Assert.Equal(Row(plan, Table.Effect).Id, Field(plan, Table.Action, "EffectConfigID"));
+        Assert.Equal(Row(plan, Table.Electrical).Id, Field(plan, Table.Furniture, "ElectricalFurnitureID"));
     }
 
-    [Fact]
-    public void EachRowSetsItsOwnIdField()
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void EachRowSetsItsOwnIdField(string size)
     {
-        foreach (var row in Plan.Rows) Assert.Equal(row.Id, Field(row.Table, "ID"));
+        var plan = Plan(Kind(size));
+
+        foreach (var row in plan.Rows) Assert.Equal(row.Id, Field(plan, row.Table, "ID"));
     }
 
-    [Fact]
-    public void ItCanOnlyBeInstalledInTheYardOrOnTheTerrace()
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void ItCanOnlyBeInstalledInTheYardOrOnTheTerrace(string size)
     {
-        Assert.Equal(new[] { 4, 8 }, ((int[])Field(Table.Electrical, "AllowedRooms")).OrderBy(room => room));
+        Assert.Equal(new[] { 4, 8 }, ((int[])Field(Plan(Kind(size)), Table.Electrical, "AllowedRooms")).OrderBy(room => room));
     }
 
-    [Fact]
-    public void EveryRowIsACopyOfTheLargeSolarPanelsChainUnderANewId()
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void EveryRowIsACopyOfItsSolarPanelsChainUnderANewId(string size)
     {
-        var copied = Plan.Rows.ToDictionary(row => row.Table, row => row.CopyFrom);
+        var kind = Kind(size);
+        var copied = Plan(kind).Rows.ToDictionary(row => row.Table, row => row.CopyFrom);
 
-        Assert.Equal(TurbineRows.Stock.Recipe, copied[Table.Recipe]);
-        Assert.Equal(TurbineRows.Stock.Item, copied[Table.Item]);
-        Assert.Equal(TurbineRows.Stock.Furniture, copied[Table.Furniture]);
-        Assert.Equal(TurbineRows.Stock.Electrical, copied[Table.Electrical]);
-        Assert.All(Plan.Rows, row => Assert.NotEqual(row.CopyFrom, row.Id));
+        Assert.Equal(kind.Stock.Recipe, copied[Table.Recipe]);
+        Assert.Equal(kind.Stock.Item, copied[Table.Item]);
+        Assert.Equal(kind.Stock.Action, copied[Table.Action]);
+        Assert.Equal(kind.Stock.Effect, copied[Table.Effect]);
+        Assert.Equal(kind.Stock.Furniture, copied[Table.Furniture]);
+        Assert.Equal(kind.Stock.Electrical, copied[Table.Electrical]);
+        Assert.All(Plan(kind).Rows, row => Assert.NotEqual(row.CopyFrom, row.Id));
+    }
+
+    // The copy decides the slot the turbine fits: the medium turbine takes a Medium Solar Panel's spot, the large one a
+    // Large Solar Panel's.
+    [Fact]
+    public void EachTurbineCopiesTheSolarPanelOfItsSize()
+    {
+        Assert.Equal(40001, TurbineRows.Medium.Stock.Furniture);
+        Assert.Equal(40002, TurbineRows.Large.Stock.Furniture);
+    }
+
+    // Two turbines writing to one id would leave only one of them in the game.
+    [Fact]
+    public void TheTwoTurbinesShareNoIdInAnyTable()
+    {
+        var rows = TurbineRows.All.SelectMany(kind => Plan(kind).Rows).Select(row => (row.Table, row.Id)).ToList();
+
+        Assert.Equal(rows.Count, rows.Distinct().Count());
     }
 
     // GetLocalTxt shows the key itself when it is missing, and the _Local fields hold the Chinese text directly.
-    [Fact]
-    public void EveryTextKeyHasEnglishAndChineseAndEachLocalFieldMatchesItsKey()
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void EveryTextKeyHasEnglishAndChineseAndEachLocalFieldMatchesItsKey(string size)
     {
-        var texts = Plan.Texts.ToDictionary(text => text.Key);
+        var plan = Plan(Kind(size));
+        var texts = plan.Texts.ToDictionary(text => text.Key);
 
-        foreach (var row in Plan.Rows)
+        foreach (var row in plan.Rows)
         {
             foreach (var field in row.Fields.Where(field => field.Name.EndsWith("_Local")))
             {
-                var key = (string)Field(row.Table, field.Name[..^"_Local".Length]);
+                var key = (string)Field(plan, row.Table, field.Name[..^"_Local".Length]);
 
                 Assert.True(texts.ContainsKey(key), $"{row.Table}.{field.Name}: no text for {key}");
                 Assert.Equal(texts[key].Zh, field.Value);
             }
         }
 
-        Assert.All(Plan.Texts, text =>
+        Assert.All(plan.Texts.Append(Kind(size).QuestLine), text =>
         {
             Assert.False(string.IsNullOrWhiteSpace(text.En));
             Assert.False(string.IsNullOrWhiteSpace(text.Zh));
@@ -72,50 +110,114 @@ public class TurbineRowsTests
     }
 
     [Fact]
+    public void NoTextKeyIsUsedTwice()
+    {
+        var keys = TurbineRows.All.SelectMany(kind => kind.Texts).Concat(TurbineRows.SharedTexts).Select(text => text.Key).ToList();
+
+        Assert.Equal(keys.Count, keys.Distinct().Count());
+    }
+
+    // Like the solar panels: hidden until a quest reward shows it, then craftable from Production 1 on.
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void TheRecipeIsShownByItsQuestAndCraftableFromProductionOne(string size)
+    {
+        var plan = Plan(Kind(size));
+
+        Assert.Equal(0, Field(plan, Table.Recipe, "show_level"));
+        Assert.Equal(1, Field(plan, Table.Recipe, "craft_level"));
+    }
+
+    [Fact]
+    public void TheShopPriceIsTheOneGiven()
+    {
+        Assert.Equal(75, Field(TurbineRows.Plan(TurbineRows.Medium, new[] { 20004 }, 75), Table.Furniture, "FurniturePrice"));
+    }
+
+    [Fact]
+    public void TheMaterialsAreTheOnesGiven()
+    {
+        var plan = TurbineRows.Plan(TurbineRows.Large, new[] { 20004, 20004, 20373 }, 120);
+
+        Assert.Equal(new[] { 20004, 20004, 20373 }, (int[])Field(plan, Table.Recipe, "MaterialList"));
+        Assert.Equal(new[] { 20004, 20004, 20373 }, (int[])Field(plan, Table.Recipe, "perfect_item_id"));
+    }
+
+    // The wind never stops at night, so each turbine makes less than the solar panel of its size and costs more.
+    [Fact]
+    public void TheDefaultsAreTheAgreedBalance()
+    {
+        Assert.Equal(new TurbineSettings(18f, "20004:4, 20104:2, 20210:2", 60, 2), TurbineRows.Medium.Defaults);
+        Assert.Equal(new TurbineSettings(36f, "20004:5, 20104:3, 20210:3, 20373:1", 120, 2), TurbineRows.Large.Defaults);
+    }
+
+    // The medium turbine comes with the solar quest, the large one with the storage quest that follows it.
+    [Fact]
+    public void EachTurbineIsShownByItsOwnQuest()
+    {
+        Assert.Equal((40421, 6237, 309), (TurbineRows.Medium.Quest, TurbineRows.Medium.RewardSets[0], TurbineRows.Medium.RevealedWith));
+        Assert.Equal((40422, 6238, 311), (TurbineRows.Large.Quest, TurbineRows.Large.RewardSets[0], TurbineRows.Large.RevealedWith));
+        Assert.Equal("Event_EventDes_40421", TurbineRows.Medium.QuestLine.Key);
+        Assert.Equal("Event_EventDes_40422", TurbineRows.Large.QuestLine.Key);
+    }
+
+    [Fact]
     public void AnEmptyGameWithAllStockRowsHasNoProblems()
     {
-        Assert.Empty(TurbineRows.Problems(Plan, (_, id) => IsStockId(id) ? Slot.Stock : Slot.Empty, NoOtherRecipe));
+        var kind = TurbineRows.Medium;
+
+        Assert.Empty(TurbineRows.Problems(Plan(kind), (_, id) => IsStockId(kind, id) ? Slot.Stock : Slot.Empty, NoOtherRecipe));
     }
 
     [Fact]
     public void RowsWeWroteEarlierCanBeWrittenAgain()
     {
-        Assert.Empty(TurbineRows.Problems(Plan, (_, id) => IsStockId(id) ? Slot.Stock : Slot.Ours, NoOtherRecipe));
+        var kind = TurbineRows.Large;
+
+        Assert.Empty(TurbineRows.Problems(Plan(kind), (_, id) => IsStockId(kind, id) ? Slot.Stock : Slot.Ours, NoOtherRecipe));
     }
 
     [Fact]
     public void AGameRowAtOneOfOurIdsStopsTheWholeTurbine()
     {
-        var problems = TurbineRows.Problems(Plan, (table, id) => IsStockId(id) || (table == Table.Recipe && id == TurbineRows.Ids.Recipe) ? Slot.Stock : Slot.Empty, NoOtherRecipe);
+        var kind = TurbineRows.Medium;
+        var problems = TurbineRows.Problems(Plan(kind), (table, id) => IsStockId(kind, id) || (table == Table.Recipe && id == kind.Ids.Recipe) ? Slot.Stock : Slot.Empty, NoOtherRecipe);
 
-        Assert.Equal(new[] { $"Recipe {TurbineRows.Ids.Recipe} is already used by the game" }, problems);
+        Assert.Equal(new[] { $"Recipe {kind.Ids.Recipe} is already used by the game" }, problems);
     }
 
     [Fact]
     public void AMissingSolarPanelRowIsReported()
     {
-        var problems = TurbineRows.Problems(Plan, (table, id) => table == Table.Electrical && id == TurbineRows.Stock.Electrical ? Slot.Empty : IsStockId(id) ? Slot.Stock : Slot.Empty, NoOtherRecipe);
+        var kind = TurbineRows.Large;
+        var problems = TurbineRows.Problems(Plan(kind), (table, id) => table == Table.Electrical && id == kind.Stock.Electrical ? Slot.Empty : IsStockId(kind, id) ? Slot.Stock : Slot.Empty, NoOtherRecipe);
 
-        Assert.Equal(new[] { $"Electrical {TurbineRows.Stock.Electrical}, the row to copy, is missing" }, problems);
+        Assert.Equal(new[] { $"Electrical {kind.Stock.Electrical}, the row to copy, is missing" }, problems);
     }
 
-    // The Large Solar Panel's materials, as recipe 310 lists them in 1.1.20151. The first build copied them and the
-    // game filed both recipes under one key, so the turbine never showed in the crafting menu.
-    private static readonly int[] SolarMaterials = { 20002, 20002, 20002, 20002, 20002, 20002, 20002, 20002, 20004, 20004, 20004, 20004, 20210, 20210, 20210 };
-
-    [Fact]
-    public void TheRecipeIsNotFiledUnderTheSolarPanelsMaterials()
+    // The solar panels' materials, as recipes 309 and 310 list them in 1.1.20151. The first build copied the large
+    // panel's and the game filed both recipes under one key, so the turbine never showed in the crafting menu.
+    private static readonly int[][] SolarMaterials =
     {
-        var materials = (int[])Field(Table.Recipe, "MaterialList");
+        new[] { 20002, 20002, 20002, 20002, 20002, 20004, 20004, 20004, 20210, 20210 },
+        new[] { 20002, 20002, 20002, 20002, 20002, 20002, 20002, 20002, 20004, 20004, 20004, 20004, 20210, 20210, 20210 },
+    };
 
-        Assert.NotEqual(TurbineRows.MaterialKey(SolarMaterials), TurbineRows.MaterialKey(materials));
-        Assert.Equal(materials, (int[])Field(Table.Recipe, "perfect_item_id"));
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void TheDefaultRecipeIsNotFiledUnderASolarPanelsMaterials(string size)
+    {
+        var materials = (int[])Field(Plan(Kind(size)), Table.Recipe, "MaterialList");
+
+        Assert.All(SolarMaterials, solar => Assert.NotEqual(TurbineRows.MaterialKey(solar), TurbineRows.MaterialKey(materials)));
     }
 
     [Fact]
-    public void TheRecipeIsListedWithoutHavingToBeDiscovered()
+    public void TheTwoDefaultRecipesAreNotFiledUnderOneKey()
     {
-        Assert.True((int)Field(Table.Recipe, "show_level") > 0);
+        Assert.NotEqual(TurbineRows.MaterialKey(MaterialList.Standard(TurbineRows.Medium.Defaults.Materials)), TurbineRows.MaterialKey(MaterialList.Standard(TurbineRows.Large.Defaults.Materials)));
     }
 
     [Fact]
@@ -128,13 +230,14 @@ public class TurbineRowsTests
     [Fact]
     public void AnotherRecipeWithTheSameMaterialsStopsTheWholeTurbine()
     {
-        var ours = TurbineRows.MaterialKey(TurbineRows.Materials);
-        var problems = TurbineRows.Problems(Plan, (_, id) => IsStockId(id) ? Slot.Stock : Slot.Empty, materials => TurbineRows.MaterialKey(materials) == ours ? 555 : null);
+        var kind = TurbineRows.Medium;
+        var ours = TurbineRows.MaterialKey(MaterialList.Standard(kind.Defaults.Materials));
+        var problems = TurbineRows.Problems(Plan(kind), (_, id) => IsStockId(kind, id) ? Slot.Stock : Slot.Empty, materials => TurbineRows.MaterialKey(materials) == ours ? 555 : null);
 
         Assert.Equal(new[] { "Recipe 555 already uses the same materials, so only one of the two could be crafted" }, problems);
     }
 
     private static int? NoOtherRecipe(IReadOnlyList<int> materials) => null;
 
-    private static bool IsStockId(int id) => id is TurbineRows.Stock.Item or TurbineRows.Stock.Furniture or TurbineRows.Stock.Electrical or TurbineRows.Stock.Recipe or TurbineRows.Stock.Action or TurbineRows.Stock.Effect;
+    private static bool IsStockId(TurbineKind kind, int id) => new[] { kind.Stock.Item, kind.Stock.Furniture, kind.Stock.Electrical, kind.Stock.Recipe, kind.Stock.Action, kind.Stock.Effect }.Contains(id);
 }

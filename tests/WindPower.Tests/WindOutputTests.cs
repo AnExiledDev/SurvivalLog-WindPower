@@ -5,6 +5,9 @@ namespace WindPower.Tests;
 
 public class WindOutputTests
 {
+    // A round rating so each weather's share reads easily; the turbines' own ratings are settings.
+    private const float Rated = 48f;
+
     // Weather ids from Config_Weather. The table is the mod's own: the game's WindValue is read by nothing.
     [Theory]
     [InlineData(12, 0)]   // Heavy Smog: still air
@@ -19,7 +22,7 @@ public class WindOutputTests
     [InlineData(6, 48)]   // Severe Cold: the full rating
     public void EachWeatherGivesItsShareOfTheRatingInTheYard(int weatherId, int power)
     {
-        Assert.Equal(power, WindOutput.Shown(WindOutput.Power(WindOutput.Share(weatherId), isOnTerrace: false)));
+        Assert.Equal(power, WindOutput.Shown(WindOutput.Power(Rated, WindOutput.Share(weatherId), isOnTerrace: false)));
     }
 
     // Severe Cold on the terrace is 48 x 1.2, more than the rating: the terrace is the better spot, not a cap.
@@ -29,7 +32,7 @@ public class WindOutputTests
     [InlineData(12, 0)]
     public void TheTerraceGivesAFifthMoreThanTheYard(int weatherId, int power)
     {
-        Assert.Equal(power, WindOutput.Shown(WindOutput.Power(WindOutput.Share(weatherId), isOnTerrace: true)));
+        Assert.Equal(power, WindOutput.Shown(WindOutput.Power(Rated, WindOutput.Share(weatherId), isOnTerrace: true)));
     }
 
     [Fact]
@@ -41,20 +44,36 @@ public class WindOutputTests
     [Fact]
     public void ABadShareCountsAsStill()
     {
-        Assert.Equal(0f, WindOutput.Power(-1f, isOnTerrace: true));
+        Assert.Equal(0f, WindOutput.Power(Rated, -1f, isOnTerrace: true));
         Assert.Equal(0, WindOutput.Percent(-1f));
+    }
+
+    // The medium turbine is rated at half the large one, so in any weather it makes half as much.
+    [Fact]
+    public void OutputScalesWithTheTurbinesRating()
+    {
+        var share = WindOutput.Share(3);
+
+        Assert.Equal(WindOutput.Power(36f, share, isOnTerrace: false) / 2f, WindOutput.Power(18f, share, isOnTerrace: false), 4);
+        Assert.Equal(0f, WindOutput.Power(-5f, share, isOnTerrace: false));
+    }
+
+    [Fact]
+    public void TheNoteShowsThatTurbinesOwnRating()
+    {
+        Assert.StartsWith("Rated 18,", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", 18f, WindOutput.Share(3), isOnTerrace: false));
     }
 
     [Fact]
     public void TheNoteShowsTheRatingTheWeatherAndTheWindsShare()
     {
-        Assert.Equal("Rated 48, Rainy wind 35%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", WindOutput.Share(3), isOnTerrace: false));
+        Assert.Equal("Rated 48, Rainy wind 35%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), isOnTerrace: false));
     }
 
     [Fact]
     public void ATerraceTurbinesNoteAddsTheTerracesBonus()
     {
-        Assert.Equal("Rated 48, Rainy wind 35%, 2F terrace +20%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", WindOutput.Share(3), isOnTerrace: true));
+        Assert.Equal("Rated 48, Rainy wind 35%, 2F terrace +20%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), isOnTerrace: true));
     }
 
     private const string Panel =

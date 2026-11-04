@@ -4,14 +4,14 @@ namespace WindPower.Core;
 
 /// <summary>
 /// How one turbine moves, frame by frame. The rotor's speed follows the wind's share of the rating, eased so it winds
-/// up over a few seconds and coasts down over longer. Every so often a gust comes through: the whole top swings round
-/// to meet it, the rotor picks up speed, and both settle back as it passes. Gusts come at uneven times and from
+/// up over a few seconds and coasts down over longer. Every so often a gust comes through: the rotor picks up speed,
+/// on the large turbine the whole top swings round to meet it, and both settle back as it passes. Gusts come at uneven times and from
 /// either side, and each turbine has its own phase, so two turbines never move in step. All angles are in degrees;
 /// the adapter turns each part to them.
 /// </summary>
 public sealed class TurbineMotion
 {
-    /// <summary>Degrees a second at full wind, a little under a turn.</summary>
+    /// <summary>Degrees a second at full wind for the large turbine's rotor, a little under a turn.</summary>
     public const float MaxSpin = 340f;
 
     /// <summary>How far the steady flutter pushes the speed above and below the wind's own.</summary>
@@ -39,13 +39,19 @@ public sealed class TurbineMotion
     private const float LongestStep = 0.1f;
 
     private readonly float _phase;
+    private readonly float _maxSpin;
+    private readonly bool _turnsIntoGusts;
     private float _level;
     private bool _hasStarted;
 
     /// <param name="phase">Seconds this turbine's gusts run ahead of the others'.</param>
-    public TurbineMotion(float phase)
+    /// <param name="spinScale">The rotor's top speed as a share of <see cref="MaxSpin"/>.</param>
+    /// <param name="turnsIntoGusts">False for a rotor that takes the wind from every side, whose top never swings.</param>
+    public TurbineMotion(float phase, float spinScale = 1f, bool turnsIntoGusts = true)
     {
         _phase = phase;
+        _maxSpin = MaxSpin * Math.Max(0f, spinScale);
+        _turnsIntoGusts = turnsIntoGusts;
     }
 
     public float RotorAngle { get; private set; }
@@ -70,14 +76,14 @@ public sealed class TurbineMotion
         {
             _hasStarted = true;
             _level = target;
-            HeadYaw = Yaw(gust, target);
+            HeadYaw = _turnsIntoGusts ? Yaw(gust, target) : 0f;
         }
 
         _level = Ease(_level, target, dt, target > _level ? SpinUpTau : SpinDownTau);
 
-        Spin = MaxSpin * _level * (1f + FlutterDepth * Flutter(time + _phase) + GustBoost * Math.Abs(gust));
+        Spin = _maxSpin * _level * (1f + FlutterDepth * Flutter(time + _phase) + GustBoost * Math.Abs(gust));
         RotorAngle = (RotorAngle + Spin * dt) % 360f;
-        HeadYaw = Ease(HeadYaw, Yaw(gust, _level), dt, YawTau);
+        if (_turnsIntoGusts) HeadYaw = Ease(HeadYaw, Yaw(gust, _level), dt, YawTau);
     }
 
     /// <summary>

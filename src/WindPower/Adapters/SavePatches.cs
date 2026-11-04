@@ -9,7 +9,7 @@ using Il2CppAgentSaves = Il2CppSystem.Collections.Generic.List<GameCore.HotUpdat
 namespace WindPower.Adapters;
 
 /// <summary>
-/// Saves each turbine as the stock Large Solar Panel and turns it back on load (see <see cref="SaveTwin"/>). The
+/// Saves each turbine as the stock solar panel it copies and turns it back on load (see <see cref="SaveTwin"/>). The
 /// furniture and packed-furniture saves are hooked after they write their ids; the load is hooked where the game
 /// gathers a chapter's saves before creating them; moving furniture between chapters clones a save without its name,
 /// so the clone gets the marker back. Every target was checked in GameAssembly.dll: no relative jump or call in its
@@ -38,7 +38,7 @@ internal static class SavePatches
 
             var fields = Read(__0);
 
-            if (SaveTwin.ToStock(ref fields)) Write(__0, fields);
+            if (SaveTwin.ToStock(ref fields, TurbineRows.All)) Write(__0, fields);
         }
         catch (Exception ex)
         {
@@ -60,7 +60,7 @@ internal static class SavePatches
 
                 var fields = Read(save);
 
-                if (SaveTwin.FromStock(ref fields)) Write(save, fields);
+                if (SaveTwin.FromStock(ref fields, TurbineRows.All)) Write(save, fields);
             }
         }
         catch (Exception ex)
@@ -73,7 +73,7 @@ internal static class SavePatches
     {
         try
         {
-            if (__0?.Name != null && __result != null && __0.Name.StartsWith(SaveTwin.Marker, StringComparison.Ordinal)) __result.Name = __0.Name;
+            if (__0?.Name != null && __result != null && __0.Name.StartsWith(SaveTwin.MarkerStart, StringComparison.Ordinal)) __result.Name = __0.Name;
         }
         catch (Exception ex)
         {

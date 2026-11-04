@@ -205,6 +205,30 @@ public class TurbineMotionTests
         Assert.NotEqual(one.HeadYaw, two.HeadYaw);
     }
 
+    // The medium turbine's rotor stands upright and takes the wind from every side, so its top never swings round,
+    // though a gust still speeds the rotor up.
+    [Fact]
+    public void ARotorThatTakesTheWindFromEverySideNeverSwingsItsTop()
+    {
+        var (left, right, _, fastest) = Watch(new TurbineMotion(0f, 0.6f, turnsIntoGusts: false), 120f, 1f);
+
+        Assert.Equal(0f, left);
+        Assert.Equal(0f, right);
+        Assert.True(fastest > 0.6f * TurbineMotion.MaxSpin * 1.15f, $"gusts never sped the rotor past {fastest}");
+    }
+
+    [Fact]
+    public void ASmallerRotorTurnsAtItsShareOfTheLargeOnesSpeed()
+    {
+        var large = new TurbineMotion(5f);
+        var medium = new TurbineMotion(5f, 0.6f, turnsIntoGusts: false);
+
+        Run(large, 0f, 20f, 0.7f);
+        Run(medium, 0f, 20f, 0.7f);
+
+        Assert.InRange(medium.Spin / large.Spin, 0.599f, 0.601f);
+    }
+
     // A load or a hitch hands over one huge frame; the rotor must not leap round by it.
     [Fact]
     public void ALongFrameDoesNotMakeTheRotorJump()

@@ -12,6 +12,7 @@
     <GameDir Condition="'$(GameDir)' == ''">D:\SteamLibrary\steamapps\common\Survival Log</GameDir>
     <BepInExCore>$(GameDir)\BepInEx\core</BepInExCore>
     <Interop>$(GameDir)\BepInEx\interop</Interop>
+    <ToolkitDll Condition="'$(ToolkitDll)' == ''">D:\devnew\game-mods\SurvivalLog\mods\sl-exiled-toolkit\src\ExiledToolkit\bin\Release\ExiledToolkit.dll</ToolkitDll>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,10 +27,13 @@
     <Reference Include="$(Interop)\UnityEngine.PhysicsModule.dll" Private="false" />
     <Reference Include="$(Interop)\AOT.dll" Private="false" />
     <Reference Include="$(Interop)\Vuplex.WebView.dll" Private="false" />
+    <Reference Include="$(ToolkitDll)" Private="false" />
   </ItemGroup>
 
-  <!-- The turbine's model and icon and the weather tooltip's page script travel inside the DLL, so installing the mod is still one file. -->
+  <!-- The turbines' models and icons and the weather tooltip's page script travel inside the DLL, so installing the mod is still one file. -->
   <ItemGroup>
+    <EmbeddedResource Include="..\..\assets\WindTurbineMedium.glb" LogicalName="WindTurbineMedium.glb" />
+    <EmbeddedResource Include="..\..\assets\UI_Item_Icon_WindTurbine_M.png" LogicalName="UI_Item_Icon_WindTurbine_M.png" />
     <EmbeddedResource Include="..\..\assets\WindTurbineLarge.glb" LogicalName="WindTurbineLarge.glb" />
     <EmbeddedResource Include="..\..\assets\UI_Item_Icon_WindTurbine_L.png" LogicalName="UI_Item_Icon_WindTurbine_L.png" />
     <EmbeddedResource Include="windpower.js" LogicalName="WindPower.windpower.js" />
@@ -38,7 +42,7 @@
   <!-- What the Mod Manager's Mods screen shows about this mod. -->
   <ItemGroup>
     <AssemblyMetadata Include="ModManager.Name" Value="Wind Power&#10;风力发电" />
-    <AssemblyMetadata Include="ModManager.Description" Value="Adds a craftable Large Wind Turbine that makes power outdoors.&#10;新增可制作的大型风力发电机，装在户外发电。" />
+    <AssemblyMetadata Include="ModManager.Description" Value="Adds craftable Medium and Large Wind Turbines that make power outdoors, day and night.&#10;新增可制作的中型和大型风力发电机，装在户外，昼夜发电。" />
     <AssemblyMetadata Include="ModManager.Author" Value="AnExiledDev" />
     <AssemblyMetadata Include="ModManager.Category" Value="Gameplay" />
     <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.20151" />

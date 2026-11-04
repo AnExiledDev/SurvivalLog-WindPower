@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace WindPower.Core;
 
@@ -33,61 +34,23 @@ public enum Slot
 }
 
 /// <summary>
-/// The table rows that make the Large Wind Turbine: the recipe, the package it crafts, the unpack action and its effect,
-/// the furniture, and its power row. Each is a copy of the Large Solar Panel's row with its links and text changed, so
-/// everything the solar panel does that is not named here (model, icon, install time, what removing it gives back) the
-/// turbine does too.
+/// The two turbines and the table rows that make each one: the recipe, the package it crafts, the unpack action and its
+/// effect, the furniture, and its power row. Each is a copy of a solar panel's row (the Medium Solar Panel's for the
+/// medium turbine, the Large Solar Panel's for the large) with its links and text changed, so everything the panel
+/// does that is not named here (install time, slot size, what removing it gives back) the turbine does too.
 /// </summary>
 public static class TurbineRows
 {
     /// <summary>Config_MapSlot rooms: 4 is the 2F terrace, 8 the yard outside. The same pair as the Transceiver.</summary>
     public static readonly IReadOnlyList<int> OutdoorRooms = new[] { 4, 8 };
 
-    public static class Stock
-    {
-        public const int Item = 14011;
-        public const int Furniture = 40002;
-        public const int Electrical = 6;
-        public const int Recipe = 310;
-        public const int Action = 100014011;
-        public const int Effect = 100014011;
-    }
+    /// <summary>Config_MapSlot room id of the 2F terrace.</summary>
+    public const int TerraceRoom = 4;
 
-    /// <summary>Far above the game's own ids (1.1.20151: item 70152, furniture 90291, recipe 1703, power row 19), so an update is unlikely to reach them.</summary>
-    public static class Ids
-    {
-        public const int Item = 910001;
-        public const int Furniture = 910001;
-        public const int Electrical = 910;
-        public const int Recipe = 9101;
-        public const int Action = 100910001;
-        public const int Effect = 100910001;
-    }
+    /// <summary>The pre-disaster furniture shops (Config_ShopFurniture), which sell both solar panels.</summary>
+    public static readonly IReadOnlyList<int> Shops = new[] { 1, 14, 15 };
 
-    /// <summary>
-    /// 6 Scrap Metal, 4 Electrical Wire, 4 Stainless Steel Plate, 3 Electronic Components. The game finds a recipe by
-    /// its sorted materials, so they must differ from every other recipe's or one of the two drops out of the menu.
-    /// </summary>
-    public static readonly IReadOnlyList<int> Materials = Enumerable.Repeat(20004, 6).Concat(Enumerable.Repeat(20372, 4)).Concat(Enumerable.Repeat(20373, 4)).Concat(Enumerable.Repeat(20210, 3)).ToArray();
-
-    /// <summary>The key the game files a recipe under: its materials, sorted.</summary>
-    public static string MaterialKey(IEnumerable<int> materials) => string.Join(",", materials.OrderBy(id => id));
-
-    private const string PackageKey = "WindPower_Large_Package";
-    private const string NameKey = "WindPower_Large_Name";
-    private const string DesKey = "WindPower_Large_Des";
-    private const string UnpackKey = "WindPower_Large_Unpack";
-    private const string UnpackingKey = "WindPower_Large_Unpacking";
-
-    /// <summary>The prefab name the furniture row gives. The game has no such prefab: the mod builds it.</summary>
-    public const string ResName = "Mod_WindTurbine_L";
-
-    public const string IconFile = "UI_Item_Icon_WindTurbine_L.png";
-
-    /// <summary>Where the web UI finds the icon, written the way the game writes its own (from a page two folders below WebUI).</summary>
     public const string WebIconFolder = "Res/Mods/WindPower";
-
-    public const string WebIcon = "../../" + WebIconFolder + "/" + IconFile;
 
     /// <summary>The wind part of the power hover's note: {0} the weather, {1} the output as a share of the rating.</summary>
     public const string WindNoteKey = "WindPower_WindNote";
@@ -98,76 +61,158 @@ public static class TurbineRows
     /// <summary>The wind row's label in the HUD's weather tooltip, next to the game's own Light Intensity.</summary>
     public const string WindLabelKey = "WindPower_WindLabel";
 
-    /// <summary>Config_MapSlot room ids: the 2F terrace and the yard outside.</summary>
-    public const int TerraceRoom = 4;
-
-    public static TurbinePlan Large()
+    public static readonly IReadOnlyList<Text> SharedTexts = new[]
     {
-        var texts = new[]
+        new Text(WindNoteKey, "{0} wind {1}", "{0}风力 {1}"),
+        new Text(TerraceNoteKey, "2F terrace +20%", "二楼露台 +20%"),
+        new Text(WindLabelKey, "Wind Intensity", "风力强度"),
+    };
+
+    /// <summary>
+    /// A Savonius rotor: two half drums on an upright shaft. It is revealed with the Medium Solar Panel, from the
+    /// solar quest on, and makes half the large turbine's power.
+    /// </summary>
+    public static readonly TurbineKind Medium = new()
+    {
+        Name = "Medium Wind Turbine",
+        Size = "Medium",
+        // Far above the game's own ids (1.1.20151: item 70152, furniture 90291, recipe 1703, power row 19), so an
+        // update is unlikely to reach them.
+        Ids = new RowIds(Item: 910002, Furniture: 910002, Electrical: 911, Recipe: 9102, Action: 100910002, Effect: 100910002),
+        Stock = new RowIds(Item: 14010, Furniture: 40001, Electrical: 5, Recipe: 309, Action: 100014010, Effect: 100014010),
+        ResName = "Mod_WindTurbine_M",
+        StockPrefab = "P_RoofEquipment_009_S1_M01_Middle",
+        ModelFile = "WindTurbineMedium.glb",
+        IconFile = "UI_Item_Icon_WindTurbine_M.png",
+        Movers = new Dictionary<string, Vector3> { ["Rotor"] = Vector3.UnitY },
+        TurnsIntoGusts = false,
+        SpinScale = 0.6f,
+        RevealedWith = 309,
+        RewardSets = new[] { 6237, 66011, 48000 },
+        Quest = 40421,
+        QuestLine = new Text("Event_EventDes_40421",
+            "The Scrap Metal could catch the wind as well: bent into two half drums and set on a shaft, it would turn day and night. A Medium Wind Turbine might be worth building too.",
+            "铁皮也能用来接风：弯成两个半圆筒装在转轴上，风一吹就能日夜转个不停。做一台中型风力发电机，应该也值得。"),
+        SaveMarker = "WindPower.Turbine.Medium:",
+        Defaults = new TurbineSettings(RatedPower: 18f, Materials: "20004:4, 20104:2, 20210:2", ShopPrice: 60, ShopStock: 2),
+        Texts = new[]
         {
-            new Text(PackageKey, "Large Wind Turbine Package", "大型风力发电机包裹"),
-            new Text(NameKey, "Large Wind Turbine", "大型风力发电机"),
-            new Text(DesKey,
+            new Text("WindPower_Medium_Package", "Medium Wind Turbine Package", "中型风力发电机包裹"),
+            new Text("WindPower_Medium_Name", "Medium Wind Turbine", "中型风力发电机"),
+            new Text("WindPower_Medium_Des",
+                "Medium wind turbine. Its two half drums catch wind from any side, so it turns day and night and makes more power the stronger the wind blows. It can only be installed outdoors: in the yard outside or on the 2F terrace.",
+                "中型风力发电机，两片半圆筒四面来风都能接住，昼夜都能转动，风越大发电越多。只能装在户外：屋外空地或二楼露台。"),
+            new Text("WindPower_Medium_Unpack", "Unpack Medium Wind Turbine Package", "拆封 中型风力发电机包裹"),
+            new Text("WindPower_Medium_Unpacking", "Unpacking Medium Wind Turbine Package...", "拆封 中型风力发电机包裹中…"),
+        },
+    };
+
+    /// <summary>A three-blade turbine on a mast, whose top swings round into gusts. It is revealed with the batteries, from the storage quest on.</summary>
+    public static readonly TurbineKind Large = new()
+    {
+        Name = "Large Wind Turbine",
+        Size = "Large",
+        Ids = new RowIds(Item: 910001, Furniture: 910001, Electrical: 910, Recipe: 9101, Action: 100910001, Effect: 100910001),
+        Stock = new RowIds(Item: 14011, Furniture: 40002, Electrical: 6, Recipe: 310, Action: 100014011, Effect: 100014011),
+        ResName = "Mod_WindTurbine_L",
+        StockPrefab = "P_RoofEquipment_009_S1_M02_Large",
+        ModelFile = "WindTurbineLarge.glb",
+        IconFile = "UI_Item_Icon_WindTurbine_L.png",
+        // three.js spins a rotor about X.
+        Movers = new Dictionary<string, Vector3> { ["Head"] = Vector3.UnitY, ["Rotor"] = Vector3.UnitX },
+        TurnsIntoGusts = true,
+        SpinScale = 1f,
+        RevealedWith = 311,
+        RewardSets = new[] { 6238, 66011, 48000 },
+        Quest = 40422,
+        QuestLine = new Text("Event_EventDes_40422",
+            "And the wind keeps blowing after dark, when the panels go quiet. With somewhere to store the power, a Large Wind Turbine would keep it coming all night.",
+            "天黑后太阳能板歇了，风却还在吹。有了存电的地方，再造一台大型风力发电机，整夜都能有电进来。"),
+        // The marker 0.1 to 0.3 wrote, kept so their saves still load as turbines.
+        SaveMarker = "WindPower.Turbine:",
+        Defaults = new TurbineSettings(RatedPower: 36f, Materials: "20004:5, 20104:3, 20210:3, 20373:1", ShopPrice: 120, ShopStock: 2),
+        Texts = new[]
+        {
+            new Text("WindPower_Large_Package", "Large Wind Turbine Package", "大型风力发电机包裹"),
+            new Text("WindPower_Large_Name", "Large Wind Turbine", "大型风力发电机"),
+            new Text("WindPower_Large_Des",
                 "Large wind turbine. It turns day and night and makes more power the stronger the wind blows. It can only be installed outdoors: in the yard outside or on the 2F terrace.",
                 "大型风力发电机，昼夜都能转动，风越大发电越多。只能装在户外：屋外空地或二楼露台。"),
-            new Text(UnpackKey, "Unpack Large Wind Turbine Package", "拆封 大型风力发电机包裹"),
-            new Text(UnpackingKey, "Unpacking Large Wind Turbine Package...", "拆封 大型风力发电机包裹中…"),
-            new Text(WindNoteKey, "{0} wind {1}", "{0}风力 {1}"),
-            new Text(TerraceNoteKey, "2F terrace +20%", "二楼露台 +20%"),
-            new Text(WindLabelKey, "Wind Intensity", "风力强度"),
-        };
+            new Text("WindPower_Large_Unpack", "Unpack Large Wind Turbine Package", "拆封 大型风力发电机包裹"),
+            new Text("WindPower_Large_Unpacking", "Unpacking Large Wind Turbine Package...", "拆封 大型风力发电机包裹中…"),
+        },
+    };
 
-        string Zh(string key) => texts.First(text => text.Key == key).Zh;
+    public static readonly IReadOnlyList<TurbineKind> All = new[] { Medium, Large };
+
+    /// <summary>The key the game files a recipe under: its materials, sorted.</summary>
+    public static string MaterialKey(IEnumerable<int> materials) => string.Join(",", materials.OrderBy(id => id));
+
+    /// <param name="materials">The recipe's materials, each id once per piece.</param>
+    /// <param name="price">What the pre-disaster shop asks for it, in gold.</param>
+    public static TurbinePlan Plan(TurbineKind kind, IReadOnlyList<int> materials, int price)
+    {
+        var ids = kind.Ids;
+        var package = kind.Key("Package");
+        var name = kind.Key("Name");
+        var des = kind.Key("Des");
+        var unpack = kind.Key("Unpack");
+        var unpacking = kind.Key("Unpacking");
+
+        string Zh(string key) => kind.Texts.First(text => text.Key == key).Zh;
 
         var rows = new[]
         {
-            new RowPlan(Table.Recipe, Ids.Recipe, Stock.Recipe, new[]
+            new RowPlan(Table.Recipe, ids.Recipe, kind.Stock.Recipe, new[]
             {
-                new RowField("ID", Ids.Recipe),
-                new RowField("ShopName", PackageKey),
-                new RowField("ShopName_Local", Zh(PackageKey)),
-                new RowField("ProductID", new[] { Ids.Item }),
-                new RowField("MaterialList", Materials.ToArray()),
-                new RowField("perfect_item_id", Materials.ToArray()),
-                // Listed from the start, like the early recipes, instead of waiting to be found by trying materials.
-                new RowField("show_level", 1),
+                new RowField("ID", ids.Recipe),
+                new RowField("ShopName", package),
+                new RowField("ShopName_Local", Zh(package)),
+                new RowField("ProductID", new[] { ids.Item }),
+                new RowField("MaterialList", materials.ToArray()),
+                new RowField("perfect_item_id", materials.ToArray()),
+                // Hidden until a quest reward or the mod's check shows it, then craftable from Production 1 on, like
+                // the solar panels.
+                new RowField("show_level", 0),
+                new RowField("craft_level", 1),
             }),
-            new RowPlan(Table.Item, Ids.Item, Stock.Item, new[]
+            new RowPlan(Table.Item, ids.Item, kind.Stock.Item, new[]
             {
-                new RowField("ID", Ids.Item),
-                new RowField("ItemName", PackageKey),
-                new RowField("ItemName_Local", Zh(PackageKey)),
-                new RowField("TargetFurnitureID", Ids.Furniture),
-                new RowField("UseAction", Ids.Action),
-                new RowField("WebIcon", WebIcon),
+                new RowField("ID", ids.Item),
+                new RowField("ItemName", package),
+                new RowField("ItemName_Local", Zh(package)),
+                new RowField("TargetFurnitureID", ids.Furniture),
+                new RowField("UseAction", ids.Action),
+                new RowField("WebIcon", kind.WebIcon),
             }),
-            new RowPlan(Table.Action, Ids.Action, Stock.Action, new[]
+            new RowPlan(Table.Action, ids.Action, kind.Stock.Action, new[]
             {
-                new RowField("ID", Ids.Action),
-                new RowField("Name", UnpackKey),
-                new RowField("Name_Local", Zh(UnpackKey)),
-                new RowField("NameDoing", UnpackingKey),
-                new RowField("NameDoing_Local", Zh(UnpackingKey)),
-                new RowField("EffectConfigID", Ids.Effect),
+                new RowField("ID", ids.Action),
+                new RowField("Name", unpack),
+                new RowField("Name_Local", Zh(unpack)),
+                new RowField("NameDoing", unpacking),
+                new RowField("NameDoing_Local", Zh(unpacking)),
+                new RowField("EffectConfigID", ids.Effect),
             }),
-            new RowPlan(Table.Effect, Ids.Effect, Stock.Effect, new[]
+            new RowPlan(Table.Effect, ids.Effect, kind.Stock.Effect, new[]
             {
-                new RowField("ID", Ids.Effect),
+                new RowField("ID", ids.Effect),
             }),
-            new RowPlan(Table.Furniture, Ids.Furniture, Stock.Furniture, new[]
+            new RowPlan(Table.Furniture, ids.Furniture, kind.Stock.Furniture, new[]
             {
-                new RowField("ID", Ids.Furniture),
-                new RowField("Name", NameKey),
-                new RowField("Name_Local", Zh(NameKey)),
-                new RowField("Des", DesKey),
-                new RowField("Des_Local", Zh(DesKey)),
-                new RowField("ElectricalFurnitureID", Ids.Electrical),
-                new RowField("ResName", ResName),
-                new RowField("ICON", WebIcon),
+                new RowField("ID", ids.Furniture),
+                new RowField("Name", name),
+                new RowField("Name_Local", Zh(name)),
+                new RowField("Des", des),
+                new RowField("Des_Local", Zh(des)),
+                new RowField("ElectricalFurnitureID", ids.Electrical),
+                new RowField("ResName", kind.ResName),
+                new RowField("ICON", kind.WebIcon),
+                new RowField("FurniturePrice", price),
             }),
-            new RowPlan(Table.Electrical, Ids.Electrical, Stock.Electrical, new[]
+            new RowPlan(Table.Electrical, ids.Electrical, kind.Stock.Electrical, new[]
             {
-                new RowField("ID", Ids.Electrical),
+                new RowField("ID", ids.Electrical),
                 new RowField("AllowedRooms", OutdoorRooms.ToArray()),
                 // Kept a solar-type row so the game lists, saves and shows it like a panel, with no sunlight power of
                 // its own: the wind power is added by the mod, and the solar talent has nothing to multiply.
@@ -175,7 +220,7 @@ public static class TurbineRows
             }),
         };
 
-        return new TurbinePlan(rows, texts);
+        return new TurbinePlan(rows, kind.Texts);
     }
 
     /// <summary>

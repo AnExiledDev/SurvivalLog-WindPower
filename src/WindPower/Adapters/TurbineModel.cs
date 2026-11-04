@@ -17,38 +17,29 @@ using Object = UnityEngine.Object;
 namespace WindPower.Adapters;
 
 /// <summary>
-/// Gives the turbine its own model. Its furniture row names a prefab the game does not have; when the game asks for
-/// it, it gets a copy of the Large Solar Panel's prefab (so every part the game looks for is there: the head bar, the
-/// collider, the animator) with the panel's meshes swapped for the turbine's, built from the model file inside the
-/// DLL. The rotor's speed follows the turbine's output, the head hunts gently as the wind shifts, and the tail swings
-/// side-on in Heavy Rain (<see cref="TurbineMotion"/>). If the model cannot be built, the game gets the solar panel's
-/// own prefab, so the turbine still works, looking like a panel.
+/// Gives each turbine its own model. Its furniture row names a prefab the game does not have; when the game asks for
+/// it, it gets a copy of the prefab of the solar panel the turbine copies (so every part the game looks for is there:
+/// the head bar, the collider, the animator) with the panel's meshes swapped for the turbine's, built from the model
+/// file inside the DLL. The rotor's speed follows the turbine's output, and on the large turbine the whole top swings
+/// round into gusts (<see cref="TurbineMotion"/>). If a model cannot be built, the game gets the solar panel's own
+/// prefab, so the turbine still works, looking like a panel.
 /// </summary>
 internal static class TurbineModel
 {
     private const string Folder = "Assets/RuntimeAssets/Prefabs/Furniture/";
-    private const string Path = Folder + TurbineRows.ResName;
-    private const string StockPath = Folder + "P_RoofEquipment_009_S1_M02_Large";
     private const string ModelName = "WindTurbine";
     private const string HeadName = "Head";
     private const string RotorName = "Rotor";
     private const float HeadBarAboveTop = 0.2f;
 
-    /// <summary>The model's moving parts and the axis of each node's own space it turns about: three.js spins a rotor about X.</summary>
-    private static readonly Dictionary<string, Numerics.Vector3> Movers = new()
-    {
-        [HeadName] = Numerics.Vector3.UnitY,
-        [RotorName] = Numerics.Vector3.UnitX,
-    };
+    private static readonly Look[] Looks = TurbineRows.All.Select(kind => new Look(kind)).ToArray();
 
+    /// <summary>Every turbine in the world, by its rotor.</summary>
     private static readonly Dictionary<IntPtr, Rig> Rigs = new();
-    private static readonly Dictionary<string, UnityEngine.Vector3> Axes = new();
+
     private static readonly System.Random Phases = new();
     private static Action<string> _log = _ => { };
     private static GameObject? _holder;
-    private static GameObject? _template;
-    private static Model? _model;
-    private static bool _hasFailed;
 
     public static void Apply(Harmony harmony, Action<string> log)
     {
@@ -74,7 +65,7 @@ internal static class TurbineModel
         {
             var rig = pair.Value;
 
-            if (rig.Head == null || rig.Head.WasCollected)
+            if (rig.Rotor == null || rig.Rotor.WasCollected)
             {
                 (gone ??= new List<IntPtr>()).Add(pair.Key);
 
@@ -82,40 +73,51 @@ internal static class TurbineModel
             }
 
             rig.Motion.Step(seconds, time, share);
-            Turn(rig.Head, HeadName, rig.Motion.HeadYaw);
-            Turn(rig.Rotor, RotorName, rig.Motion.RotorAngle);
+
+            if (rig.Head != null) Turn(rig.Look, rig.Head, HeadName, rig.Motion.HeadYaw);
+
+            Turn(rig.Look, rig.Rotor, RotorName, rig.Motion.RotorAngle);
         }
 
         if (gone != null)
             foreach (var key in gone) Rigs.Remove(key);
     }
 
-    private static void Turn(Transform? part, string name, float degrees)
+    private static void Turn(Look look, Transform part, string name, float degrees)
     {
-        if (part != null && Axes.TryGetValue(name, out var axis)) part.localRotation = Quaternion.AngleAxis(degrees, axis);
+        if (look.Axes.TryGetValue(name, out var axis)) part.localRotation = Quaternion.AngleAxis(degrees, axis);
+    }
+
+    /// <summary>The turbine whose prefab is at <paramref name="path"/>, or null.</summary>
+    private static Look? LookAt(string? path)
+    {
+        for (var i = 0; i < Looks.Length; i++)
+            if (Looks[i].Path == path) return Looks[i];
+
+        return null;
     }
 
     private static bool GiveOurModel(string __0, ref GameObject __result)
     {
-        if (__0 != Path) return true;
+        if (LookAt(__0) is not { } look) return true;
 
         try
         {
-            __result = Template() ?? BattleResource.LoadPrefabWithFallback(StockPath);
+            __result = Template(look) ?? BattleResource.LoadPrefabWithFallback(look.StockPath);
         }
         catch (Exception ex)
         {
-            if (!_hasFailed) _log("the Large Wind Turbine's model could not be built, so it looks like a solar panel: " + ex);
+            if (!look.HasFailed) _log($"the {look.Kind.Name}'s model could not be built, so it looks like a solar panel: {ex}");
 
-            _hasFailed = true;
-            __result = BattleResource.LoadPrefabWithFallback(StockPath);
+            look.HasFailed = true;
+            __result = BattleResource.LoadPrefabWithFallback(look.StockPath);
         }
 
         return false;
     }
 
-    /// <summary>The game preloads every furniture prefab a level uses from its asset bundles, and ours is in none.</summary>
-    private static bool SkipPreloadingOurModel(string __1) => __1 != Path;
+    /// <summary>The game preloads every furniture prefab a level uses from its asset bundles, and ours are in none.</summary>
+    private static bool SkipPreloadingOurModel(string __1) => LookAt(__1) == null;
 
     private static void FindRotor(string __0, GameObject __result) => Remember(__0, __result);
 
@@ -123,35 +125,42 @@ internal static class TurbineModel
 
     private static void Remember(string path, GameObject model)
     {
-        if (path != Path || model == null) return;
+        if (model == null || LookAt(path) is not { } look) return;
 
-        var head = model.transform.Find(ModelName + "/" + HeadName);
+        var top = model.transform.Find(ModelName);
 
-        if (head == null) return;
+        if (top == null) return;
+
+        // The large turbine's rotor rides on its head; the medium turbine has no head, and its rotor stands on the body.
+        var head = top.Find(HeadName);
+        var rotor = (head ?? top).Find(RotorName);
+
+        if (rotor == null) return;
 
         // Each turbine gets its own head start on the gusts, so a row of them never turns in step.
-        var motion = new TurbineMotion((float)Phases.NextDouble() * 600f);
+        var motion = new TurbineMotion((float)Phases.NextDouble() * 600f, look.Kind.SpinScale, look.Kind.TurnsIntoGusts);
 
-        Rigs[head.Pointer] = new Rig(head, head.Find(RotorName), motion);
+        Rigs[rotor.Pointer] = new Rig(look, head, rotor, motion);
     }
 
-    private static GameObject? Template()
+    private static GameObject? Template(Look look)
     {
-        if (_template != null && !_template.WasCollected) return _template;
+        if (look.Template != null && !look.Template.WasCollected) return look.Template;
 
-        if (_hasFailed) return null;
+        if (look.HasFailed) return null;
 
-        var stock = BattleResource.LoadPrefabWithFallback(StockPath);
+        var kind = look.Kind;
+        var stock = BattleResource.LoadPrefabWithFallback(look.StockPath);
 
         if (stock == null)
         {
-            _log("the Large Solar Panel's prefab is missing, so the Large Wind Turbine has no model");
-            _hasFailed = true;
+            _log($"the solar panel's prefab {kind.StockPrefab} is missing, so the {kind.Name} has no model");
+            look.HasFailed = true;
 
             return null;
         }
 
-        _model ??= Glb.Read(Resource("WindTurbineLarge.glb"), Movers);
+        look.Model ??= Glb.Read(Resource(kind.ModelFile), kind.Movers);
 
         if (_holder == null || _holder.WasCollected)
         {
@@ -162,14 +171,14 @@ internal static class TurbineModel
 
         var copy = Object.Instantiate(stock, _holder.transform);
 
-        copy.name = TurbineRows.ResName;
-        Build(copy, _model);
-        _template = copy;
+        copy.name = kind.ResName;
+        Build(copy, look, look.Model);
+        look.Template = copy;
 
         return copy;
     }
 
-    private static void Build(GameObject copy, Model model)
+    private static void Build(GameObject copy, Look look, Model model)
     {
         var root = copy.transform;
         var renderers = copy.GetComponentsInChildren<MeshRenderer>(true);
@@ -177,7 +186,7 @@ internal static class TurbineModel
         var layer = renderers.Length > 0 ? renderers[0].gameObject.layer : copy.layer;
         var (stockMin, stockMax, hasStockBounds) = StockBounds(root, copy.GetComponentsInChildren<MeshFilter>(true));
 
-        _log($"building the Large Wind Turbine on the solar panel's prefab: {renderers.Length} mesh renderers, layer {layer}, shader {(stockMaterial == null ? "none" : stockMaterial.shader.name)}, panel box {stockMin} to {stockMax}");
+        _log($"building the {look.Kind.Name} on the solar panel's prefab: {renderers.Length} mesh renderers, layer {layer}, shader {(stockMaterial == null ? "none" : stockMaterial.shader.name)}, panel box {stockMin} to {stockMax}");
 
         if (stockMaterial == null) throw new InvalidOperationException("the solar panel's prefab has no material to copy");
 
@@ -198,7 +207,7 @@ internal static class TurbineModel
         ours.transform.localScale = new UnityEngine.Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
 
         var made = new List<MeshRenderer>();
-        var holders = Pivots(ours.transform, model, layer);
+        var holders = Pivots(ours.transform, model, layer, look.Axes);
 
         foreach (var part in model.Parts)
             for (var i = 0; i < part.Meshes.Count; i++) made.Add(MakeMesh(holders[part.Name], $"{part.Name}_{i}", part.Meshes[i], materials[part.Meshes[i].Material], layer));
@@ -242,15 +251,15 @@ internal static class TurbineModel
 
         if (dye != null) dye.Targets = new Il2CppReferenceArray<Renderer>(0);
 
-        _log($"Large Wind Turbine model built: {model.TriangleCount} triangles, {made.Count} meshes, {model.Materials.Count} materials");
+        _log($"{look.Kind.Name} model built: {model.TriangleCount} triangles, {made.Count} meshes, {model.Materials.Count} materials");
     }
 
     /// <summary>
-    /// A pivot for each moving part at its turning point, each hung on the part it rides on (the rotor and the tail on
-    /// the head, so they turn with it). Every pivot starts unturned, so each axis, read with the model at rest, holds
+    /// A pivot for each moving part at its turning point, each hung on the part it rides on (the large turbine's rotor
+    /// on its head, so it turns with it). Every pivot starts unturned, so each axis, read with the model at rest, holds
     /// in its pivot's own space. The body's meshes hang straight on the model.
     /// </summary>
-    private static Dictionary<string, Transform> Pivots(Transform model, Model source, int layer)
+    private static Dictionary<string, Transform> Pivots(Transform model, Model source, int layer, Dictionary<string, UnityEngine.Vector3> axes)
     {
         var holders = new Dictionary<string, Transform> { [Glb.BodyName] = model };
 
@@ -261,7 +270,7 @@ internal static class TurbineModel
             pivot.transform.SetParent(model, false);
             pivot.transform.localPosition = Unity(part.Pivot);
             holders[part.Name] = pivot.transform;
-            Axes[part.Name] = Unity(part.Axis);
+            axes[part.Name] = Unity(part.Axis);
         }
 
         foreach (var part in source.Parts)
@@ -407,7 +416,33 @@ internal static class TurbineModel
 
     private static UnityEngine.Vector3 Unity(Numerics.Vector3 v) => new(v.X, v.Y, v.Z);
 
-    private sealed record Rig(Transform Head, Transform? Rotor, TurbineMotion Motion);
+    private sealed record Rig(Look Look, Transform? Head, Transform Rotor, TurbineMotion Motion);
+
+    /// <summary>One turbine's model: where the game asks for it, the panel it is built on, and the copy once built.</summary>
+    private sealed class Look
+    {
+        public Look(TurbineKind kind)
+        {
+            Kind = kind;
+            Path = Folder + kind.ResName;
+            StockPath = Folder + kind.StockPrefab;
+        }
+
+        public TurbineKind Kind { get; }
+
+        public string Path { get; }
+
+        public string StockPath { get; }
+
+        /// <summary>The axis each moving part turns about, in its pivot's own space.</summary>
+        public Dictionary<string, UnityEngine.Vector3> Axes { get; } = new();
+
+        public GameObject? Template { get; set; }
+
+        public Model? Model { get; set; }
+
+        public bool HasFailed { get; set; }
+    }
 
     internal static byte[] Resource(string name)
     {
@@ -423,7 +458,7 @@ internal static class TurbineModel
     {
         if (target == null)
         {
-            _log("cannot find a model loading method; the Large Wind Turbine may look like a solar panel");
+            _log("cannot find a model loading method; the wind turbines may look like solar panels");
 
             return;
         }

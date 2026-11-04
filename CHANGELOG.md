@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0
+
+- New: a Medium Wind Turbine. Its upright rotor of two half drums catches the wind from any side, and it fits a medium furniture spot in the yard outside or on the 2F terrace.
+- The Medium Wind Turbine makes up to 18 power, and the Large Wind Turbine now makes up to 36 instead of 48. A turbine runs day and night, so at 48 it was far better than a solar panel.
+- The Medium Wind Turbine's recipe shows up with the Medium Solar Panel's, when [Main Quest] Assemble Solar Panels begins. Its package takes 4 Scrap Metal, 2 Wire and 2 Electronic Components.
+- The Large Wind Turbine's recipe now shows up with the Lead-Acid Battery Pack's, when [Main Quest] Store the Electricity begins. Its package now takes 5 Scrap Metal, 3 Wire, 3 Electronic Components and 1 Stainless Steel Plate.
+- A save that is already past those quests gets the turbine recipes when it loads.
+- The text of both quests now mentions the wind turbine.
+- Before the disaster, the Classic Furniture shop sells both turbines.
+- New settings for each turbine: the power it makes, what its package takes, its price in the shop and how many the shop has. With Exiled's Toolkit installed, a change takes effect without restarting the game.
+- Made for Survival Log 1.1.20151.
+
 ## 0.3.1
 
 - The turbine's power now follows the weather much more closely: nothing in Heavy Smog, 6 on a Clear day, 17 in rain, 36 in Heavy Rain and up to 48 in Severe Cold.

@@ -6,16 +6,14 @@ using System.Text;
 namespace WindPower.Core;
 
 /// <summary>
-/// How much power the Large Wind Turbine makes. It turns day and night at a share of its rating that the weather sets:
-/// none in smog (smog forms in still air), a light breeze on clear days, more as fronts bring rain, and the most in cold
+/// How much power a wind turbine makes. It turns day and night at a share of its rating that the weather sets: none
+/// in smog (smog forms in still air), a light breeze on clear days, more as fronts bring rain, and the most in cold
 /// snaps. Heavy Rain stops short of full, as a storm's wind is gusty rather than strong. The game's own
-/// Config_Weather.WindValue is read by nothing in the game, so the mod keeps its own table here.
+/// Config_Weather.WindValue is read by nothing in the game, so the mod keeps its own table here. Each turbine's rating
+/// is a setting, set below its solar panel's since the wind never stops at night.
 /// </summary>
 public static class WindOutput
 {
-    /// <summary>The Large Solar Panel's output outdoors on a Clear day.</summary>
-    public const float Rated = 48f;
-
     /// <summary>The 2F terrace stands higher and more open than the yard.</summary>
     public const float TerraceBonus = 1.2f;
 
@@ -38,7 +36,7 @@ public static class WindOutput
         _ => UnknownShare,
     };
 
-    public static float Power(float share, bool isOnTerrace) => Rated * Math.Max(0f, share) * (isOnTerrace ? TerraceBonus : 1f);
+    public static float Power(float rated, float share, bool isOnTerrace) => Math.Max(0f, rated) * Math.Max(0f, share) * (isOnTerrace ? TerraceBonus : 1f);
 
     /// <summary>The whole number the game's power panel shows and adds up, rounded the way the game rounds.</summary>
     public static int Shown(float power) => (int)Math.Round(power);
@@ -50,9 +48,9 @@ public static class WindOutput
     /// "Rated {0}" text, the weather and how hard the wind blows as a share of the rating, then the terrace's bonus
     /// when the turbine stands there.
     /// </summary>
-    public static string Note(string ratedFormat, string windFormat, string terraceText, string weatherName, float share, bool isOnTerrace)
+    public static string Note(string ratedFormat, string windFormat, string terraceText, string weatherName, float rated, float share, bool isOnTerrace)
     {
-        var note = string.Format(CultureInfo.InvariantCulture, ratedFormat, Shown(Rated)) + ", " + string.Format(CultureInfo.InvariantCulture, windFormat, weatherName, Percent(share) + "%");
+        var note = string.Format(CultureInfo.InvariantCulture, ratedFormat, Shown(rated)) + ", " + string.Format(CultureInfo.InvariantCulture, windFormat, weatherName, Percent(share) + "%");
 
         return isOnTerrace ? note + ", " + terraceText : note;
     }

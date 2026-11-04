@@ -9,13 +9,13 @@ public class ModelFileTests
 {
     private static byte[] Asset(string name) => File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "assets", name));
 
-    private static readonly Dictionary<string, Vector3> Movers = new()
-    {
-        ["Head"] = Vector3.UnitY,
-        ["Rotor"] = Vector3.UnitX,
-    };
+    private static readonly IReadOnlyDictionary<string, Vector3> Movers = TurbineRows.Large.Movers;
 
-    private static readonly Model Turbine = Glb.Read(Asset("WindTurbineLarge.glb"), Movers);
+    private static readonly Model Turbine = Glb.Read(Asset(TurbineRows.Large.ModelFile), Movers);
+
+    private static readonly Model Medium = Glb.Read(Asset(TurbineRows.Medium.ModelFile), TurbineRows.Medium.Movers);
+
+    private static Model Load(string size) => size == "Medium" ? Medium : Turbine;
 
     private static ModelPart Part(string name) => Turbine.Parts.Single(part => part.Name == name);
 
@@ -79,14 +79,49 @@ public class ModelFileTests
         Assert.InRange(max.Z - min.Z, 1.5f, 3.5f);
     }
 
+    // The medium turbine's rotor stands upright in its frame: the one moving part, with no head to ride on.
     [Fact]
-    public void EveryMeshIsWholeAndPointsAtARealMaterial()
+    public void TheMediumTurbineSplitsIntoTheStillFrameAndTheRotor()
     {
-        Assert.InRange(Turbine.TriangleCount, 1000, 10000);
+        Assert.Equal(new[] { Glb.BodyName, "Rotor" }, Medium.Parts.Select(part => part.Name).OrderBy(name => name, StringComparer.Ordinal));
+        Assert.All(Medium.Parts, part => Assert.NotEmpty(part.Meshes));
+        Assert.Null(Medium.Parts.Single(part => part.Name == "Rotor").Parent);
+    }
 
-        foreach (var mesh in Turbine.Parts.SelectMany(part => part.Meshes))
+    [Fact]
+    public void TheMediumRotorTurnsAboutItsUprightShaft()
+    {
+        var rotor = Medium.Parts.Single(part => part.Name == "Rotor");
+
+        Assert.InRange(rotor.Axis.Y, 0.99f, 1.01f);
+        Assert.InRange(Math.Abs(rotor.Pivot.X) + Math.Abs(rotor.Pivot.Z), 0f, 0.05f);
+        Assert.InRange(rotor.Pivot.Y, 1.3f, 1.6f);
+    }
+
+    // The Medium Solar Panel's spot is 2 m by 1 m, and the turbine stands about 3 m tall in it.
+    [Fact]
+    public void TheMediumTurbineStandsOnTheGroundAndFitsTheMediumSpot()
+    {
+        var (min, max) = Medium.Bounds();
+
+        Assert.InRange(min.Y, -0.01f, 0.01f);
+        Assert.InRange(max.Y, 2.8f, 3.5f);
+        Assert.InRange(max.X - min.X, 1.5f, 2.0f);
+        Assert.InRange(max.Z - min.Z, 0.7f, 1.0f);
+    }
+
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void EveryMeshIsWholeAndPointsAtARealMaterial(string size)
+    {
+        var model = Load(size);
+
+        Assert.InRange(model.TriangleCount, 1000, 10000);
+
+        foreach (var mesh in model.Parts.SelectMany(part => part.Meshes))
         {
-            Assert.InRange(mesh.Material, 0, Turbine.Materials.Count - 1);
+            Assert.InRange(mesh.Material, 0, model.Materials.Count - 1);
             Assert.Equal(mesh.Positions.Length, mesh.Normals.Length);
             Assert.Equal(mesh.Positions.Length, mesh.Uvs.Length);
             Assert.Equal(0, mesh.Triangles.Length % 3);
@@ -94,26 +129,31 @@ public class ModelFileTests
         }
     }
 
-    [Fact]
-    public void EveryTextureInTheModelDecodes()
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void EveryTextureInTheModelDecodes(string size)
     {
-        var textured = Turbine.Materials.Where(material => material.Image != null).ToList();
+        var model = Load(size);
+        var textured = model.Materials.Where(material => material.Image != null).ToList();
 
         Assert.NotEmpty(textured);
 
         foreach (var material in textured)
         {
-            var picture = Png.Decode(Turbine.Images[material.Image!.Value]);
+            var picture = Png.Decode(model.Images[material.Image!.Value]);
 
             Assert.Equal(picture.Width * picture.Height * 4, picture.Rgba.Length);
             Assert.True(picture.Width >= 16 && picture.Height >= 16);
         }
     }
 
-    [Fact]
-    public void TheIconIsTheSameSizeAsTheGamesOwn()
+    [Theory]
+    [InlineData("Medium")]
+    [InlineData("Large")]
+    public void TheIconIsTheSameSizeAsTheGamesOwn(string size)
     {
-        var icon = Png.Decode(Asset("UI_Item_Icon_WindTurbine_L.png"));
+        var icon = Png.Decode(Asset(TurbineRows.All.Single(kind => kind.Size == size).IconFile));
 
         Assert.Equal((512, 512), (icon.Width, icon.Height));
     }

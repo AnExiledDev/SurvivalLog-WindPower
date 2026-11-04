@@ -10,10 +10,10 @@ using Il2CppFurnitures = Il2CppSystem.Collections.Generic.List<GameCore.HotUpdat
 namespace WindPower.Adapters;
 
 /// <summary>
-/// Makes the turbine's power come from the wind. Its power row is a solar row with no power of its own, so the game
-/// lists it, saves it and draws it like a panel; these hooks add its wind power to the city's supply and show it in
-/// the power panel, the power hover and the name hover. The power hover is moved down to the turbine's foot, since the
-/// game puts it over the top, which is off screen when zoomed in on a six-metre turbine. The game's sunlight sum (CalcSolarOutput) is left alone, since
+/// Makes the turbines' power come from the wind. Each one's power row is a solar row with no power of its own, so the
+/// game lists it, saves it and draws it like a panel; these hooks add its wind power to the city's supply and show it
+/// in the power panel, the power hover and the name hover. The power hover is moved down to the turbine's foot, since
+/// the game puts it over the top, which is off screen when zoomed in on a tall turbine. The game's sunlight sum (CalcSolarOutput) is left alone, since
 /// Power Manager already hooks it. Every target was checked in GameAssembly.dll: no relative jump or call in its first
 /// 14 bytes. A hook that fails reports once and lets the game's own answer through.
 /// </summary>
@@ -81,7 +81,29 @@ internal static class WindPatches
     /// <summary>The wind as a whole percent of the rating, for the weather tooltip; -1 when there is no weather.</summary>
     public static int WindPercent() => WeatherId() < 0 ? -1 : WindOutput.Percent(Wind());
 
-    private static float Power(Furniture furniture) => WindOutput.Power(Wind(), IsOnTerrace(furniture));
+    private static float Power(Furniture furniture, TurbineKind kind) => WindOutput.Power(WindSettings.Of(kind).RatedPower, Wind(), IsOnTerrace(furniture));
+
+    /// <summary>The turbine whose furniture row has this id, or null.</summary>
+    private static TurbineKind? KindOf(int furnitureId)
+    {
+        for (var i = 0; i < TurbineRows.All.Count; i++)
+            if (TurbineRows.All[i].Ids.Furniture == furnitureId) return TurbineRows.All[i];
+
+        return null;
+    }
+
+    /// <summary>The turbine whose power row this is, or null.</summary>
+    private static TurbineKind? KindOf(Config_FurnitureElectrical? row)
+    {
+        if (row == null) return null;
+
+        var id = row.ID;
+
+        for (var i = 0; i < TurbineRows.All.Count; i++)
+            if (TurbineRows.All[i].Ids.Electrical == id) return TurbineRows.All[i];
+
+        return null;
+    }
 
     /// <summary>Whether the turbine's furniture spot is on the 2F terrace, asked once a second at most per turbine.</summary>
     private static bool IsOnTerrace(Furniture furniture)
@@ -99,8 +121,6 @@ internal static class WindPatches
         return isOnTerrace;
     }
 
-    private static bool IsTurbine(Config_FurnitureElectrical? row) => row != null && row.ID == TurbineRows.Ids.Electrical;
-
     private static void AddWindPower(Il2CppFurnitures __0, ref float __result)
     {
         try
@@ -108,7 +128,7 @@ internal static class WindPatches
             if (__0 == null) return;
 
             for (var i = 0; i < __0.Count; i++)
-                if (__0[i] is { } furniture && furniture.AgentConfigId == TurbineRows.Ids.Furniture) __result += Power(furniture);
+                if (__0[i] is { } furniture && KindOf(furniture.AgentConfigId) is { } kind) __result += Power(furniture, kind);
         }
         catch (Exception ex)
         {
@@ -118,15 +138,18 @@ internal static class WindPatches
 
     private static void ShowWindInPowerHover(Furniture __0, Config_FurnitureElectrical __2, SolarFloatData __result)
     {
+        var kind = KindOf(__2);
+
         try
         {
-            if (!IsTurbine(__2) || __result == null || __0 == null) return;
+            if (kind == null || __result == null || __0 == null) return;
 
+            var rated = WindSettings.Of(kind).RatedPower;
             var share = Wind();
             var isOnTerrace = IsOnTerrace(__0);
-            var note = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0} wind {1}"), Local(TurbineRows.TerraceNoteKey, "2F terrace +20%"), _weatherName, share, isOnTerrace);
+            var note = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0} wind {1}"), Local(TurbineRows.TerraceNoteKey, "2F terrace +20%"), _weatherName, rated, share, isOnTerrace);
 
-            __result.PowerCur = WindOutput.Shown(WindOutput.Power(share, isOnTerrace));
+            __result.PowerCur = WindOutput.Shown(WindOutput.Power(rated, share, isOnTerrace));
             __result.NoteText = note;
             __result.IsIdle = false;
         }
@@ -137,7 +160,7 @@ internal static class WindPatches
 
         try
         {
-            if (IsTurbine(__2) && __result != null && __0 != null) PointHoverAtFoot(__0, __result);
+            if (kind != null && __result != null && __0 != null) PointHoverAtFoot(__0, __result);
         }
         catch (Exception ex)
         {
@@ -168,14 +191,23 @@ internal static class WindPatches
         {
             if (string.IsNullOrEmpty(__result)) return;
 
-            var turbines = GameSingleton.Existing<BattleLogicWorld>()?._AgentManager?.GetFurnituresByConfigId(TurbineRows.Ids.Furniture);
+            var agents = GameSingleton.Existing<BattleLogicWorld>()?._AgentManager;
 
-            if (turbines == null || turbines.Count == 0) return;
+            if (agents == null) return;
 
             var powerById = new Dictionary<string, int>();
 
-            for (var i = 0; i < turbines.Count; i++)
-                if (turbines[i] is { } turbine) powerById[turbine.InstanceId.ToString()] = WindOutput.Shown(Power(turbine));
+            foreach (var kind in TurbineRows.All)
+            {
+                var turbines = agents.GetFurnituresByConfigId(kind.Ids.Furniture);
+
+                if (turbines == null) continue;
+
+                for (var i = 0; i < turbines.Count; i++)
+                    if (turbines[i] is { } turbine) powerById[turbine.InstanceId.ToString()] = WindOutput.Shown(Power(turbine, kind));
+            }
+
+            if (powerById.Count == 0) return;
 
             var (json, added) = WindOutput.Rewrite(__result, powerById);
 
@@ -192,9 +224,9 @@ internal static class WindPatches
     {
         try
         {
-            if (!IsTurbine(__0) || __instance == null) return;
+            if (KindOf(__0) is not { } kind || __instance == null) return;
 
-            __result = string.Format(GameKey.Text_Power_HoverGeneration, (float)WindOutput.Shown(Power(__instance)));
+            __result = string.Format(GameKey.Text_Power_HoverGeneration, (float)WindOutput.Shown(Power(__instance, kind)));
         }
         catch (Exception ex)
         {
