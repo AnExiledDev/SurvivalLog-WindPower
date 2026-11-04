@@ -1,12 +1,14 @@
 # Wind Power
 
-Adds a Large Wind Turbine to Survival Log. You craft it like the Large Solar Panel, unpack it, and install it in a large furniture spot outdoors: in the yard outside or on the 2F terrace.
+Adds a Large Wind Turbine to Survival Log. Craft the Large Wind Turbine Package from 6 Scrap Metal, 4 Electrical Wire, 4 Stainless Steel Plate and 3 Electronic Components, unpack it, and install it in a large furniture spot outdoors: in the yard outside or on the 2F terrace.
 
-This is an early test build. The turbine still looks like the Large Solar Panel and makes power the way the solar panel does. Its own model and wind-based power come next.
+The turbine has its own model and icon, and its blades turn faster in stronger wind. It makes power day and night, more the windier the weather is: 12 on Clear or Cloudy days, 18 in rain and up to 42 in Severe Cold. The game counts Heavy Rain and the cold clear days (Frosty/Clear, Cold/Clear, Chilly/Clear) as still air, so the turbine makes its least then, 6. Hover over it to see what it makes now and how strong the wind is.
+
+This is an early test build.
 
 ## Save safety
 
-Keep a backup of your save before you install the turbine. A save with a turbine in it, placed or still packed, will most likely not load once the mod is removed.
+The game saves each turbine as a Large Solar Panel, and the mod turns it back into a turbine when the save loads. If you remove the mod, your turbines become Large Solar Panels and the save still loads. A turbine package that is still in your bag or in storage is lost when the mod is removed, so install it first.
 
 ## Requirements
 

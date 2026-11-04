@@ -14,7 +14,7 @@ public enum Table
     Effect,
 }
 
-/// <summary>One field to set on a row, by the name the table gives it: an int, a string, a bool or an int[] list.</summary>
+/// <summary>One field to set on a row, by the name the table gives it: an int, a float, a string, a bool or an int[] list.</summary>
 public sealed record RowField(string Name, object Value);
 
 /// <summary>A row to add: a copy of the stock row <paramref name="CopyFrom"/> under <paramref name="Id"/>, with these fields changed.</summary>
@@ -64,11 +64,33 @@ public static class TurbineRows
         public const int Effect = 100910001;
     }
 
+    /// <summary>
+    /// 6 Scrap Metal, 4 Electrical Wire, 4 Stainless Steel Plate, 3 Electronic Components. The game finds a recipe by
+    /// its sorted materials, so they must differ from every other recipe's or one of the two drops out of the menu.
+    /// </summary>
+    public static readonly IReadOnlyList<int> Materials = Enumerable.Repeat(20004, 6).Concat(Enumerable.Repeat(20372, 4)).Concat(Enumerable.Repeat(20373, 4)).Concat(Enumerable.Repeat(20210, 3)).ToArray();
+
+    /// <summary>The key the game files a recipe under: its materials, sorted.</summary>
+    public static string MaterialKey(IEnumerable<int> materials) => string.Join(",", materials.OrderBy(id => id));
+
     private const string PackageKey = "WindPower_Large_Package";
     private const string NameKey = "WindPower_Large_Name";
     private const string DesKey = "WindPower_Large_Des";
     private const string UnpackKey = "WindPower_Large_Unpack";
     private const string UnpackingKey = "WindPower_Large_Unpacking";
+
+    /// <summary>The prefab name the furniture row gives. The game has no such prefab: the mod builds it.</summary>
+    public const string ResName = "Mod_WindTurbine_L";
+
+    public const string IconFile = "UI_Item_Icon_WindTurbine_L.png";
+
+    /// <summary>Where the web UI finds the icon, written the way the game writes its own (from a page two folders below WebUI).</summary>
+    public const string WebIconFolder = "Res/Mods/WindPower";
+
+    public const string WebIcon = "../../" + WebIconFolder + "/" + IconFile;
+
+    /// <summary>The wind part of the power hover's note: {0} the weather, {1} the output as a share of the rating.</summary>
+    public const string WindNoteKey = "WindPower_WindNote";
 
     public static TurbinePlan Large()
     {
@@ -81,6 +103,7 @@ public static class TurbineRows
                 "大型风力发电机，昼夜都能转动，风越大发电越多。只能装在户外：屋外空地或二楼露台。"),
             new Text(UnpackKey, "Unpack Large Wind Turbine Package", "拆封 大型风力发电机包裹"),
             new Text(UnpackingKey, "Unpacking Large Wind Turbine Package...", "拆封 大型风力发电机包裹中…"),
+            new Text(WindNoteKey, "{0} wind {1}", "{0}风力 {1}"),
         };
 
         string Zh(string key) => texts.First(text => text.Key == key).Zh;
@@ -93,6 +116,10 @@ public static class TurbineRows
                 new RowField("ShopName", PackageKey),
                 new RowField("ShopName_Local", Zh(PackageKey)),
                 new RowField("ProductID", new[] { Ids.Item }),
+                new RowField("MaterialList", Materials.ToArray()),
+                new RowField("perfect_item_id", Materials.ToArray()),
+                // Listed from the start, like the early recipes, instead of waiting to be found by trying materials.
+                new RowField("show_level", 1),
             }),
             new RowPlan(Table.Item, Ids.Item, Stock.Item, new[]
             {
@@ -101,6 +128,7 @@ public static class TurbineRows
                 new RowField("ItemName_Local", Zh(PackageKey)),
                 new RowField("TargetFurnitureID", Ids.Furniture),
                 new RowField("UseAction", Ids.Action),
+                new RowField("WebIcon", WebIcon),
             }),
             new RowPlan(Table.Action, Ids.Action, Stock.Action, new[]
             {
@@ -123,11 +151,16 @@ public static class TurbineRows
                 new RowField("Des", DesKey),
                 new RowField("Des_Local", Zh(DesKey)),
                 new RowField("ElectricalFurnitureID", Ids.Electrical),
+                new RowField("ResName", ResName),
+                new RowField("ICON", WebIcon),
             }),
             new RowPlan(Table.Electrical, Ids.Electrical, Stock.Electrical, new[]
             {
                 new RowField("ID", Ids.Electrical),
                 new RowField("AllowedRooms", OutdoorRooms.ToArray()),
+                // Kept a solar-type row so the game lists, saves and shows it like a panel, with no sunlight power of
+                // its own: the wind power is added by the mod, and the solar talent has nothing to multiply.
+                new RowField("BasePower", 0f),
             }),
         };
 
@@ -138,7 +171,8 @@ public static class TurbineRows
     /// Why the plan cannot be written, or nothing if it can. Writing is all or nothing: a turbine missing its recipe or
     /// its power row is worse than no turbine, and a stock row at one of our ids must never be replaced.
     /// </summary>
-    public static List<string> Problems(TurbinePlan plan, Func<Table, int, Slot> slotAt)
+    /// <param name="recipeUsing">The id of another recipe made of these materials in any order, or null.</param>
+    public static List<string> Problems(TurbinePlan plan, Func<Table, int, Slot> slotAt, Func<IReadOnlyList<int>, int?> recipeUsing)
     {
         var problems = new List<string>();
 
@@ -147,6 +181,9 @@ public static class TurbineRows
             if (slotAt(row.Table, row.CopyFrom) == Slot.Empty) problems.Add($"{row.Table} {row.CopyFrom}, the row to copy, is missing");
 
             if (slotAt(row.Table, row.Id) == Slot.Stock) problems.Add($"{row.Table} {row.Id} is already used by the game");
+
+            if (row.Fields.FirstOrDefault(field => field.Name == "MaterialList")?.Value is int[] materials && recipeUsing(materials) is int other)
+                problems.Add($"Recipe {other} already uses the same materials, so only one of the two could be crafted");
         }
 
         return problems;

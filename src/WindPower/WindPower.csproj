@@ -23,6 +23,14 @@
     <Reference Include="$(Interop)\HotUpdate.dll" Private="false" />
     <Reference Include="$(Interop)\Il2Cppmscorlib.dll" Private="false" />
     <Reference Include="$(Interop)\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="$(Interop)\UnityEngine.PhysicsModule.dll" Private="false" />
+    <Reference Include="$(Interop)\AOT.dll" Private="false" />
+  </ItemGroup>
+
+  <!-- The turbine's model and icon travel inside the DLL, so installing the mod is still one file. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\assets\WindTurbineLarge.glb" LogicalName="WindTurbineLarge.glb" />
+    <EmbeddedResource Include="..\..\assets\UI_Item_Icon_WindTurbine_L.png" LogicalName="UI_Item_Icon_WindTurbine_L.png" />
   </ItemGroup>
 
   <!-- What the Mod Manager's Mods screen shows about this mod. -->

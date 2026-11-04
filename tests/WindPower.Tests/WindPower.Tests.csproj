@@ -11,6 +11,7 @@
   <!-- The pure core is compiled straight in, so the tests need none of the game or BepInEx assemblies. -->
   <ItemGroup>
     <Compile Include="..\..\src\WindPower\Core\*.cs" Link="Core\%(Filename)%(Extension)" />
+    <None Include="..\..\assets\*" Link="assets\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

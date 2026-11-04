@@ -61,7 +61,7 @@ internal sealed class TurbineTables
     private void Write(ConfigManager config, Dictionary<Table, ITableView> views, Il2CppDictionary.Dictionary<string, string> english, Il2CppDictionary.Dictionary<string, string> chinese)
     {
         var plan = TurbineRows.Large();
-        var problems = TurbineRows.Problems(plan, (table, id) => views[table].SlotAt(id, _ours));
+        var problems = TurbineRows.Problems(plan, (table, id) => views[table].SlotAt(id, _ours), materials => RecipeUsing(config, materials));
 
         if (problems.Count > 0)
         {
@@ -88,6 +88,26 @@ internal sealed class TurbineTables
         foreach (var reason in refused) _log("Large Wind Turbine field not set: " + reason);
 
         _log($"Large Wind Turbine added: item {TurbineRows.Ids.Item}, furniture {TurbineRows.Ids.Furniture}, recipe {TurbineRows.Ids.Recipe}, power row {TurbineRows.Ids.Electrical}");
+    }
+
+    private int? RecipeUsing(ConfigManager config, IReadOnlyList<int> materials)
+    {
+        var key = TurbineRows.MaterialKey(materials);
+
+        foreach (var pair in config._Config_ProductionList_Dict)
+        {
+            var recipe = pair.Value;
+
+            if (recipe == null || _ours.Contains(recipe.Pointer) || recipe.MaterialList == null || recipe.MaterialList.Count != materials.Count) continue;
+
+            var theirs = new List<int>();
+
+            foreach (var id in recipe.MaterialList) theirs.Add(id);
+
+            if (TurbineRows.MaterialKey(theirs) == key) return pair.Key;
+        }
+
+        return null;
     }
 
     private static ITableView? View<T>(Il2CppDictionary.Dictionary<int, T>? table, Func<T> make) where T : Il2CppObjectBase =>
