@@ -41,6 +41,31 @@ public sealed record Model(IReadOnlyList<ModelPart> Parts, IReadOnlyList<ModelMa
 
         return (min, max);
     }
+
+    /// <summary>
+    /// The corners of the box around the points that touch the ground: the turbine's base. Blades and tails reach
+    /// out further on one side than the other, so the base, not the whole model, is what goes in the middle of a spot.
+    /// </summary>
+    public (Vector3 Min, Vector3 Max) Footprint(float height = 0.05f)
+    {
+        var ground = Bounds().Min.Y + height;
+        var min = new Vector3(float.MaxValue);
+        var max = new Vector3(float.MinValue);
+
+        foreach (var part in Parts)
+            foreach (var mesh in part.Meshes)
+                foreach (var position in mesh.Positions)
+                {
+                    var point = position + part.Pivot;
+
+                    if (point.Y > ground) continue;
+
+                    min = Vector3.Min(min, point);
+                    max = Vector3.Max(max, point);
+                }
+
+        return (min, max);
+    }
 }
 
 /// <summary>

@@ -213,9 +213,10 @@ internal static class TurbineModel
         foreach (var part in model.Parts)
             for (var i = 0; i < part.Meshes.Count; i++) made.Add(MakeMesh(holders[part.Name], $"{part.Name}_{i}", part.Meshes[i], materials[part.Meshes[i].Material], layer));
 
-        // Stand the turbine where the panel stood: centred on the panel's footprint, its foot at the panel's foot.
+        // Stand the turbine where the panel stood: its base centred on the panel's footprint, its foot at the panel's foot.
         var (min, max) = model.Bounds();
-        var centre = (min + max) / 2f;
+        var (baseMin, baseMax) = model.Footprint();
+        var centre = (baseMin + baseMax) / 2f;
         var foot = hasStockBounds ? new UnityEngine.Vector3((stockMin.x + stockMax.x) / 2f, stockMin.y, (stockMin.z + stockMax.z) / 2f) : UnityEngine.Vector3.zero;
 
         ours.transform.localPosition = foot - Divide(new UnityEngine.Vector3(centre.X, min.Y, centre.Z), scale);

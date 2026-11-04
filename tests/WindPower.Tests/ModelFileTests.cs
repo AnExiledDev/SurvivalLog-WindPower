@@ -133,6 +133,39 @@ public class ModelFileTests
         Assert.InRange(max.Z - min.Z, 0.7f, 1.0f);
     }
 
+    // The turbine is centred on its base, so the base must sit in its spot: Small 1 m by 1 m, Medium 2 m by 1 m,
+    // Large 2 m by 2 m. The blades and the tail reach further out on one side, so centring the whole model would push
+    // the base off the spot.
+    [Theory]
+    [InlineData("Small", 1f, 1f)]
+    [InlineData("Medium", 2f, 1f)]
+    [InlineData("Large", 2f, 2f)]
+    public void TheBaseFitsItsSpotWhenItIsCentred(string size, float spotX, float spotZ)
+    {
+        var (min, max) = Load(size).Footprint();
+
+        Assert.InRange(min.Y, -0.01f, 0.01f);
+        Assert.InRange(max.X - min.X, 0.5f, spotX + 0.01f);
+        Assert.InRange(max.Z - min.Z, 0.5f, spotZ + 0.01f);
+    }
+
+    // The large and small turbines' tops lean to one side, so the box around the whole model is off centre while the
+    // base sits under the mast.
+    [Theory]
+    [InlineData("Large")]
+    [InlineData("Small")]
+    public void TheBaseIsCentredUnderTheMastWhileTheWholeModelIsNot(string size)
+    {
+        var model = Load(size);
+        var (min, max) = model.Footprint();
+        var (allMin, allMax) = model.Bounds();
+        var baseCentre = (min + max) / 2f;
+        var allCentre = (allMin + allMax) / 2f;
+
+        Assert.InRange(new Vector2(baseCentre.X, baseCentre.Z).Length(), 0f, 0.05f);
+        Assert.True(new Vector2(allCentre.X, allCentre.Z).Length() > 0.1f, $"the whole {size} model is centred at {allCentre}");
+    }
+
     [Theory]
     [InlineData("Medium")]
     [InlineData("Large")]

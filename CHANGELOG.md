@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.2
+
+- The Small and Large Wind Turbines stand in the middle of their spot. Before, their base stuck out over one edge.
+- Made for Survival Log 1.1.20151.
+
 ## 0.6.1
 
 - Dyed turbines are coloured the way the game colours its own furniture, so they match a dyed solar panel next to them.
