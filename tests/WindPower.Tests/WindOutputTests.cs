@@ -38,16 +38,6 @@ public class WindOutputTests
         Assert.Equal(WindOutput.Share(2), WindOutput.Share(99));
     }
 
-    [Theory]
-    [InlineData(10, true)]
-    [InlineData(13, true)]
-    [InlineData(6, false)]
-    [InlineData(11, false)]
-    public void OnlyHeavyRainFurlsTheTail(int weatherId, bool isFurled)
-    {
-        Assert.Equal(isFurled, WindOutput.IsFurled(weatherId));
-    }
-
     [Fact]
     public void ABadShareCountsAsStill()
     {

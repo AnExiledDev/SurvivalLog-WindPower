@@ -18,7 +18,7 @@ The turbine has its own model and icon. It makes power day and night, more the w
 
 A turbine on the 2F terrace stands higher in the wind and makes a fifth more, up to 58.
 
-The blades speed up and slow down smoothly with the wind and stand still in Heavy Smog. The head turns gently into the wind, and in Heavy Rain the tail swings to the side to protect the rotor. Hover over the turbine to see, at its base, what it makes now and how strong the wind is. The weather box on the screen shows the wind too, as a Wind Intensity line.
+The blades speed up and slow down smoothly with the wind and stand still in Heavy Smog. Every so often a gust comes through: the whole top swings round to meet it and the blades speed up, then both settle back. Hover over the turbine to see, at its base, what it makes now and how strong the wind is. The weather box on the screen shows the wind too, as a Wind Intensity line.
 
 This is an early test build.
 

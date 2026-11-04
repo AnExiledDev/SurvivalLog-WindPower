@@ -32,7 +32,6 @@ internal static class TurbineModel
     private const string ModelName = "WindTurbine";
     private const string HeadName = "Head";
     private const string RotorName = "Rotor";
-    private const string TailName = "Tail";
     private const float HeadBarAboveTop = 0.2f;
 
     /// <summary>The model's moving parts and the axis of each node's own space it turns about: three.js spins a rotor about X.</summary>
@@ -40,7 +39,6 @@ internal static class TurbineModel
     {
         [HeadName] = Numerics.Vector3.UnitY,
         [RotorName] = Numerics.Vector3.UnitX,
-        [TailName] = Numerics.Vector3.UnitY,
     };
 
     private static readonly Dictionary<IntPtr, Rig> Rigs = new();
@@ -67,7 +65,7 @@ internal static class TurbineModel
     {
         if (Rigs.Count == 0) return;
 
-        var (share, isFurled) = WindPatches.Wind();
+        var share = WindPatches.Wind();
         var seconds = Time.deltaTime;
         var time = Time.time;
         List<IntPtr>? gone = null;
@@ -83,10 +81,9 @@ internal static class TurbineModel
                 continue;
             }
 
-            rig.Motion.Step(seconds, time, share, isFurled);
+            rig.Motion.Step(seconds, time, share);
             Turn(rig.Head, HeadName, rig.Motion.HeadYaw);
             Turn(rig.Rotor, RotorName, rig.Motion.RotorAngle);
-            Turn(rig.Tail, TailName, rig.Motion.TailAngle);
         }
 
         if (gone != null)
@@ -135,7 +132,7 @@ internal static class TurbineModel
         // Each turbine gets its own head start on the gusts, so a row of them never turns in step.
         var motion = new TurbineMotion((float)Phases.NextDouble() * 600f);
 
-        Rigs[head.Pointer] = new Rig(head, head.Find(RotorName), head.Find(TailName), motion);
+        Rigs[head.Pointer] = new Rig(head, head.Find(RotorName), motion);
     }
 
     private static GameObject? Template()
@@ -410,7 +407,7 @@ internal static class TurbineModel
 
     private static UnityEngine.Vector3 Unity(Numerics.Vector3 v) => new(v.X, v.Y, v.Z);
 
-    private sealed record Rig(Transform Head, Transform? Rotor, Transform? Tail, TurbineMotion Motion);
+    private sealed record Rig(Transform Head, Transform? Rotor, TurbineMotion Motion);
 
     internal static byte[] Resource(string name)
     {

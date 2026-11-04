@@ -45,12 +45,12 @@ internal static class WindPatches
         Hook(harmony, typeof(Furniture), "GetElectricalHoverText", nameof(ShowWindInNameHover));
     }
 
-    /// <summary>The wind's share of the rating now and whether the tail is furled. With no weather (the main menu) it is still.</summary>
-    public static (float Share, bool IsFurled) Wind()
+    /// <summary>The wind's share of the rating now. With no weather (the main menu) it is still.</summary>
+    public static float Wind()
     {
         var id = WeatherId();
 
-        return id < 0 ? (0f, false) : (WindOutput.Share(id), WindOutput.IsFurled(id));
+        return id < 0 ? 0f : WindOutput.Share(id);
     }
 
     /// <summary>The weather's Config_Weather id, read at most once a second; -1 when there is none.</summary>
@@ -79,9 +79,9 @@ internal static class WindPatches
     }
 
     /// <summary>The wind as a whole percent of the rating, for the weather tooltip; -1 when there is no weather.</summary>
-    public static int WindPercent() => WeatherId() < 0 ? -1 : WindOutput.Percent(Wind().Share);
+    public static int WindPercent() => WeatherId() < 0 ? -1 : WindOutput.Percent(Wind());
 
-    private static float Power(Furniture furniture) => WindOutput.Power(Wind().Share, IsOnTerrace(furniture));
+    private static float Power(Furniture furniture) => WindOutput.Power(Wind(), IsOnTerrace(furniture));
 
     /// <summary>Whether the turbine's furniture spot is on the 2F terrace, asked once a second at most per turbine.</summary>
     private static bool IsOnTerrace(Furniture furniture)
@@ -122,7 +122,7 @@ internal static class WindPatches
         {
             if (!IsTurbine(__2) || __result == null || __0 == null) return;
 
-            var share = Wind().Share;
+            var share = Wind();
             var isOnTerrace = IsOnTerrace(__0);
             var note = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0} wind {1}"), Local(TurbineRows.TerraceNoteKey, "2F terrace +20%"), _weatherName, share, isOnTerrace);
 

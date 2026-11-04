@@ -6,7 +6,7 @@ Wind Power adds a Large Wind Turbine to Survival Log.
 
 [size=5]Main features[/size]
 [list]
-[*][b]Its own item[/b]: the Large Wind Turbine has its own model and icon. Its blades speed up and slow down with the wind, its head turns gently into the wind, and in Heavy Rain its tail swings to the side to protect the rotor.[/*]
+[*][b]Its own item[/b]: the Large Wind Turbine has its own model and icon. Its blades speed up and slow down with the wind, and every so often a gust swings the whole top round and speeds the blades up.[/*]
 [*][b]Craft it[/b]: the Large Wind Turbine Package takes 6 Scrap Metal, 4 Electrical Wire, 4 Stainless Steel Plate and 3 Electronic Components.[/*]
 [*][b]Power from the wind[/b]: it makes power day and night, more the windier the weather is. Nothing in Heavy Smog, 6 on a Clear day, 17 in rain, 36 in Heavy Rain and up to 48 in Severe Cold.[/*]
 [*][b]Higher is windier[/b]: a turbine on the 2F terrace makes a fifth more than one in the yard, up to 58.[/*]
@@ -33,7 +33,7 @@ A turbine package still in your bag or in storage is lost when the mod is remove
 
 [size=5]主要功能[/size]
 [list]
-[*][b]独立物品[/b]：大型风力发电机有自己的模型和图标。叶片随风力加速或减速，机头会轻轻转向来风，遇到「暴雨」时尾翼会转到侧面，保护风轮。[/*]
+[*][b]独立物品[/b]：大型风力发电机有自己的模型和图标。叶片随风力加速或减速，时不时会有一阵阵风吹来，整个机头会随之转动，叶片也会转得更快。[/*]
 [*][b]可以制作[/b]：大型风力发电机包裹需要 6 个铁皮、4 个电线、4 个不锈钢板和 3 个电器元件。[/*]
 [*][b]靠风发电[/b]：白天黑夜都能发电，风越大发电越多。「大雾霾天」不发电，晴天 6，雨天 17，「暴雨」36，「重度寒潮」中最高 48。[/*]
 [*][b]越高风越大[/b]：装在二楼露台的风力发电机比屋外空地多发两成电，最高 58。[/*]

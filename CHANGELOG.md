@@ -1,11 +1,11 @@
 # Changelog
 
-## 0.3.0
+## 0.3.1
 
 - The turbine's power now follows the weather much more closely: nothing in Heavy Smog, 6 on a Clear day, 17 in rain, 36 in Heavy Rain and up to 48 in Severe Cold.
 - A turbine on the 2F terrace makes a fifth more power than one in the yard, because it stands higher in the wind.
-- The blades now speed up and slow down smoothly with the wind, with small gusts, and they stand still in Heavy Smog.
-- The turbine's head now turns gently into the wind, and in Heavy Rain its tail swings to the side to protect the rotor.
+- The blades now turn faster, speed up and slow down smoothly with the wind, and stand still in Heavy Smog.
+- Every so often a gust comes through: the whole top of the turbine swings round to meet it and the blades speed up, then both settle back.
 - The power shown when you hover over the turbine now appears at its base, so you can see it when zoomed in.
 - The weather box on the screen now shows a Wind Intensity line under Light Intensity and Cold Intensity.
 - Made for Survival Log 1.1.20151.

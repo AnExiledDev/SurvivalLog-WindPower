@@ -13,7 +13,6 @@ public class ModelFileTests
     {
         ["Head"] = Vector3.UnitY,
         ["Rotor"] = Vector3.UnitX,
-        ["Tail"] = Vector3.UnitY,
     };
 
     private static readonly Model Turbine = Glb.Read(Asset("WindTurbineLarge.glb"), Movers);
@@ -21,32 +20,39 @@ public class ModelFileTests
     private static ModelPart Part(string name) => Turbine.Parts.Single(part => part.Name == name);
 
     [Fact]
-    public void TheTurbineSplitsIntoTheStillBodyAndItsThreeMovingParts()
+    public void TheTurbineSplitsIntoTheStillBodyTheTurningTopAndTheRotor()
     {
-        Assert.Equal(new[] { Glb.BodyName, "Head", "Rotor", "Tail" }, Turbine.Parts.Select(part => part.Name).OrderBy(name => name, StringComparer.Ordinal));
+        Assert.Equal(new[] { Glb.BodyName, "Head", "Rotor" }, Turbine.Parts.Select(part => part.Name).OrderBy(name => name, StringComparer.Ordinal));
         Assert.All(Turbine.Parts, part => Assert.NotEmpty(part.Meshes));
     }
 
-    // The rotor and tail ride on the head, so when the head swings into the wind they swing with it.
+    // The rotor rides on the head, so when the top swings into a gust it swings with it.
     [Fact]
-    public void TheRotorAndTailRideOnTheHead()
+    public void TheRotorRidesOnTheHead()
     {
         Assert.Equal("Head", Part("Rotor").Parent);
-        Assert.Equal("Head", Part("Tail").Parent);
         Assert.Null(Part("Head").Parent);
     }
 
+    // The tail is not a part of its own: it is fixed to the head and only moves when the whole top does.
     [Fact]
-    public void TheHeadAndTailTurnAboutTheUprightAtopTheMast()
+    public void TheTailIsFixedToTheHead()
+    {
+        // A part's points are measured from its pivot, the top of the mast.
+        var reach = Part("Head").Meshes.SelectMany(mesh => mesh.Positions).Max(point => new Vector2(point.X, point.Z).Length());
+
+        Assert.DoesNotContain(Turbine.Parts, part => part.Name == "Tail");
+        Assert.True(reach > 0.6f, $"the head's meshes reach only {reach} m from the mast, so the tail is missing from it");
+    }
+
+    [Fact]
+    public void TheTopTurnsAboutTheUprightAtopTheMast()
     {
         var head = Part("Head");
-        var tail = Part("Tail");
 
         Assert.InRange(head.Pivot.Y, 3.8f, 4.7f);
         Assert.InRange(Math.Abs(head.Pivot.X) + Math.Abs(head.Pivot.Z), 0f, 0.05f);
         Assert.InRange(head.Axis.Y, 0.99f, 1.01f);
-        Assert.InRange(Math.Abs(tail.Axis.Y), 0.99f, 1.01f);
-        Assert.InRange(tail.Pivot.Y, head.Pivot.Y, head.Pivot.Y + 0.6f);
     }
 
     // The rotor hub sits on top of the mast, a blade's length below the tips (the export scales the model to about

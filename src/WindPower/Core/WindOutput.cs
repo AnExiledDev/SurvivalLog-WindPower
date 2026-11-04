@@ -8,7 +8,7 @@ namespace WindPower.Core;
 /// <summary>
 /// How much power the Large Wind Turbine makes. It turns day and night at a share of its rating that the weather sets:
 /// none in smog (smog forms in still air), a light breeze on clear days, more as fronts bring rain, and the most in cold
-/// snaps. In Heavy Rain the tail furls to turn the rotor out of the storm, so it stops short of full. The game's own
+/// snaps. Heavy Rain stops short of full, as a storm's wind is gusty rather than strong. The game's own
 /// Config_Weather.WindValue is read by nothing in the game, so the mod keeps its own table here.
 /// </summary>
 public static class WindOutput
@@ -37,9 +37,6 @@ public static class WindOutput
         6 or 17 => 1.0f,
         _ => UnknownShare,
     };
-
-    /// <summary>Heavy Rain: the tail turns side-on so the storm cannot overspeed the rotor.</summary>
-    public static bool IsFurled(int weatherId) => weatherId is 10 or 13;
 
     public static float Power(float share, bool isOnTerrace) => Rated * Math.Max(0f, share) * (isOnTerrace ? TerraceBonus : 1f);
 
