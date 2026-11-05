@@ -5,6 +5,13 @@ using System.Linq;
 
 namespace WindPower.Core;
 
+/// <summary>Why a list from the settings cannot be used: a line for the log, and the reason for the player in both languages.</summary>
+public sealed record MaterialProblem(string Log, string English, string Chinese)
+{
+    /// <summary>"English\nChinese", the way the Mod Manager reads a reason.</summary>
+    public string Player => English + "\n" + Chinese;
+}
+
 /// <summary>
 /// A recipe's materials as the player writes them in the settings, id:count pairs ("20004:4, 20104:2"), and as the
 /// recipe table holds them, each id once per piece.
@@ -79,25 +86,77 @@ public static class MaterialList
     /// <summary>
     /// The materials to use: the player's, or the default when theirs cannot be used, with why. Theirs cannot be used
     /// when the text cannot be read, names an item the game does not have, or matches another recipe's materials (a
-    /// stock recipe's, or one already <paramref name="taken"/> by another turbine), since the game files recipes by
-    /// their materials and only one of two alike could be crafted.
+    /// stock recipe's, or one <paramref name="taken"/> by another turbine), since the game files recipes by their
+    /// materials and only one of two alike could be crafted.
     /// </summary>
-    public static (int[] Materials, string? Problem) Choose(string? text, string fallback, Func<int, bool> isItem, Func<IReadOnlyList<int>, int?> recipeUsing, IEnumerable<IReadOnlyList<int>> taken)
+    /// <param name="taken">Each other turbine's materials, and whether they are its default, kept for it in case it falls back.</param>
+    /// <param name="recipeName">The name of what a stock recipe makes, in both languages, when it can be found.</param>
+    public static (int[] Materials, MaterialProblem? Problem) Choose(string? text, TurbineKind kind, Func<int, bool> isItem, Func<IReadOnlyList<int>, int?> recipeUsing, IEnumerable<(TurbineKind Kind, IReadOnlyList<int> Materials, bool IsDefault)> taken, Func<int, (string English, string Chinese)?>? recipeName = null)
     {
-        var standard = Standard(fallback);
+        var standard = Standard(kind.Defaults.Materials);
+        const string keeps = "so the turbine keeps its default materials.";
+        const string keepsZh = "风力发电机会改用默认材料。";
+        const string noSharing = "Two recipes cannot take the same materials, so this turbine keeps its default materials.";
+        const string noSharingZh = "两个配方不能用完全相同的材料，这台风力发电机会改用默认材料。";
 
-        if (!TryParse(text, out var materials, out var problem)) return (standard, $"the materials '{text}' cannot be used: {problem}");
+        MaterialProblem Problem(string log, string english, string chinese) => new($"the materials '{text}' cannot be used: {log}", english, chinese);
 
-        if (materials.Distinct().FirstOrDefault(id => !isItem(id)) is var missing and > 0) return (standard, $"the materials '{text}' cannot be used: the game has no item {missing}");
+        if (string.IsNullOrWhiteSpace(text)) return (standard, Problem("it lists no materials", "The list is empty, " + keeps, "材料清单是空的，" + keepsZh));
 
-        if (recipeUsing(materials) is int other) return (standard, $"the materials '{text}' cannot be used: recipe {other} already uses them");
+        if (!TryParse(text, out var materials, out var problem)) return (standard, Problem(problem, $"The list cannot be read ({problem}), " + keeps, "这份清单无法读取，" + keepsZh));
+
+        if (materials.Distinct().FirstOrDefault(id => !isItem(id)) is var missing and > 0) return (standard, Problem($"the game has no item {missing}", $"The game has no item {missing}, " + keeps, $"游戏里没有物品 {missing}，" + keepsZh));
+
+        if (recipeUsing(materials) is int other)
+        {
+            var made = recipeName?.Invoke(other);
+            var english = made is { } name ? $"The game's own {name.English} recipe takes exactly these materials. " : "A recipe the game already has takes exactly these materials. ";
+            var chinese = made is { } same ? $"游戏自带的{same.Chinese}配方用的正是这些材料。" : "游戏里已有配方用的正是这些材料。";
+
+            return (standard, Problem($"recipe {other} already uses them", english + noSharing, chinese + noSharingZh));
+        }
 
         var key = TurbineRows.MaterialKey(materials);
 
-        if (taken.Any(list => TurbineRows.MaterialKey(list) == key)) return (standard, $"the materials '{text}' cannot be used: another wind turbine already uses them");
+        foreach (var (turbine, list, isDefault) in taken)
+        {
+            if (TurbineRows.MaterialKey(list) != key) continue;
+
+            return isDefault
+                ? (standard, Problem($"they are the {turbine.Name}'s default materials", $"These are the {turbine.Name}'s default materials, which it keeps in case its own list cannot be used. " + noSharing, $"这是{turbine.ChineseName}的默认材料，要留给它备用。" + noSharingZh))
+                : (standard, Problem($"the {turbine.Name} already uses them", $"The {turbine.Name} already takes exactly these materials. " + noSharing, $"{turbine.ChineseName}已经用了完全相同的材料。" + noSharingZh));
+        }
 
         return (materials, null);
     }
+
+    /// <summary>The word a Returns list holds when taking the turbine down gives nothing back.</summary>
+    public const string NoItems = "none";
+
+    /// <summary>
+    /// What taking a turbine made of <paramref name="materials"/> down gives back: <paramref name="percent"/> of them
+    /// when <paramref name="text"/> is blank, nothing for "none", else the list as written. A list that cannot be used
+    /// gives back the percent share, with why.
+    /// </summary>
+    public static (int[] Back, MaterialProblem? Problem) Returns(string? text, IReadOnlyList<int> materials, int percent, Func<int, bool> isItem)
+    {
+        var share = GivenBack(materials, percent);
+        const string falls = "so taking the turbine down gives back its Return percent share.";
+        const string fallsZh = "拆除时改按「Return percent」返还。";
+
+        if (string.IsNullOrWhiteSpace(text)) return (share, null);
+
+        if (text.Trim().Equals(NoItems, StringComparison.OrdinalIgnoreCase)) return (Array.Empty<int>(), null);
+
+        if (!TryParse(text, out var back, out var problem)) return (share, new MaterialProblem($"the returns '{text}' cannot be used: {problem}", $"The list cannot be read ({problem}), " + falls, "这份清单无法读取，" + fallsZh));
+
+        if (back.Distinct().FirstOrDefault(id => !isItem(id)) is var missing and > 0) return (share, new MaterialProblem($"the returns '{text}' cannot be used: the game has no item {missing}", $"The game has no item {missing}, " + falls, $"游戏里没有物品 {missing}，" + fallsZh));
+
+        return (back, null);
+    }
+
+    /// <summary>Pieces written back the way the settings hold them, "20004:3,20104:2", in the order they first appear.</summary>
+    public static string Pairs(IEnumerable<int> pieces) => string.Join(",", pieces.GroupBy(id => id).Select(group => group.Key.ToString(CultureInfo.InvariantCulture) + ":" + group.Count().ToString(CultureInfo.InvariantCulture)));
 
     /// <summary>The share of its materials a turbine gives back when taken down by default, about what the game's own furniture gives.</summary>
     public const int DefaultReturnPercent = 50;

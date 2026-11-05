@@ -5,13 +5,14 @@ namespace WindPower.Tests;
 
 public class MaterialListTests
 {
-    private const string Fallback = "20004:1";
+    // A Medium turbine whose default is one piece of Scrap Metal, so a fall back is easy to see.
+    private static readonly TurbineKind Kind = TurbineRows.Medium with { Defaults = TurbineRows.Medium.Defaults with { Materials = "20004:1" } };
 
     private static bool AnyItem(int id) => true;
 
     private static int? NoOtherRecipe(IReadOnlyList<int> materials) => null;
 
-    private static readonly IReadOnlyList<int>[] NothingTaken = Array.Empty<IReadOnlyList<int>>();
+    private static readonly (TurbineKind, IReadOnlyList<int>, bool)[] NothingTaken = Array.Empty<(TurbineKind, IReadOnlyList<int>, bool)>();
 
     [Fact]
     public void EachPairBecomesThatManyPiecesInOrder()
@@ -54,7 +55,7 @@ public class MaterialListTests
     [Fact]
     public void AUsableListIsChosen()
     {
-        var (materials, problem) = MaterialList.Choose("20373:2", Fallback, AnyItem, NoOtherRecipe, NothingTaken);
+        var (materials, problem) = MaterialList.Choose("20373:2", Kind, AnyItem, NoOtherRecipe, NothingTaken);
 
         Assert.Equal(new[] { 20373, 20373 }, materials);
         Assert.Null(problem);
@@ -63,39 +64,99 @@ public class MaterialListTests
     [Fact]
     public void AnUnreadableListFallsBackToTheDefault()
     {
-        var (materials, problem) = MaterialList.Choose("scrap", Fallback, AnyItem, NoOtherRecipe, NothingTaken);
+        var (materials, problem) = MaterialList.Choose("scrap", Kind, AnyItem, NoOtherRecipe, NothingTaken);
 
         Assert.Equal(new[] { 20004 }, materials);
-        Assert.Contains("not written as item id:count", problem);
+        Assert.Contains("not written as item id:count", problem!.Log);
+    }
+
+    // The Mod Manager writes an emptied list as blank, so the player is told the turbine keeps its default.
+    [Fact]
+    public void AnEmptyListFallsBackToTheDefaultAndSaysSo()
+    {
+        var (materials, problem) = MaterialList.Choose(" ", Kind, AnyItem, NoOtherRecipe, NothingTaken);
+
+        Assert.Equal(new[] { 20004 }, materials);
+        Assert.Equal("The list is empty, so the turbine keeps its default materials.\n材料清单是空的，风力发电机会改用默认材料。", problem!.Player);
     }
 
     [Fact]
     public void AnItemTheGameDoesNotHaveFallsBackToTheDefault()
     {
-        var (materials, problem) = MaterialList.Choose("20373:1, 99999:1", Fallback, id => id != 99999, NoOtherRecipe, NothingTaken);
+        var (materials, problem) = MaterialList.Choose("20373:1, 99999:1", Kind, id => id != 99999, NoOtherRecipe, NothingTaken);
 
         Assert.Equal(new[] { 20004 }, materials);
-        Assert.Contains("no item 99999", problem);
+        Assert.Contains("no item 99999", problem!.Log);
+        Assert.StartsWith("The game has no item 99999,", problem.English);
     }
 
     // The game files recipes by their materials, so a list another recipe already uses would hide one of the two.
     [Fact]
-    public void AnotherRecipesMaterialsFallBackToTheDefault()
+    public void AnotherRecipesMaterialsFallBackToTheDefaultNamingWhatItMakes()
     {
-        var (materials, problem) = MaterialList.Choose("20373:1", Fallback, AnyItem, list => list.SequenceEqual(new[] { 20373 }) ? 42 : null, NothingTaken);
+        var (materials, problem) = MaterialList.Choose("20373:1", Kind, AnyItem, list => list.SequenceEqual(new[] { 20373 }) ? 42 : null, NothingTaken, id => id == 42 ? ("Table Saw", "台锯") : null);
 
         Assert.Equal(new[] { 20004 }, materials);
-        Assert.Contains("recipe 42", problem);
+        Assert.Contains("recipe 42", problem!.Log);
+        Assert.StartsWith("The game's own Table Saw recipe takes exactly these materials.", problem.English);
+        Assert.StartsWith("游戏自带的台锯配方", problem.Chinese);
+    }
+
+    [Fact]
+    public void AStockRecipeWithNoNameToShowStillSaysWhy()
+    {
+        var (_, problem) = MaterialList.Choose("20373:1", Kind, AnyItem, _ => 42, NothingTaken);
+
+        Assert.StartsWith("A recipe the game already has takes exactly these materials.", problem!.English);
     }
 
     [Fact]
     public void TheOtherTurbinesMaterialsInAnyOrderFallBackToTheDefault()
     {
-        var taken = new IReadOnlyList<int>[] { new[] { 20104, 20373, 20373 } };
-        var (materials, problem) = MaterialList.Choose("20373:2, 20104:1", Fallback, AnyItem, NoOtherRecipe, taken);
+        var taken = new (TurbineKind, IReadOnlyList<int>, bool)[] { (TurbineRows.Large, new[] { 20104, 20373, 20373 }, false) };
+        var (materials, problem) = MaterialList.Choose("20373:2, 20104:1", Kind, AnyItem, NoOtherRecipe, taken);
 
         Assert.Equal(new[] { 20004 }, materials);
-        Assert.Contains("other wind turbine", problem);
+        Assert.Contains("the Large Wind Turbine already uses them", problem!.Log);
+        Assert.StartsWith("The Large Wind Turbine already takes exactly these materials.", problem.English);
+        Assert.StartsWith("大型风力发电机已经用了", problem.Chinese);
+    }
+
+    [Fact]
+    public void ALaterTurbinesDefaultIsKeptForIt()
+    {
+        var taken = new (TurbineKind, IReadOnlyList<int>, bool)[] { (TurbineRows.Small, new[] { 20373 }, true) };
+        var (_, problem) = MaterialList.Choose("20373:1", Kind, AnyItem, NoOtherRecipe, taken);
+
+        Assert.StartsWith("These are the Small Wind Turbine's default materials", problem!.English);
+    }
+
+    // Returns: blank follows ReturnPercent, "none" gives nothing, a list is used as written, even items the recipe lacks.
+    [Theory]
+    [InlineData("", 50, "20004:3,20104:2,20210:1")]
+    [InlineData("  ", 0, "")]
+    [InlineData("none", 50, "")]
+    [InlineData(" None ", 50, "")]
+    [InlineData("20312:2, 20004:9", 50, "20312:2,20004:9")]
+    public void TakingATurbineDownGivesBackWhatReturnsSays(string returns, int percent, string expected)
+    {
+        var (back, problem) = MaterialList.Returns(returns, MaterialList.Standard("20004:5, 20104:3, 20210:3, 20373:1"), percent, AnyItem);
+
+        Assert.Equal(expected, MaterialList.Pairs(back));
+        Assert.Null(problem);
+    }
+
+    [Fact]
+    public void AReturnsListTheGameCannotUseGivesBackTheShareAndSaysWhy()
+    {
+        var made = MaterialList.Standard("20004:4");
+        var (unread, unreadWhy) = MaterialList.Returns("20004", made, 50, AnyItem);
+        var (missing, missingWhy) = MaterialList.Returns("99999:1", made, 50, id => id != 99999);
+
+        Assert.Equal(new[] { 20004, 20004 }, unread);
+        Assert.Contains("not written as item id:count", unreadWhy!.Log);
+        Assert.Equal(new[] { 20004, 20004 }, missing);
+        Assert.Equal("The game has no item 99999, so taking the turbine down gives back its Return percent share.\n游戏里没有物品 99999，拆除时改按「Return percent」返还。", missingWhy!.Player);
     }
 
     [Fact]

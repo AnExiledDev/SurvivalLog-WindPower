@@ -4,12 +4,13 @@ Settings live in `BepInEx\config\com.dev.survivallog.windpower.cfg`, created the
 
 ## SmallTurbine, MediumTurbine and LargeTurbine
 
-Each turbine has its own section, `[SmallTurbine]`, `[MediumTurbine]` and `[LargeTurbine]`, with the same four settings.
+Each turbine has its own section, `[SmallTurbine]`, `[MediumTurbine]` and `[LargeTurbine]`, with the same five settings. On the Mod Manager's Mods screen (0.14.0 or newer), `Materials` and `Returns` show as item cards you pick from every item in the game, and the screen says when the turbine cannot use a list.
 
 | Setting | Small default | Medium default | Large default | What it does |
 | --- | --- | --- | --- | --- |
 | `RatedPower` | `9` | `18` | `36` | The power the turbine makes on average in Severe Cold, the windiest weather, before `Variation` moves it up and down. Calmer weather gives a share of it: none in Heavy Smog, about a third in rain. A turbine on the 2F terrace makes 20% more. Any value from `1` to `200`. |
-| `Materials` | `20004:3, 20104:1, 20210:1` | `20004:4, 20104:2, 20210:2` | `20004:5, 20104:3, 20210:3, 20373:1` | What crafting the turbine's package takes, written as item id:count pairs split by commas. 20004 is Scrap Metal, 20104 Wire, 20210 Electronic Components and 20373 Stainless Steel Plate. Up to 7 different items and up to 99 of each. A list the game cannot use (one it cannot read, an item that does not exist, or the same materials as another recipe, another turbine's included) falls back to the default, with a line in `BepInEx\LogOutput.log` saying why. Taking the turbine down gives back a share of these (see `ReturnPercent`). |
+| `Materials` | `20004:3, 20104:1, 20210:1` | `20004:4, 20104:2, 20210:2` | `20004:5, 20104:3, 20210:3, 20373:1` | What crafting the turbine's package takes, written as item id:count pairs split by commas. 20004 is Scrap Metal, 20104 Wire, 20210 Electronic Components and 20373 Stainless Steel Plate. Up to 7 different items and up to 99 of each. A list the game cannot use (one it cannot read, an item that does not exist, or the same materials as another recipe, another turbine's included) falls back to the default, with a line in `BepInEx\LogOutput.log` saying why. Taking the turbine down gives back a share of these (see `Returns` and `ReturnPercent`). |
+| `Returns` | blank | blank | blank | What taking the turbine down gives back, written like `Materials`. Blank gives back the `ReturnPercent` share of its materials. `none` gives nothing back. A list gives back exactly that, and may name any items, not only the recipe's. Up to 7 different items and up to 99 of each. A list the game cannot use (one it cannot read, or an item that does not exist) gives back the `ReturnPercent` share instead, with a line in `BepInEx\LogOutput.log` saying why. |
 | `ShopPrice` | `30` | `60` | `120` | What the Classic Furniture shop asks for the turbine before the disaster. The Small Solar Panel costs 20 there, the Medium 40 and the Large 80. Any value from `0` to `9999`. |
 | `ShopStock` | `2` | `2` | `2` | How many of the turbine the Classic Furniture shop has for sale before the disaster. `0` takes them off the shelves. A shop that already has more than this is brought down to it, and turbines you already bought stay yours. Any value from `0` to `20`. |
 
@@ -23,7 +24,7 @@ Each turbine has its own section, `[SmallTurbine]`, `[MediumTurbine]` and `[Larg
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `ReturnPercent` | `50` | How much of a turbine's materials taking it down gives back, as a percent of its recipe. `50` is about half, like the game's own furniture: the Large Wind Turbine gives back 3 Scrap Metal, 2 Wire and 1 Electronic Components. `0` gives nothing back and `100` gives back everything. Each material's share is rounded down, then topped up one at a time to the right total. Any value from `0` to `100`. |
+| `ReturnPercent` | `50` | How much of a turbine's materials taking it down gives back, as a percent of its recipe. `50` is about half, like the game's own furniture: the Large Wind Turbine gives back 3 Scrap Metal, 2 Wire and 1 Electronic Components. `0` gives nothing back and `100` gives back everything. Each material's share is rounded down, then topped up one at a time to the right total. A turbine whose `Returns` list is filled in gives back that list instead. Any value from `0` to `100`. |
 
 ## Uninstall
 

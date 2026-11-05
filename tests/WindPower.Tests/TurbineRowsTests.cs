@@ -247,6 +247,16 @@ public class TurbineRowsTests
         Assert.Equal(new[] { 20004, 20004, 20373 }, (int[])Field(plan, Table.Furniture, "RemoveGet"));
     }
 
+    // A Returns list set by hand goes on the furniture row as it is, items the recipe lacks included.
+    [Fact]
+    public void WhatTakingItDownGivesBackCanBeSetOutright()
+    {
+        var plan = TurbineRows.Plan(TurbineRows.Large, new[] { 20004, 20004, 20373 }, 120, new[] { 20312, 20312 });
+
+        Assert.Equal(new[] { 20312, 20312 }, (int[])Field(plan, Table.Furniture, "RemoveGet"));
+        Assert.Empty((int[])Field(TurbineRows.Plan(TurbineRows.Large, new[] { 20004 }, 120, System.Array.Empty<int>()), Table.Furniture, "RemoveGet"));
+    }
+
     [Fact]
     public void MaterialKeyIgnoresOrderButNotCount()
     {

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+- New setting for each turbine: Returns. It names exactly what taking that turbine down gives back, any items you like. Left blank, the turbine gives back its ReturnPercent share as before; set to none, it gives back nothing.
+- With Mod Manager 0.14.0 or newer, each turbine's Materials and Returns show as item cards you pick from every item in the game, with what the recipe is worth and a warning when taking the turbine down would give back more than that.
+- The Mods screen now says why a turbine cannot use a materials list, such as one with exactly the same materials as one of the game's recipes or another turbine's.
+- Made for Survival Log 1.1.20151.
+
 ## 0.7.1
 
 - New setting: ReturnPercent, under Dismantle. It sets how much of a turbine's materials taking it down gives back, from 0 to 100% of its recipe. The default of 50 gives back the same as before.

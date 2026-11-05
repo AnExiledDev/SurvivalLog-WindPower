@@ -189,8 +189,8 @@ public static class TurbineRows
 
     /// <param name="materials">The recipe's materials, each id once per piece.</param>
     /// <param name="price">What the pre-disaster shop asks for it, in gold.</param>
-    /// <param name="returnPercent">The share of the materials taking it down gives back.</param>
-    public static TurbinePlan Plan(TurbineKind kind, IReadOnlyList<int> materials, int price, int returnPercent = MaterialList.DefaultReturnPercent)
+    /// <param name="givenBack">What taking it down gives back, each id once per piece; by default half the materials.</param>
+    public static TurbinePlan Plan(TurbineKind kind, IReadOnlyList<int> materials, int price, IReadOnlyList<int>? givenBack = null)
     {
         var ids = kind.Ids;
         var package = kind.Key("Package");
@@ -250,7 +250,7 @@ public static class TurbineRows
                 new RowField("ICON", kind.WebIcon),
                 new RowField("FurniturePrice", price),
                 // What taking it down gives back. The copied row would give the solar panel's parts.
-                new RowField("RemoveGet", MaterialList.GivenBack(materials, returnPercent)),
+                new RowField("RemoveGet", (givenBack ?? MaterialList.GivenBack(materials)).ToArray()),
             }),
             new RowPlan(Table.Electrical, ids.Electrical, kind.Stock.Electrical, new[]
             {

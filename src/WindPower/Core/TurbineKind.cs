@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace WindPower.Core;
@@ -7,8 +8,11 @@ namespace WindPower.Core;
 /// <summary>The ids of one turbine's six rows: the recipe crafts the package item, which unpacks into the furniture.</summary>
 public sealed record RowIds(int Item, int Furniture, int Electrical, int Recipe, int Action, int Effect);
 
-/// <summary>What the player sets for one turbine. Materials is written as id:count pairs, "20004:4, 20104:2".</summary>
-public sealed record TurbineSettings(float RatedPower, string Materials, int ShopPrice, int ShopStock, int ReturnPercent = MaterialList.DefaultReturnPercent);
+/// <summary>
+/// What the player sets for one turbine. Materials and Returns are written as id:count pairs, "20004:4, 20104:2";
+/// a blank Returns gives back ReturnPercent of the materials, and "none" gives nothing back.
+/// </summary>
+public sealed record TurbineSettings(float RatedPower, string Materials, int ShopPrice, int ShopStock, int ReturnPercent = MaterialList.DefaultReturnPercent, string Returns = "");
 
 /// <summary>
 /// One turbine the mod adds: the solar panel it copies (its rows, its prefab and the slot it fits), its own ids, model
@@ -72,4 +76,9 @@ public sealed record TurbineKind
     public string WebIcon => "../../" + TurbineRows.WebIconFolder + "/" + IconFile;
 
     public string Key(string part) => $"WindPower_{Size}_{part}";
+
+    /// <summary>The config section of its settings, "MediumTurbine".</summary>
+    public string Section => Size + "Turbine";
+
+    public string ChineseName => Texts.First(text => text.Key == Key("Name")).Zh;
 }

@@ -100,20 +100,20 @@ internal sealed class TurbineTables
         var written = new List<(TurbineKind Kind, TurbineSettings Settings, int[] Materials)>();
         var items = tables.Items!;
         var recipes = tables.Recipes!;
+        var choices = TurbineChoices.Of(settings, items.ContainsKey, list => RecipeUsing(recipes, list, recipe => _ours.Contains(recipe.Pointer)));
 
         for (var i = 0; i < TurbineRows.All.Count; i++)
         {
             var kind = TurbineRows.All[i];
             var wanted = settings[i];
+            var (_, materials, problem, back, returnsProblem, _, _) = choices[i];
 
-            // The earlier turbines' materials as written, and the later ones' defaults, which each may fall back to.
-            var taken = written.Select(done => (IReadOnlyList<int>)done.Materials).Concat(TurbineRows.All.Skip(i + 1).Select(later => (IReadOnlyList<int>)MaterialList.Standard(later.Defaults.Materials))).ToList();
-            var (materials, problem) = MaterialList.Choose(wanted.Materials, kind.Defaults.Materials, items.ContainsKey, list => RecipeUsing(recipes, list), taken);
+            if (problem != null) _log($"{kind.Name}: {problem.Log}, so it takes its default materials");
 
-            if (problem != null) _log($"{kind.Name}: {problem}, so it takes its default materials");
+            if (returnsProblem != null) _log($"{kind.Name}: {returnsProblem.Log}, so taking it down gives back {wanted.ReturnPercent}% of its materials");
 
-            var plan = TurbineRows.Plan(kind, materials, wanted.ShopPrice, wanted.ReturnPercent);
-            var problems = TurbineRows.Problems(plan, (table, id) => views[table].SlotAt(id, _ours), list => RecipeUsing(recipes, list));
+            var plan = TurbineRows.Plan(kind, materials, wanted.ShopPrice, back);
+            var problems = TurbineRows.Problems(plan, (table, id) => views[table].SlotAt(id, _ours), list => RecipeUsing(recipes, list, recipe => _ours.Contains(recipe.Pointer)));
 
             if (problems.Count > 0)
             {
@@ -310,7 +310,8 @@ internal sealed class TurbineTables
         }
     }
 
-    private int? RecipeUsing(Il2CppDictionary.Dictionary<int, Config_ProductionList> recipes, IReadOnlyList<int> materials)
+    /// <summary>The id of a recipe other than ours made of these materials in any order, or null.</summary>
+    internal static int? RecipeUsing(Il2CppDictionary.Dictionary<int, Config_ProductionList> recipes, IReadOnlyList<int> materials, Func<Config_ProductionList, bool> isOurs)
     {
         var key = TurbineRows.MaterialKey(materials);
 
@@ -318,7 +319,7 @@ internal sealed class TurbineTables
         {
             var recipe = pair.Value;
 
-            if (recipe == null || _ours.Contains(recipe.Pointer) || recipe.MaterialList == null || recipe.MaterialList.Count != materials.Count) continue;
+            if (recipe == null || isOurs(recipe) || recipe.MaterialList == null || recipe.MaterialList.Count != materials.Count) continue;
 
             if (TurbineRows.MaterialKey(ToArray(recipe.MaterialList)) == key) return pair.Key;
         }
