@@ -8,7 +8,7 @@ namespace WindPower.Core;
 public sealed record RowIds(int Item, int Furniture, int Electrical, int Recipe, int Action, int Effect);
 
 /// <summary>What the player sets for one turbine. Materials is written as id:count pairs, "20004:4, 20104:2".</summary>
-public sealed record TurbineSettings(float RatedPower, string Materials, int ShopPrice, int ShopStock);
+public sealed record TurbineSettings(float RatedPower, string Materials, int ShopPrice, int ShopStock, int ReturnPercent = MaterialList.DefaultReturnPercent);
 
 /// <summary>
 /// One turbine the mod adds: the solar panel it copies (its rows, its prefab and the slot it fits), its own ids, model

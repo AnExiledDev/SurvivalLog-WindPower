@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.1
+
+- New setting: ReturnPercent, under Dismantle. It sets how much of a turbine's materials taking it down gives back, from 0 to 100% of its recipe. The default of 50 gives back the same as before.
+- Made for Survival Log 1.1.20151.
+
 ## 0.7.0
 
 - The wind now rises and falls within a weather instead of blowing at one strength all day. It swells and slackens over the hours, by up to 30% either way, and every turbine and the rotors follow it. Over a day it evens out to the same power as before.

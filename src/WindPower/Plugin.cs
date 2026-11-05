@@ -13,7 +13,7 @@ namespace WindPower;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.7.0";
+    private const string Version = "0.7.1";
 
     public override void Load()
     {
@@ -29,6 +29,10 @@ public sealed class Plugin : BasePlugin
             new AcceptableValueRange<int>(0, WindVariation.MostPercent)));
 
         OptionalLive.Watch(variation, percent => WindSettings.VariationPercent = percent);
+        _returnPercent = Config.Bind("Dismantle", "ReturnPercent", MaterialList.DefaultReturnPercent, new ConfigDescription(
+            "How much of a turbine's materials taking it down gives back, as a percent of its recipe. 50 is about half, like the game's own furniture. 0 gives nothing back and 100 gives back everything. Each material's share is rounded down, then topped up one at a time to the right total.\n" +
+            "拆除风力发电机时返还多少材料，按配方的百分比计。50 约为一半，和游戏自带的家具一样。0 什么都不返还，100 全部返还。每种材料按比例向下取整，再逐个补足到应有的总数。",
+            new AcceptableValueRange<int>(0, 100)));
         BindSettings(TurbineRows.Small, "Small Solar Panel", "小型太阳能发电板", 20);
         BindSettings(TurbineRows.Medium, "Medium Solar Panel", "中型太阳能发电板", 40);
         BindSettings(TurbineRows.Large, "Large Solar Panel", "大型太阳能发电板", 80);
@@ -92,8 +96,9 @@ public sealed class Plugin : BasePlugin
             new AcceptableValueRange<int>(0, 20)));
 
         // Uninstall prep holds the stock at 0, so the shops stop listing the turbine.
-        OptionalLive.Watch(() => WindSettings.Set(kind, new TurbineSettings(rated.Value, materials.Value, price.Value, _uninstallPrep!.Value ? 0 : stock.Value)), rated, materials, price, stock, _uninstallPrep!);
+        OptionalLive.Watch(() => WindSettings.Set(kind, new TurbineSettings(rated.Value, materials.Value, price.Value, _uninstallPrep!.Value ? 0 : stock.Value, _returnPercent!.Value)), rated, materials, price, stock, _uninstallPrep!, _returnPercent!);
     }
 
     private ConfigEntry<bool>? _uninstallPrep;
+    private ConfigEntry<int>? _returnPercent;
 }

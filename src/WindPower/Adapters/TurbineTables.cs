@@ -112,7 +112,7 @@ internal sealed class TurbineTables
 
             if (problem != null) _log($"{kind.Name}: {problem}, so it takes its default materials");
 
-            var plan = TurbineRows.Plan(kind, materials, wanted.ShopPrice);
+            var plan = TurbineRows.Plan(kind, materials, wanted.ShopPrice, wanted.ReturnPercent);
             var problems = TurbineRows.Problems(plan, (table, id) => views[table].SlotAt(id, _ours), list => RecipeUsing(recipes, list));
 
             if (problems.Count > 0)

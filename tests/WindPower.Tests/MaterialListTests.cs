@@ -124,6 +124,29 @@ public class MaterialListTests
         Assert.Equal(MaterialList.Standard(back), MaterialList.GivenBack(MaterialList.Standard(made)));
     }
 
+    // ReturnPercent: the player's share of the recipe comes back, rounded down per material, topped up to the total.
+    [Theory]
+    [InlineData(0, "")]
+    [InlineData(25, "20004:2, 20104:1")]
+    [InlineData(50, "20004:3, 20104:2, 20210:1")]
+    [InlineData(75, "20004:4, 20104:3, 20210:2")]
+    [InlineData(100, "20004:5, 20104:3, 20210:3, 20373:1")]
+    public void TakingATurbineDownGivesBackTheSetShare(int percent, string back)
+    {
+        var expected = back.Length == 0 ? new int[0] : MaterialList.Standard(back);
+
+        Assert.Equal(expected, MaterialList.GivenBack(MaterialList.Standard("20004:5, 20104:3, 20210:3, 20373:1"), percent));
+    }
+
+    [Fact]
+    public void AShareOutsideNoneToAllIsHeldToIt()
+    {
+        var made = MaterialList.Standard("20004:5, 20104:3");
+
+        Assert.Equal(made, MaterialList.GivenBack(made, 250));
+        Assert.Empty(MaterialList.GivenBack(made, -10));
+    }
+
     [Fact]
     public void ARecipeOfOnePieceStillGivesThatPieceBack()
     {

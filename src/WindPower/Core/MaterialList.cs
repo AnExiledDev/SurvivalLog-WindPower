@@ -99,13 +99,18 @@ public static class MaterialList
         return (materials, null);
     }
 
+    /// <summary>The share of its materials a turbine gives back when taken down by default, about what the game's own furniture gives.</summary>
+    public const int DefaultReturnPercent = 50;
+
     /// <summary>
-    /// What taking a turbine down gives back: about half of what it was made from, like the game's own furniture. Each
-    /// material gives back half its count rounded down, then ones with an odd count give one more, in the order
-    /// listed, until half the pieces (at least one) are back. No material comes back more than it went in.
+    /// What taking a turbine down gives back: <paramref name="percent"/> of what it was made from. Each material gives
+    /// back its share rounded down, then ones whose share was rounded down give one more, in the order listed, until
+    /// that share of all the pieces (at least one, unless the share is 0) is back. No material comes back more than it
+    /// went in.
     /// </summary>
-    public static int[] GivenBack(IReadOnlyList<int> materials)
+    public static int[] GivenBack(IReadOnlyList<int> materials, int percent = DefaultReturnPercent)
     {
+        var share = Math.Clamp(percent, 0, 100);
         var order = new List<int>();
         var counts = new Dictionary<int, int>();
 
@@ -116,15 +121,15 @@ public static class MaterialList
             counts[id] = counts.TryGetValue(id, out var had) ? had + 1 : 1;
         }
 
-        var back = order.ToDictionary(id => id, id => counts[id] / 2);
-        var wanted = Math.Max(1, materials.Count / 2);
+        var back = order.ToDictionary(id => id, id => counts[id] * share / 100);
+        var wanted = Math.Max(1, materials.Count * share / 100);
         var total = back.Values.Sum();
 
         foreach (var id in order)
         {
             if (total >= wanted) break;
 
-            if (counts[id] % 2 == 0) continue;
+            if (counts[id] * share % 100 == 0) continue;
 
             back[id]++;
             total++;
