@@ -4,6 +4,7 @@ using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
+using ExiledToolkit;
 using HarmonyLib;
 using WindPower.Adapters;
 using WindPower.Core;
@@ -11,16 +12,14 @@ using WindPower.Core;
 namespace WindPower;
 
 [BepInPlugin(Guid, "Wind Power", Version)]
-[BepInDependency(OptionalLive.ToolkitGuid, BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("com.dev.survivallog.exiledtoolkit", ">=0.19.0")]
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.8.0";
+    private const string Version = "0.8.1";
 
     public override void Load()
     {
-        if (!OptionalLive.IsToolkitInstalled) Log.LogInfo(OptionalLive.MissingNote);
-
         _uninstallPrep = Config.Bind("Uninstall", "UninstallPrep", false,
             "Turn this on before you remove Wind Power. Once a save is loaded, every Wind Turbine Package becomes the Solar Panel Package of its size, in your bags, in storage and on the floor, in every place the save holds, and the shops stop selling the turbines. Placed and packed turbines are always saved as solar panels, so they need nothing. Then save the game, quit, and remove WindPower.dll. LogOutput.log lists what was changed. Turning this off again does not turn the packages back.\n" +
             "移除风力发电模组之前请先打开此项。读取存档后，背包、储物和地上的每个风力发电机包裹都会变成同尺寸的太阳能发电板包裹，存档里的每个地点都一样，商店也不再出售风力发电机。已安装和已打包的风力发电机本来就按太阳能发电板保存，不受影响。然后存档、退出游戏，再删除 WindPower.dll。改了哪些东西写在 LogOutput.log 里。再关掉此项，包裹也不会变回来。");
@@ -30,7 +29,7 @@ public sealed class Plugin : BasePlugin
             "同一种天气里风力上下起伏的幅度，按该天气平均风力的百分比计。风会随时间时强时弱，所有风力发电机一样，一天下来平均仍是该天气的风力。0 表示天气不变时风力也不变。",
             new AcceptableValueRange<int>(0, WindVariation.MostPercent)));
 
-        OptionalLive.Watch(variation, percent => WindSettings.VariationPercent = percent);
+        LiveSettings.Watch(variation, percent => WindSettings.VariationPercent = percent);
         _returnPercent = Config.Bind("Dismantle", "ReturnPercent", MaterialList.DefaultReturnPercent, new ConfigDescription(
             "How much of a turbine's materials taking it down gives back, as a percent of its recipe. 50 is about half, like the game's own furniture. 0 gives nothing back and 100 gives back everything. Each material's share is rounded down, then topped up one at a time to the right total. A turbine whose Returns list is filled in gives back that list instead.\n" +
             "拆除风力发电机时返还多少材料，按配方的百分比计。50 约为一半，和游戏自带的家具一样。0 什么都不返还，100 全部返还。每种材料按比例向下取整，再逐个补足到应有的总数。填了 Returns 清单的风力发电机按清单返还。",
@@ -39,7 +38,7 @@ public sealed class Plugin : BasePlugin
         BindSettings(TurbineRows.Medium, "Medium Solar Panel", "中型太阳能发电板", 40);
         BindSettings(TurbineRows.Large, "Large Solar Panel", "大型太阳能发电板", 80);
         ModManagerAnswers.Settings = () => TurbineRows.All.Select(kind => _reads[kind]()).ToList();
-        OptionalLive.Watch(_uninstallPrep, isOn =>
+        LiveSettings.Watch(_uninstallPrep, isOn =>
         {
             UninstallPrep.Set(isOn);
             if (isOn) Log.LogInfo("Uninstall prep is on: load a save to turn the turbine packages into solar panel packages");
@@ -108,7 +107,7 @@ public sealed class Plugin : BasePlugin
         TurbineSettings Read() => new(rated.Value, materials.Value, price.Value, _uninstallPrep!.Value ? 0 : stock.Value, _returnPercent!.Value, returns.Value);
 
         _reads[kind] = Read;
-        OptionalLive.Watch(() => WindSettings.Set(kind, Read()), rated, materials, returns, price, stock, _uninstallPrep!, _returnPercent!);
+        LiveSettings.Watch(() => WindSettings.Set(kind, Read()), rated, materials, returns, price, stock, _uninstallPrep!, _returnPercent!);
     }
 
     private ConfigEntry<bool>? _uninstallPrep;

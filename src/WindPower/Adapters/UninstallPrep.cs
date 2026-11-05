@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
+using ExiledToolkit.Game;
 using WindPower.Core;
 using Il2CppItemSaves = Il2CppSystem.Collections.Generic.List<GameCore.HotUpdate.ItemSave>;
 using Il2CppStock = Il2CppSystem.Collections.Generic.Dictionary<int, int>;

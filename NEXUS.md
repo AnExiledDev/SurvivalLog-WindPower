@@ -26,9 +26,9 @@ This is an early test build.
 
 [size=5]Requirements[/size]
 [list]
-[*]Survival Log 1.1.20151. A game update can break it until the mod is updated.[/*]
+[*]Survival Log 1.1.20719. A game update can break it until the mod is updated.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
-[*]Optional: [url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start.[/*]
+[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.19.0 or newer. Wind Power does not load without it. It lets settings changed on the Mod Manager's Mods screen take effect without restarting the game.[/*]
 [/list]
 
 [size=5]简体中文[/size]
@@ -57,7 +57,7 @@ This is an early test build.
 
 [size=5]前置需求[/size]
 [list]
-[*]Survival Log 1.1.20151。游戏更新后，在模组更新前可能无法使用。[/*]
+[*]Survival Log 1.1.20719。游戏更新后，在模组更新前可能无法使用。[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]，请先安装。[/*]
-[*]可选：[url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.4.0 或更新版本。装了它，在 Mod Manager 的「模组」界面改动的设置无需重启游戏即可生效；没装的话，改动在下次启动游戏时生效。[/*]
+[*][url=https://www.nexusmods.com/survivallog/mods/61]Exiled's Toolkit[/url] 0.19.0 或更新版本。没有它本模组不会加载。它让在 Mod Manager 的「模组」界面改动的设置无需重启游戏即可生效。[/*]
 [/list]

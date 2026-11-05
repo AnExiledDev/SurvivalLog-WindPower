@@ -4,6 +4,7 @@ using System.Linq;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using Il2CppInterop.Runtime.InteropTypes;
+using ExiledToolkit.Game;
 using WindPower.Core;
 using Il2CppDictionary = Il2CppSystem.Collections.Generic;
 using Il2CppInts = Il2CppSystem.Collections.Generic.List<int>;

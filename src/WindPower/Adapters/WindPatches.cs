@@ -4,6 +4,7 @@ using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using GameCore.HotUpdate.Battle.Show;
 using HarmonyLib;
+using ExiledToolkit.Game;
 using WindPower.Core;
 using Il2CppFurnitures = Il2CppSystem.Collections.Generic.List<GameCore.HotUpdate.Battle.Logic.Furniture>;
 

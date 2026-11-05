@@ -60,10 +60,11 @@ Then delete `WindPower.dll` from the `BepInEx\plugins` folder. For a clean slate
 
 ## Requirements
 
-- Survival Log 1.1.20151.
+- Survival Log 1.1.20719.
 - BepInEx for Survival Log.
-- Optional: [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start.
+- [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.19.0 or newer. Wind Power does not load without it. It lets settings changed on the Mod Manager's Mods screen take effect without restarting the game.
 
 ## Install
 
-Copy `WindPower.dll` into `BepInEx/plugins`.
+1. Install Exiled's Toolkit 0.19.0 or newer, from [its latest release](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/61).
+2. Copy `WindPower.dll` into `BepInEx/plugins`.

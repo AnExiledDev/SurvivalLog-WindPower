@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
+using ExiledToolkit.Game;
 using WindPower.Core;
 using Il2CppInts = Il2CppSystem.Collections.Generic.List<int>;
 

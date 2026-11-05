@@ -48,7 +48,7 @@
     <AssemblyMetadata Include="ModManager.Description" Value="Adds craftable Small, Medium and Large Wind Turbines that make power outdoors, day and night.&#10;新增可制作的小型、中型和大型风力发电机，装在户外，昼夜发电。" />
     <AssemblyMetadata Include="ModManager.Author" Value="AnExiledDev" />
     <AssemblyMetadata Include="ModManager.Category" Value="Gameplay" />
-    <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.20151" />
+    <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.20719" />
   </ItemGroup>
 
 </Project>

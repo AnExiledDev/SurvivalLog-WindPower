@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameCore.HotUpdate;
+using ExiledToolkit.Game;
 using WindPower.Core;
 
 namespace WindPower.Adapters;
@@ -65,8 +66,8 @@ public static class ModManagerAnswers
             if (made == null || made.Count == 0 || !items.ContainsKey(made[0])) return null;
 
             var key = items[made[0]]?.ItemName;
-            var english = Text(config, key, LanguageType.English);
-            var chinese = Text(config, key, LanguageType.Chinese) ?? items[made[0]]?.ItemName_Local;
+            var english = GameNames.Translate(config, key, LanguageType.English);
+            var chinese = GameNames.Translate(config, key, LanguageType.Chinese) ?? items[made[0]]?.ItemName_Local;
 
             return english != null ? (english, string.IsNullOrWhiteSpace(chinese) ? english : chinese) : null;
         }
@@ -74,14 +75,5 @@ public static class ModManagerAnswers
         {
             return null;
         }
-    }
-
-    private static string? Text(ConfigManager config, string? key, LanguageType language)
-    {
-        if (string.IsNullOrEmpty(key)) return null;
-
-        var text = config.GetLocalTxtByLanguage(key, language);
-
-        return string.IsNullOrWhiteSpace(text) || text == key ? null : text;
     }
 }

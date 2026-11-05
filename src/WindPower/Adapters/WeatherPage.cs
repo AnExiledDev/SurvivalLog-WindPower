@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using GameCore.HotUpdate.ReduxUI;
+using ExiledToolkit.Game;
+using ExiledToolkit.Kit;
 using WindPower.Core;
 
 namespace WindPower.Adapters;

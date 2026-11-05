@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using HarmonyLib;
+using ExiledToolkit.Game;
 using WindPower.Core;
 
 namespace WindPower.Adapters;

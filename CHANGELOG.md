@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1
+
+- Now uses Exiled's Toolkit for its shared parts, so it needs Exiled's Toolkit 0.19.0 or newer.
+- Made for Survival Log 1.1.20719.
+
 ## 0.8.0
 
 - New setting for each turbine: Returns. It names exactly what taking that turbine down gives back, any items you like. Left blank, the turbine gives back its ReturnPercent share as before; set to none, it gives back nothing.
