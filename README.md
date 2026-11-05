@@ -6,7 +6,7 @@ Adds three wind turbines to Survival Log. They make power day and night, more th
 - **Medium Wind Turbine**: an upright rotor of two half drums that catches the wind from any side. It fits a medium furniture spot.
 - **Large Wind Turbine**: three blades on a mast. Every so often a gust comes through, and the whole top swings round to meet it. It fits a large furniture spot.
 
-Each turbine has its own model and icon, and can be dyed like the game's own furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. The rotor speeds up and slows down smoothly with the wind and stands still in Heavy Smog. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The weather box on the screen shows the wind too, as a Wind Intensity line.
+Each turbine has its own model and icon, and can be dyed like the game's own furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. The rotor speeds up and slows down smoothly with the wind and stands still in Heavy Smog. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The wind rises and falls over the hours, and the rotors follow it. The weather box on the screen shows the wind too, as a Wind Intensity line.
 
 ## Getting them
 
@@ -34,6 +34,8 @@ A turbine makes less than the solar panel of its size, since it keeps going at n
 | Severe Cold | 9 | 18 | 36 |
 
 A turbine on the 2F terrace stands higher in the wind and makes 20% more: up to 11 for the small, 22 for the medium and 43 for the large.
+
+These are averages. Within a weather the wind rises and falls over the hours, by up to 30% either way at the default, so a rainy afternoon might give a small turbine 2 one hour and 4 the next. Every turbine feels the same wind, and over a day it evens out to the numbers above. The `Variation` setting widens or narrows the swing, and 0 keeps the wind steady.
 
 This is an early test build.
 

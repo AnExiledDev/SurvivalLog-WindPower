@@ -13,7 +13,7 @@ namespace WindPower;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.6.2";
+    private const string Version = "0.7.0";
 
     public override void Load()
     {
@@ -23,6 +23,12 @@ public sealed class Plugin : BasePlugin
             "Turn this on before you remove Wind Power. Once a save is loaded, every Wind Turbine Package becomes the Solar Panel Package of its size, in your bags, in storage and on the floor, in every place the save holds, and the shops stop selling the turbines. Placed and packed turbines are always saved as solar panels, so they need nothing. Then save the game, quit, and remove WindPower.dll. LogOutput.log lists what was changed. Turning this off again does not turn the packages back.\n" +
             "移除风力发电模组之前请先打开此项。读取存档后，背包、储物和地上的每个风力发电机包裹都会变成同尺寸的太阳能发电板包裹，存档里的每个地点都一样，商店也不再出售风力发电机。已安装和已打包的风力发电机本来就按太阳能发电板保存，不受影响。然后存档、退出游戏，再删除 WindPower.dll。改了哪些东西写在 LogOutput.log 里。再关掉此项，包裹也不会变回来。");
 
+        var variation = Config.Bind("Wind", "Variation", WindVariation.DefaultPercent, new ConfigDescription(
+            "How far the wind rises and falls within one weather, as a percent of that weather's average. The wind swells and slackens over the hours, the same for every turbine, and over a day it averages out to the weather's own. 0 keeps the wind steady for as long as the weather lasts.\n" +
+            "同一种天气里风力上下起伏的幅度，按该天气平均风力的百分比计。风会随时间时强时弱，所有风力发电机一样，一天下来平均仍是该天气的风力。0 表示天气不变时风力也不变。",
+            new AcceptableValueRange<int>(0, WindVariation.MostPercent)));
+
+        OptionalLive.Watch(variation, percent => WindSettings.VariationPercent = percent);
         BindSettings(TurbineRows.Small, "Small Solar Panel", "小型太阳能发电板", 20);
         BindSettings(TurbineRows.Medium, "Medium Solar Panel", "中型太阳能发电板", 40);
         BindSettings(TurbineRows.Large, "Large Solar Panel", "大型太阳能发电板", 80);
@@ -70,8 +76,8 @@ public sealed class Plugin : BasePlugin
         var defaults = kind.Defaults;
 
         var rated = Config.Bind(section, "RatedPower", defaults.RatedPower, new ConfigDescription(
-            $"Power the {name} makes in the strongest wind. Calmer weather gives a share of it, and a turbine on the 2F terrace makes 20% more.\n" +
-            $"{chinese}在风最大时的发电量。风小的天气只发出其中一部分，装在二楼露台的多发 20%。",
+            $"Power the {name} makes on average in the strongest wind. Calmer weather gives a share of it, the wind rises and falls around that (see Variation), and a turbine on the 2F terrace makes 20% more.\n" +
+            $"{chinese}在风最大的天气里的平均发电量。风小的天气只发出其中一部分，风力会在此上下起伏（见 Variation），装在二楼露台的多发 20%。",
             new AcceptableValueRange<float>(1f, 200f)));
         var materials = Config.Bind(section, "Materials", defaults.Materials,
             $"What crafting a {name} Package takes, written as item id:count pairs split by commas. 20004 is Scrap Metal, 20104 Wire, 20210 Electronic Components and 20373 Stainless Steel Plate. Up to {MaterialList.MostKinds} different items. A list the game cannot use (an unknown item, or the same materials as another recipe) falls back to the default, and LogOutput.log says why.\n" +

@@ -35,6 +35,9 @@ public sealed class TurbineMotion
     private const float SpinDownTau = 8f / 3f;
     private const float YawTau = 0.45f;
 
+    /// <summary>The strongest wind the rotor follows: a gusty spell can push the wind past the rating.</summary>
+    public const float MostShare = 1.6f;
+
     /// <summary>A frame longer than this (a load, a hitch) is taken as this long, so nothing jumps.</summary>
     private const float LongestStep = 0.1f;
 
@@ -64,10 +67,10 @@ public sealed class TurbineMotion
 
     /// <param name="seconds">The frame's length.</param>
     /// <param name="time">The game clock in seconds, which stops while the game is paused.</param>
-    /// <param name="share">The wind's share of the rating, 0 to 1.</param>
+    /// <param name="share">The wind's share of the rating, 0 to <see cref="MostShare"/>.</param>
     public void Step(float seconds, float time, float share)
     {
-        var target = Math.Clamp(share, 0f, 1f);
+        var target = Math.Clamp(share, 0f, MostShare);
         var dt = Math.Clamp(seconds, 0f, LongestStep);
         var gust = Gust(time + _phase);
 

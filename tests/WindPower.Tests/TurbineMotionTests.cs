@@ -245,4 +245,17 @@ public class TurbineMotionTests
 
         Assert.InRange(turned, 0f, Fastest * 0.1f + 0.01f);
     }
+
+    // A windy spell in Severe Cold pushes the wind past the rating; the blades show it instead of stopping at full.
+    [Fact]
+    public void WindPastTheRatingSpinsFasterThanFullWind()
+    {
+        var full = new TurbineMotion(0f);
+        var stronger = new TurbineMotion(0f);
+
+        Run(full, 0f, 20f, 1f);
+        Run(stronger, 0f, 20f, 1.3f);
+
+        Assert.InRange(stronger.Spin / full.Spin, 1.29f, 1.31f);
+    }
 }

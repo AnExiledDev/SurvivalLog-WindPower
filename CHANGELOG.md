@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0
+
+- The wind now rises and falls within a weather instead of blowing at one strength all day. It swells and slackens over the hours, by up to 30% either way, and every turbine and the rotors follow it. Over a day it evens out to the same power as before.
+- New setting: Variation, under Wind. It sets how far the wind swings; 0 keeps it steady as before.
+- Made for Survival Log 1.1.20151.
+
 ## 0.6.2
 
 - The Small and Large Wind Turbines stand in the middle of their spot. Before, their base stuck out over one edge.

@@ -34,6 +34,7 @@ internal static class WindPatches
     private static int _weatherId = -1;
     private static string _weatherName = "";
     private static float _windReadAt = float.MinValue;
+    private static int _gameSeconds;
 
     public static void Apply(Harmony harmony, Action<string> log)
     {
@@ -45,15 +46,18 @@ internal static class WindPatches
         Hook(harmony, typeof(Furniture), "GetElectricalHoverText", nameof(ShowWindInNameHover));
     }
 
-    /// <summary>The wind's share of the rating now. With no weather (the main menu) it is still.</summary>
+    /// <summary>
+    /// The wind's share of the rating now: the weather's average, risen or fallen with the hour (see
+    /// <see cref="WindVariation"/>). With no weather (the main menu) it is still.
+    /// </summary>
     public static float Wind()
     {
         var id = WeatherId();
 
-        return id < 0 ? 0f : WindOutput.Share(id);
+        return id < 0 ? 0f : WindVariation.Share(WindOutput.Share(id), WindSettings.VariationPercent, _gameSeconds);
     }
 
-    /// <summary>The weather's Config_Weather id, read at most once a second; -1 when there is none.</summary>
+    /// <summary>The weather's Config_Weather id and the game clock, read at most once a second; -1 when there is no weather.</summary>
     private static int WeatherId()
     {
         var now = UnityEngine.Time.realtimeSinceStartup;
@@ -70,6 +74,7 @@ internal static class WindPatches
         if (weather == null) return _weatherId;
 
         _weatherId = weather.GetWeatherConfigId();
+        _gameSeconds = GameSingleton.Existing<BattleLogicWorld>()?._GameTimeManager?.GetTotalSeconds() ?? 0;
 
         var row = GameSingleton.Existing<ConfigManager>()?.Get_Config_Weather(_weatherId);
 

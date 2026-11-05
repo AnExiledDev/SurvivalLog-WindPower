@@ -15,6 +15,9 @@ internal static class WindSettings
 
     public static IReadOnlyList<TurbineSettings> Current => _current;
 
+    /// <summary>How far the wind swings above and below the weather's average, in percent of it.</summary>
+    public static int VariationPercent { get; set; } = WindVariation.DefaultPercent;
+
     public static TurbineSettings Of(TurbineKind kind) => _current[IndexOf(kind)];
 
     public static void Set(TurbineKind kind, TurbineSettings settings)
