@@ -155,7 +155,17 @@ internal static class WindPatches
 
     private static void ShowWindInPowerHover(Furniture __0, Config_FurnitureElectrical __2, SolarFloatData __result)
     {
-        var kind = KindOf(__2);
+        TurbineKind? kind;
+
+        try
+        {
+            kind = KindOf(__2);
+        }
+        catch (Exception ex)
+        {
+            Fail("power hover", ex);
+            return;
+        }
 
         try
         {

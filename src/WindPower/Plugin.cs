@@ -16,7 +16,7 @@ namespace WindPower;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.9.0";
+    private const string Version = "0.9.1";
 
     public override void Load()
     {
@@ -61,8 +61,10 @@ public sealed class Plugin : BasePlugin
             if (!iconPlaced)
             {
                 iconPlaced = true;
-                TurbineIcon.Place(message => Log.LogInfo(message));
+                TurbineIcon.Place();
             }
+
+            TurbineIcon.Report(message => Log.LogInfo(message));
 
             tables.Tick(now);
             UninstallPrep.Tick(now);

@@ -1,6 +1,6 @@
 # Wind Power
 
-Adds three wind turbines to Survival Log. They make power day and night, more the windier the weather is, and can only be installed outdoors: in the yard outside or on the 2F terrace.
+Adds three wind turbines to Survival Log. They make power day and night, more the windier the weather is, and can only be installed outdoors: the Small in the yard outside, the Medium and Large in the yard or on the 2F terrace.
 
 - **Small Wind Turbine**: three blades and a tail vane on a pole. Its head turns to face the wind. It fits a small furniture spot.
 - **Medium Wind Turbine**: an upright rotor of two half drums that catches the wind from any side. It fits a medium furniture spot.
@@ -34,15 +34,13 @@ A turbine makes less than the solar panel of its size, since it keeps going at n
 | Moderate Cold | 7 | 14 | 29 |
 | Severe Cold | 9 | 18 | 36 |
 
-A turbine on the 2F terrace stands higher in the wind and makes 20% more: up to 11 for the small, 22 for the medium and 43 for the large.
+A Medium or Large turbine on the 2F terrace stands higher in the wind and makes 20% more: up to 22 for the medium and 43 for the large. The terrace has no small spots.
 
-These are averages. Within a weather the wind rises and falls over the hours, by up to 30% either way at the default, so a rainy afternoon might give a small turbine 2 one hour and 4 the next. Every turbine feels the same wind, and over a day it evens out to the numbers above. The `Variation` setting widens or narrows the swing, and 0 keeps the wind steady.
-
-This is an early test build.
+These are averages. Within a weather the wind rises and falls over the hours, by up to 30% either way at the default, so a rainy afternoon might give a small turbine 2 one hour and 4 the next. Every turbine feels the same wind, and over several days it evens out to the numbers above. The `Variation` setting widens or narrows the swing, and 0 keeps the wind steady.
 
 ## Settings
 
-Settings live in `BepInEx\config\com.dev.survivallog.windpower.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. See [CONFIG.md](CONFIG.md) for every setting. Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
+Settings live in `BepInEx\config\com.dev.survivallog.windpower.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. See [CONFIG.md](CONFIG.md) for every setting. Every setting takes effect at once, without restarting the game.
 
 ## Save safety
 
@@ -66,5 +64,24 @@ Then delete `WindPower.dll` from the `BepInEx\plugins` folder. For a clean slate
 
 ## Install
 
-1. Install Exiled's Toolkit 0.19.0 or newer, from [its latest release](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/61).
-2. Copy `WindPower.dll` into `BepInEx/plugins`.
+1. Install the [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12) (if no other mods were installed before, start the game once so BepInEx finishes setup, then quit).
+2. Install Exiled's Toolkit 0.19.0 or newer. Download `ExiledToolkit-x.y.z.zip` from [its latest release](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/61), and extract it into the game folder (the folder with `SurvivalLog.exe`).
+3. Download `WindPower-x.y.z.zip` from the [latest release](https://github.com/AnExiledDev/SurvivalLog-WindPower/releases/latest).
+4. Extract the zip into the game folder. It holds a `BepInEx` folder, so the DLL lands in the right place. When asked, merge the folders. The result should be:
+   `C:\Program Files (x86)\Steam\steamapps\common\Survival Log\BepInEx\plugins\WindPower.dll`
+
+## Known issues
+
+- Uninstall prep works on the save you load while it is on, so each save you want to keep needs its own load and save before you remove the mod.
+
+## Feedback and bug reports
+
+Found a bug, have an idea, or something feels off? Come say so on the Core Directive Discord: https://discord.gg/trTsyxUFqg . You can also post in the Posts tab of the mod's Nexus Mods page. When reporting a bug, attach `BepInEx\LogOutput.log`.
+
+To reach me directly, message `exiled.dev` on Discord; you can find me in the [official Survival Log Discord](https://discord.gg/MZGg4gQAUe). I'm also on X as [@AnExiledDev](https://x.com/AnExiledDev).
+
+A Survival Log wiki with detailed documentation for all of my mods is coming soon.
+
+## License
+
+MIT. Copyright (c) 2026 AnExiledDev. See [LICENSE](LICENSE).

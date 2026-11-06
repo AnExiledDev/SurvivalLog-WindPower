@@ -49,6 +49,9 @@
     <AssemblyMetadata Include="ModManager.Author" Value="AnExiledDev" />
     <AssemblyMetadata Include="ModManager.Category" Value="Gameplay" />
     <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.20719" />
+    <AssemblyMetadata Include="ModManager.Settings" Value="Live" />
+    <AssemblyMetadata Include="ModManager.GitHub" Value="AnExiledDev/SurvivalLog-WindPower" />
+    <AssemblyMetadata Include="ModManager.Changelog" Value="https://github.com/AnExiledDev/SurvivalLog-WindPower/blob/main/CHANGELOG.md" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,15 +16,24 @@ namespace WindPower.Adapters;
 /// </summary>
 internal static class TurbineIcon
 {
+    /// <summary>What the background writer has to say, held for the main thread: a worker never logs to the console.</summary>
+    private static readonly ConcurrentQueue<string> Messages = new();
+
     /// <summary>Call on the main thread, since Unity gives the folder's path only there. The icons are made and written in the background.</summary>
-    public static void Place(Action<string> log)
+    public static void Place()
     {
         var folder = Path.Combine(Application.streamingAssetsPath, "WebUI", TurbineRows.WebIconFolder);
 
         Task.Run(() =>
         {
-            foreach (var kind in TurbineRows.All) log(Place(folder, kind));
+            foreach (var kind in TurbineRows.All) Messages.Enqueue(Place(folder, kind));
         });
+    }
+
+    /// <summary>Call on the main thread: logs what the background writer has finished so far.</summary>
+    public static void Report(Action<string> log)
+    {
+        while (Messages.TryDequeue(out var message)) log(message);
     }
 
     private static string Place(string folder, TurbineKind kind)

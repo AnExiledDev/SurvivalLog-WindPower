@@ -125,6 +125,9 @@ internal static class ShopStock
         var shops = GameSingleton.Existing<ConfigManager>()?._Config_ShopFurniture_Dict;
         var id = shop.buildShopConfigId;
 
+        // Uninstall prep takes the marks out, so writing them back here would leave them in the next save. Shops
+        // that never sell a turbine get no marks either.
+        if (UninstallPrep.IsOn || !System.Linq.Enumerable.Contains(TurbineRows.Shops, id)) return false;
         if (stock == null || shops == null || !shops.ContainsKey(id)) return false;
 
         var row = shops[id];

@@ -124,7 +124,25 @@ internal static class TurbineModel
 
     private static void FindRotorParented(string __0, GameObject __result) => Remember(__0, __result);
 
+    /// <summary>A hook on the game's model load, so a failure here is logged once and the model loads as it would.</summary>
     private static void Remember(string path, GameObject model)
+    {
+        try
+        {
+            Track(path, model);
+        }
+        catch (Exception ex)
+        {
+            if (_hasRotorFailed) return;
+
+            _hasRotorFailed = true;
+            _log($"a turbine's rotor could not be found, so it stands still: {ex}");
+        }
+    }
+
+    private static bool _hasRotorFailed;
+
+    private static void Track(string path, GameObject model)
     {
         if (model == null || LookAt(path) is not { } look) return;
 

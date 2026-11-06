@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.1
+
+- With UninstallPrep on, a shop that loads no longer gets the mod's stock records put back in it, so a save made right after holds none of them. Shops that never sell a turbine get none either.
+- If writing the turbines' rows fails partway, the mod tries again a few seconds later instead of leaving them half written.
+- Made for Survival Log 1.1.20719.
+
 ## 0.9.0
 
 - The turbines can be crafted in any of the game's 8 colours, like the solar panels: pick a dye on the turbine's recipe card at the workbench. The coloured package has its own icon and unpacks into a dyed turbine.

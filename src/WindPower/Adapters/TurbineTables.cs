@@ -70,9 +70,10 @@ internal sealed class TurbineTables
 
         if (ReferenceEquals(settings, _appliedSettings) && _seen.AsSpan().SequenceEqual(_applied)) return;
 
+        // Marked as applied only once the write is through, so one that fails partway is tried again at the next check.
+        Write(config, tables, english, chinese, settings);
         _seen.CopyTo(_applied, 0);
         _appliedSettings = settings;
-        Write(config, tables, english, chinese, settings);
     }
 
     private void Write(ConfigManager config, Tables tables, Il2CppDictionary.Dictionary<string, string> english, Il2CppDictionary.Dictionary<string, string> chinese, IReadOnlyList<TurbineSettings> settings)
