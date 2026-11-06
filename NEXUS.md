@@ -24,18 +24,19 @@ Wind Power adds three wind turbines to Survival Log, a Small, a Medium and a Lar
 [/list]
 
 [size=5]Power output[/size]
-What each turbine makes on average at the default settings (power 9, 18 and 36). The 2F columns are the 2F terrace. The wind moves these up and down by up to 30% over the hours.
-[code]Weather                                 Small       Medium      Large       Medium 2F   Large 2F
-Heavy Smog                              0           0           0           0           0
-Frosty/Clear, Cold/Clear, Chilly/Clear  1           2           4           2           4
-Clear                                   1           2           4           3           5
-Cloudy                                  2           4           7           4           9
-Rainy                                   3           6           13          8           15
-Continuous Rain                         4           8           16          10          19
-Mild Cold, Mild Cold Rain               5           10          20          12          24
-Heavy Rain                              7           14          27          16          32
-Moderate Cold, Moderate Cold Rain       7           14          29          17          35
-Severe Cold, Severe Cold Rain           9           18          36          22          43[/code]
+What each turbine makes on average at the default settings (power 9, 18 and 36), by weather. The wind moves these up and down by up to 30% over the hours.
+[list]
+[*][b]Heavy Smog[/b]: 0, the turbines stand still.[/*]
+[*][b]Frosty/Clear, Cold/Clear and Chilly/Clear[/b]: Small 1, Medium 2, Large 4. On the 2F terrace, Medium 2 and Large 4.[/*]
+[*][b]Clear[/b]: Small 1, Medium 2, Large 4. On the 2F terrace, Medium 3 and Large 5.[/*]
+[*][b]Cloudy[/b]: Small 2, Medium 4, Large 7. On the 2F terrace, Medium 4 and Large 9.[/*]
+[*][b]Rainy[/b]: Small 3, Medium 6, Large 13. On the 2F terrace, Medium 8 and Large 15.[/*]
+[*][b]Continuous Rain[/b]: Small 4, Medium 8, Large 16. On the 2F terrace, Medium 10 and Large 19.[/*]
+[*][b]Mild Cold and Mild Cold Rain[/b]: Small 5, Medium 10, Large 20. On the 2F terrace, Medium 12 and Large 24.[/*]
+[*][b]Heavy Rain[/b]: Small 7, Medium 14, Large 27. On the 2F terrace, Medium 16 and Large 32.[/*]
+[*][b]Moderate Cold and Moderate Cold Rain[/b]: Small 7, Medium 14, Large 29. On the 2F terrace, Medium 17 and Large 35.[/*]
+[*][b]Severe Cold and Severe Cold Rain[/b]: Small 9, Medium 18, Large 36. On the 2F terrace, Medium 22 and Large 43.[/*]
+[/list]
 
 [size=5]Known issues[/size]
 UninstallPrep only changes the save you load while it's on, so load and save each save you want to keep before you remove the mod.
@@ -95,18 +96,19 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [/list]
 
 [size=5]发电量[/size]
-默认设置下（发电量 9、18 和 36）每种风力发电机的平均发电量。「二楼」两列是装在二楼露台的数字。风会让这些数字随时间上下浮动，最多 30%。
-[code]天气                小型        中型        大型        中型(二楼)  大型(二楼)
-大雾霾天            0           0           0           0           0
-霜晴、寒晴、凛晴    1           2           4           2           4
-晴天                1           2           4           3           5
-阴天                2           4           7           4           9
-雨天                3           6           13          8           15
-持续阴雨            4           8           16          10          19
-轻度寒潮、轻度寒雨  5           10          20          12          24
-暴雨                7           14          27          16          32
-中度寒潮、中度寒雨  7           14          29          17          35
-重度寒潮、重度寒雨  9           18          36          22          43[/code]
+默认设置下（发电量 9、18 和 36），各种天气里每种风力发电机的平均发电量。风会让这些数字随时间上下浮动，最多 30%。
+[list]
+[*][b]大雾霾天[/b]：0，风力发电机不转。[/*]
+[*][b]霜晴、寒晴和凛晴[/b]：小型 1，中型 2，大型 4。二楼露台上中型 2，大型 4。[/*]
+[*][b]晴天[/b]：小型 1，中型 2，大型 4。二楼露台上中型 3，大型 5。[/*]
+[*][b]阴天[/b]：小型 2，中型 4，大型 7。二楼露台上中型 4，大型 9。[/*]
+[*][b]雨天[/b]：小型 3，中型 6，大型 13。二楼露台上中型 8，大型 15。[/*]
+[*][b]持续阴雨[/b]：小型 4，中型 8，大型 16。二楼露台上中型 10，大型 19。[/*]
+[*][b]轻度寒潮和轻度寒雨[/b]：小型 5，中型 10，大型 20。二楼露台上中型 12，大型 24。[/*]
+[*][b]暴雨[/b]：小型 7，中型 14，大型 27。二楼露台上中型 16，大型 32。[/*]
+[*][b]中度寒潮和中度寒雨[/b]：小型 7，中型 14，大型 29。二楼露台上中型 17，大型 35。[/*]
+[*][b]重度寒潮和重度寒雨[/b]：小型 9，中型 18，大型 36。二楼露台上中型 22，大型 43。[/*]
+[/list]
 
 [size=5]已知问题[/size]
 「UninstallPrep」只处理开启时读取的那个存档，所以每个想保留的存档，在移除模组前都要各自读取一次并保存。
