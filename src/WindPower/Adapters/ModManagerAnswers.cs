@@ -30,7 +30,8 @@ public static class ModManagerAnswers
     private static (IntPtr Items, IntPtr Recipes) _answeredTables;
     private static IReadOnlyList<TurbineChoice> _answers = Array.Empty<TurbineChoice>();
 
-    private static IReadOnlyList<TurbineChoice> Choices()
+    /// <summary>Every turbine's lists as the settings and tables stand now, in the order of <see cref="TurbineRows.All"/>. The test buttons read them too.</summary>
+    internal static IReadOnlyList<TurbineChoice> Choices()
     {
         var settings = (Settings?.Invoke() ?? TurbineRows.All.Select(kind => kind.Defaults).ToList()).ToArray();
         var config = GameSingleton.Existing<ConfigManager>();

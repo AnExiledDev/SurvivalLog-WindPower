@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.2
+
+- With Cheat Menu installed, its Mod tests tab has four more Wind Power buttons: Give 1 of each turbine, Give materials for each turbine, Show recipes and returns, and Show the wind for 12 hours.
+- Made for Survival Log 1.1.20719.
+
 ## 0.8.1
 
 - Now uses Exiled's Toolkit for its shared parts, so it needs Exiled's Toolkit 0.19.0 or newer.

@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace WindPower.Core;
 
@@ -20,5 +23,40 @@ public static class TurbineReport
         var rated = settings.RatedPower.ToString("0.##", CultureInfo.InvariantCulture);
 
         return $"{kind.Name}: rated {rated}, now {yard} in the yard and {terrace} on the 2F terrace. Recipe {kind.Ids.Recipe} {recipe}. Package item {kind.Ids.Item}. Shop price {settings.ShopPrice}, stock {settings.ShopStock}.";
+    }
+
+    /// <summary>
+    /// The wind hour by hour from <paramref name="gameSeconds"/> on, as the turbines will feel it if the weather holds,
+    /// so a tester can check the swing without waiting for it. Hour 0 is now.
+    /// </summary>
+    public static IReadOnlyList<string> Forecast(float weatherShare, int percent, double gameSeconds, int hours)
+    {
+        var lines = new List<string>();
+
+        for (var hour = 0; hour <= hours; hour++)
+        {
+            var share = WindVariation.Share(weatherShare, percent, gameSeconds + hour * 3600.0);
+            var when = hour == 0 ? "now" : $"+{hour} h";
+
+            lines.Add($"{when}: wind {WindOutput.Percent(share)}%");
+        }
+
+        return lines;
+    }
+
+    /// <summary>A list of pieces as counts with names, in the order each first appears: "3 Scrap Metal, 2 Wire"; empty is "nothing".</summary>
+    public static string Pieces(IReadOnlyList<int> pieces, Func<int, string> name) =>
+        pieces.Count == 0
+            ? "nothing"
+            : string.Join(", ", pieces.GroupBy(id => id).Select(group => $"{group.Count()} {name(group.Key)}"));
+
+    /// <summary>What crafting a turbine takes and what taking it down gives back now, and which setting decides the second.</summary>
+    public static string Recipe(TurbineChoice choice, TurbineSettings settings, Func<int, string> name)
+    {
+        var from = string.IsNullOrWhiteSpace(settings.Returns) || choice.ReturnsProblem != null
+            ? $"ReturnPercent {choice.Percent}%"
+            : "its Returns list";
+
+        return $"{choice.Kind.Name}: takes {Pieces(choice.Materials, name)}; taking it down gives back {Pieces(choice.Back, name)} ({from}).";
     }
 }

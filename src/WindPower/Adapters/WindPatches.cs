@@ -87,6 +87,14 @@ internal static class WindPatches
     /// <summary>The weather now, for the test buttons: its id (-1 when there is none) and its name.</summary>
     internal static (int Id, string Name) Weather() => (WeatherId(), _weatherName);
 
+    /// <summary>The game clock the wind follows, in game seconds, for the test buttons' forecast.</summary>
+    internal static double GameSeconds()
+    {
+        WeatherId();
+
+        return _gameSeconds;
+    }
+
     /// <summary>The wind as a whole percent of the rating, for the weather tooltip; -1 when there is no weather.</summary>
     public static int WindPercent() => WeatherId() < 0 ? -1 : WindOutput.Percent(Wind());
 

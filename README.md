@@ -16,7 +16,7 @@ Each turbine has its own model and icon, and can be dyed like the game's own fur
 - Before the disaster, the Classic Furniture shop sells 2 of each: the Small Wind Turbine for 30, the Medium for 60 and the Large for 120.
 - Taking a turbine down gives back about half of what its package took. The `ReturnPercent` setting changes how much, and each turbine's `Returns` setting can name exactly what it gives back instead.
 - On the Mod Manager's Mods screen (0.14.0 or newer), each turbine's materials and what it gives back show as item cards you pick from every item in the game. The screen shows what the recipe is worth, warns when taking the turbine down would give back more than that, and says when the turbine cannot use a list, such as one with exactly the same materials as another recipe.
-- **Test buttons**: with Cheat Menu installed, its Mod tests tab shows the wind now and what each turbine makes, or shows all the recipes right away.
+- **Test buttons**: with Cheat Menu installed, its Mod tests tab shows the wind now and what each turbine makes, the wind for the next 12 hours, and what each turbine takes and gives back. It can also show all the recipes right away, and put one of each turbine package, or the materials for each, in your bag.
 
 ## Power
 
