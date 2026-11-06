@@ -1,6 +1,6 @@
 # Wind Power
 
-Adds three wind turbines to Survival Log. They make power day and night, more the windier the weather is, and can only be installed outdoors: the Small in the yard outside, the Medium and Large in the yard or on the 2F terrace.
+Adds three wind turbines to Survival Log. They keep making power after dark, and the stronger the wind, the more they make. They only go outdoors: the Small in the yard, the Medium and Large in the yard or on the 2F terrace.
 
 - **Small Wind Turbine**: three blades and a tail vane on a pole. Its head turns to face the wind. It fits a small furniture spot.
 - **Medium Wind Turbine**: an upright rotor of two half drums that catches the wind from any side. It fits a medium furniture spot.
@@ -78,7 +78,7 @@ Then delete `WindPower.dll` from the `BepInEx\plugins` folder. For a clean slate
 
 Found a bug, have an idea, or something feels off? Come say so on the Core Directive Discord: https://discord.gg/trTsyxUFqg . You can also post in the Posts tab of the mod's Nexus Mods page. When reporting a bug, attach `BepInEx\LogOutput.log`.
 
-To reach me directly, message `exiled.dev` on Discord; you can find me in the [official Survival Log Discord](https://discord.gg/MZGg4gQAUe). I'm also on X as [@AnExiledDev](https://x.com/AnExiledDev).
+To reach me directly, message `exiled.dev` on Discord, you can find me in the [official Survival Log Discord](https://discord.gg/MZGg4gQAUe). I'm also on X as [@AnExiledDev](https://x.com/AnExiledDev).
 
 A Survival Log wiki with detailed documentation for all of my mods is coming soon.
 
