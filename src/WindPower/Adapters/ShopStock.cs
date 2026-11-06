@@ -11,18 +11,15 @@ namespace WindPower.Adapters;
 /// <summary>
 /// Keeps the turbines on the shelves of the shops before the disaster in a run that is already going. A shop fills its
 /// stock from its list only the first time and keeps its own counts in the save after that, so a turbine added to the
-/// list, or a stock setting changed, would never reach it. When a shop is made or loaded, these hooks add a turbine it
-/// lacks and bring one it has too many of down to the setting; a stock setting changed while a shop is open moves its
-/// count by the difference, so turbines already bought stay bought. Both targets were checked in GameAssembly.dll: no
-/// relative jump or call in their first 14 bytes.
+/// list, or a stock setting changed, would never reach it. When a shop is made or loaded, and whenever a setting
+/// changes, these hooks add a turbine it lacks and move its count by the change in the stock setting since the shop
+/// last took it, so turbines already bought stay bought (see <see cref="ShopMarks"/>, which keeps that setting in the
+/// shop's saved stock). Both targets were checked in GameAssembly.dll: no relative jump or call in their first 14 bytes.
 /// </summary>
 internal static class ShopStock
 {
     /// <summary>The shops in the world now, by pointer. A shop that is taken down has its id set to 0.</summary>
     private static readonly Dictionary<IntPtr, BuildShopComponent> Live = new();
-
-    /// <summary>The stock setting last applied to each turbine, by furniture id.</summary>
-    private static readonly Dictionary<int, int> Applied = new();
 
     private static readonly HashSet<string> Failed = new();
     private static Action<string> _log = _ => { };
@@ -35,20 +32,11 @@ internal static class ShopStock
         Hook(harmony, "LoadGame");
     }
 
-    /// <summary>Moves each open shop's turbines to the stock settings in <paramref name="wanted"/>, after the shops' lists were changed to match.</summary>
-    public static void Restock(IReadOnlyList<(int Furniture, int Stock)> wanted)
+    /// <summary>Moves each open shop's turbines to the stock settings, after the shops' lists were changed to match.</summary>
+    public static void Restock()
     {
         try
         {
-            var moves = new List<(int Furniture, int Before, int After)>();
-
-            foreach (var (furniture, stock) in wanted)
-            {
-                if (Applied.TryGetValue(furniture, out var before) && before != stock) moves.Add((furniture, before, stock));
-
-                Applied[furniture] = stock;
-            }
-
             var gone = new List<IntPtr>();
 
             foreach (var pair in Live)
@@ -62,9 +50,7 @@ internal static class ShopStock
                     continue;
                 }
 
-                var isChanged = Move(shop, moves);
-
-                if (Settle(shop) || isChanged) shop.SyncStockSnapshot();
+                if (Settle(shop)) shop.SyncStockSnapshot();
             }
 
             foreach (var pointer in gone) Live.Remove(pointer);
@@ -76,8 +62,8 @@ internal static class ShopStock
     }
 
     /// <summary>
-    /// Takes the turbines out of every open shop's stock altogether, not just down to none, so a save holds no id a game
-    /// without the mod does not know. Returns how many entries went.
+    /// Takes the turbines and their marks out of every open shop's stock altogether, not just down to none, so a save
+    /// holds no id a game without the mod does not know. Returns how many turbine entries went.
     /// </summary>
     public static int RemoveTurbines()
     {
@@ -91,6 +77,8 @@ internal static class ShopStock
 
             foreach (var kind in TurbineRows.All)
             {
+                if (stock.Remove(ShopMarks.Key(kind.Ids.Furniture))) isChanged = true;
+
                 if (!stock.Remove(kind.Ids.Furniture)) continue;
 
                 isChanged = true;
@@ -127,32 +115,9 @@ internal static class ShopStock
         }
     }
 
-    private static bool Move(BuildShopComponent shop, List<(int Furniture, int Before, int After)> moves)
-    {
-        var stock = shop.StockDict;
-        var isChanged = false;
-
-        if (stock == null) return false;
-
-        foreach (var (furniture, before, after) in moves)
-        {
-            if (!stock.ContainsKey(furniture)) continue;
-
-            var current = stock[furniture];
-            var next = Unlocks.NewStock(current, before, after);
-
-            if (next == current) continue;
-
-            stock[furniture] = next;
-            isChanged = true;
-        }
-
-        return isChanged;
-    }
-
     /// <summary>
-    /// Gives the shop each turbine its list has and its stock lacks, and takes any turbine down to what the list has
-    /// (none, for a turbine the list leaves out). Returns whether the stock changed.
+    /// Gives the shop each turbine its list has and its stock lacks, moves each one it has by the change in the stock
+    /// setting since it last took it, and marks the setting it took. Returns whether the stock changed.
     /// </summary>
     private static bool Settle(BuildShopComponent shop)
     {
@@ -176,16 +141,19 @@ internal static class ShopStock
                 for (var i = 0; i < ids.Count; i++)
                     if (ids[i] == furniture) listed = counts != null && i < counts.Count ? counts[i] : 0;
 
-            if (!stock.ContainsKey(furniture))
-            {
-                if (listed <= 0) continue;
+            var mark = ShopMarks.Key(furniture);
+            int? current = stock.ContainsKey(furniture) ? stock[furniture] : null;
+            int? applied = stock.ContainsKey(mark) ? ShopMarks.Decode(stock[mark]) : null;
 
-                stock[furniture] = listed;
+            if (ShopMarks.Count(current, applied, listed) is int next && next != current)
+            {
+                stock[furniture] = next;
                 isChanged = true;
             }
-            else if (stock[furniture] > listed)
+
+            if (applied != Math.Max(0, listed))
             {
-                stock[furniture] = Math.Max(0, listed);
+                stock[mark] = ShopMarks.Encode(listed);
                 isChanged = true;
             }
         }

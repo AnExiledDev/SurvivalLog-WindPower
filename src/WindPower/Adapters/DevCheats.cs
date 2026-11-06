@@ -99,6 +99,15 @@ public static class DevCheats
         return string.Join("\n", lines);
     }
 
+    [DisplayName("Give 1 of each dye\n给每种染料各 1 个")]
+    [Description("Puts one of each of the game's eight dyes in your bag, for crafting the coloured turbines.\n在背包里放入游戏中八种染料各 1 个，用来制作彩色风力发电机。")]
+    public static string GiveDyes()
+    {
+        if (Bag() is not { } bag) return NotInGame;
+
+        return string.Join("\n", Dyes.All.Select(dye => Give(bag, dye.Item, 1, dye.En + " Dye")));
+    }
+
     [DisplayName("Show recipes and returns\n查看配方和返还")]
     [Description("Shows, for each turbine, what crafting it takes and what taking it down gives back now, and whether Returns or ReturnPercent decides that.\n显示每种风力发电机现在的制作材料、拆下后返还的物品，以及由「Returns」还是「ReturnPercent」决定。")]
     public static string ShowRecipesAndReturns()

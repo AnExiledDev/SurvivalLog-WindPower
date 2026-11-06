@@ -2,45 +2,65 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using WindPower.Core;
 
 namespace WindPower.Adapters;
 
 /// <summary>
-/// Puts each turbine's icon where the game's web UI looks for pictures, next to the game's own furniture icons. An icon
-/// is written only when the file there is missing or differs, so a mod update brings its new icon.
+/// Puts each turbine's icon, and one for each of its colours, where the game's web UI looks for pictures, next to the
+/// game's own furniture icons. The coloured ones are made from the plain icon the way the dye shader colours the model.
+/// An icon is written only when the file there is missing or differs, so a mod update brings its new icon.
 /// </summary>
 internal static class TurbineIcon
 {
-    /// <summary>Call on the main thread, since Unity gives the folder's path only there. Returns what happened.</summary>
-    public static string Place()
+    /// <summary>Call on the main thread, since Unity gives the folder's path only there. The icons are made and written in the background.</summary>
+    public static void Place(Action<string> log)
     {
         var folder = Path.Combine(Application.streamingAssetsPath, "WebUI", TurbineRows.WebIconFolder);
-        var notes = new List<string>();
 
-        foreach (var kind in TurbineRows.All) notes.Add(Place(folder, kind));
-
-        return string.Join("; ", notes);
+        Task.Run(() =>
+        {
+            foreach (var kind in TurbineRows.All) log(Place(folder, kind));
+        });
     }
 
     private static string Place(string folder, TurbineKind kind)
     {
         try
         {
-            var file = Path.Combine(folder, kind.IconFile);
             var icon = TurbineModel.Resource(kind.IconFile);
+            var plain = Write(folder, kind.IconFile, icon);
 
-            if (File.Exists(file) && File.ReadAllBytes(file).SequenceEqual(icon)) return $"the {kind.Name}'s icon is in place";
+            try
+            {
+                var dyed = Paint.DyedIcons(Png.Decode(icon), Dyes.All.Select(dye => dye.Colour)).ToList();
+                var written = Dyes.All.Where((dye, i) => Write(folder, Dyes.IconFile(kind, dye), Png.Encode(dyed[i]))).Count();
 
-            Directory.CreateDirectory(folder);
-            File.WriteAllBytes(file, icon);
-
-            return $"the {kind.Name}'s icon was written to {file}";
+                return $"the {kind.Name}'s icon is {(plain ? "written" : "in place")}, and {written} of its 8 coloured icons were written";
+            }
+            catch (Exception ex)
+            {
+                return $"the {kind.Name}'s icon is {(plain ? "written" : "in place")}, but its coloured icons could not be made, so its coloured packages show without one: {ex.Message}";
+            }
         }
         catch (Exception ex)
         {
             return $"the {kind.Name}'s icon could not be written, so it shows without one: {ex.Message}";
         }
+    }
+
+    /// <summary>Writes the file unless it already holds these bytes. Returns whether it wrote.</summary>
+    private static bool Write(string folder, string name, byte[] bytes)
+    {
+        var file = Path.Combine(folder, name);
+
+        if (File.Exists(file) && File.ReadAllBytes(file).SequenceEqual(bytes)) return false;
+
+        Directory.CreateDirectory(folder);
+        File.WriteAllBytes(file, bytes);
+
+        return true;
     }
 }

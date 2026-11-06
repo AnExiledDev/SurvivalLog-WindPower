@@ -16,7 +16,7 @@ namespace WindPower;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.8.2";
+    private const string Version = "0.9.0";
 
     public override void Load()
     {
@@ -61,7 +61,7 @@ public sealed class Plugin : BasePlugin
             if (!iconPlaced)
             {
                 iconPlaced = true;
-                Log.LogInfo(TurbineIcon.Place());
+                TurbineIcon.Place(message => Log.LogInfo(message));
             }
 
             tables.Tick(now);
@@ -87,8 +87,8 @@ public sealed class Plugin : BasePlugin
             $"{chinese}在风最大的天气里的平均发电量。风小的天气只发出其中一部分，风力会在此上下起伏（见 Variation），装在二楼露台的多发 20%。",
             new AcceptableValueRange<float>(1f, 200f)));
         var materials = Config.Bind(section, TurbineChoices.MaterialsKey, defaults.Materials, new ConfigDescription(
-            $"What crafting a {name} Package takes, written as item id:count pairs split by commas. 20004 is Scrap Metal, 20104 Wire, 20210 Electronic Components and 20373 Stainless Steel Plate. Up to {MaterialList.MostKinds} different items, up to {MaterialList.MostOfOne} of each. A list the game cannot use (an unknown item, or the same materials as another recipe) falls back to the default, and LogOutput.log says why.\n" +
-            $"制作{chinese}包裹所需的材料，写成「物品id:数量」，用逗号隔开。20004 是铁皮，20104 是铁丝，20210 是电器元件，20373 是不锈钢板。最多 {MaterialList.MostKinds} 种物品，每种最多 {MaterialList.MostOfOne} 个。游戏用不了的清单（物品不存在，或和别的配方材料相同）会改用默认值，原因写在 LogOutput.log 里。",
+            $"What crafting a {name} Package takes, written as item id:count pairs split by commas. 20004 is Scrap Metal, 20104 Wire, 20210 Electronic Components and 20373 Stainless Steel Plate. Up to {MaterialList.MostKinds} different items, up to {MaterialList.MostOfOne} of each. A list the game cannot use (an unknown item, a dye, or the same materials as another recipe) falls back to the default, and LogOutput.log says why.\n" +
+            $"制作{chinese}包裹所需的材料，写成「物品id:数量」，用逗号隔开。20004 是铁皮，20104 是铁丝，20210 是电器元件，20373 是不锈钢板。最多 {MaterialList.MostKinds} 种物品，每种最多 {MaterialList.MostOfOne} 个。游戏用不了的清单（物品不存在、含有染料，或和别的配方材料相同）会改用默认值，原因写在 LogOutput.log 里。",
             null, listTags.Append($"ModManager.Makes={kind.Ids.Item}").ToArray<object>()));
         var returns = Config.Bind(section, TurbineChoices.ReturnsKey, defaults.Returns, new ConfigDescription(
             $"What taking a {name} down gives back, written like Materials. Blank gives back the ReturnPercent share of its materials (under Dismantle); {MaterialList.NoItems} gives nothing back; a list gives back exactly that, and may name any items. Up to {MaterialList.MostKinds} different items, up to {MaterialList.MostOfOne} of each. A list the game cannot use (an unknown item) gives back the ReturnPercent share instead, and LogOutput.log says why.\n" +

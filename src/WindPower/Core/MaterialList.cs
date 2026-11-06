@@ -85,9 +85,9 @@ public static class MaterialList
 
     /// <summary>
     /// The materials to use: the player's, or the default when theirs cannot be used, with why. Theirs cannot be used
-    /// when the text cannot be read, names an item the game does not have, or matches another recipe's materials (a
-    /// stock recipe's, or one <paramref name="taken"/> by another turbine), since the game files recipes by their
-    /// materials and only one of two alike could be crafted.
+    /// when the text cannot be read, names an item the game does not have, holds a dye (the coloured recipes add one),
+    /// or matches another recipe's materials (a stock recipe's, or one <paramref name="taken"/> by another turbine),
+    /// since the game files recipes by their materials and only one of two alike could be crafted.
     /// </summary>
     /// <param name="taken">Each other turbine's materials, and whether they are its default, kept for it in case it falls back.</param>
     /// <param name="recipeName">The name of what a stock recipe makes, in both languages, when it can be found.</param>
@@ -106,6 +106,9 @@ public static class MaterialList
         if (!TryParse(text, out var materials, out var problem)) return (standard, Problem(problem, $"The list cannot be read ({problem}), " + keeps, "这份清单无法读取，" + keepsZh));
 
         if (materials.Distinct().FirstOrDefault(id => !isItem(id)) is var missing and > 0) return (standard, Problem($"the game has no item {missing}", $"The game has no item {missing}, " + keeps, $"游戏里没有物品 {missing}，" + keepsZh));
+
+        if (materials.FirstOrDefault(Dyes.IsDye) is var dye and > 0)
+            return (standard, Problem($"item {dye} is a dye", "A dye cannot be one of the materials: picking a colour adds one when crafting. " + keeps, "染料不能作为材料：制作时选颜色会自动加上一份。" + keepsZh));
 
         if (recipeUsing(materials) is int other)
         {

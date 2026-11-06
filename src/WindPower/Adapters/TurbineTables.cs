@@ -93,7 +93,8 @@ internal sealed class TurbineTables
         _ours = new HashSet<IntPtr>();
 
         foreach (var kind in TurbineRows.All)
-        foreach (var (table, id) in RowsOf(kind.Ids))
+        foreach (var ids in Dyes.All.Select(dye => Dyes.Ids(kind.Ids, dye)).Prepend(kind.Ids))
+        foreach (var (table, id) in RowsOf(ids))
             views[table].Keep(id, before, _ours);
 
         SetTexts(TurbineRows.SharedTexts, english, chinese);
@@ -131,6 +132,7 @@ internal sealed class TurbineTables
 
             foreach (var reason in refused) _log($"{kind.Name} field not set: {reason}");
 
+            WriteDyed(kind, materials, views, recipes, english, chinese);
             written.Add((kind, wanted, materials));
         }
 
@@ -140,13 +142,15 @@ internal sealed class TurbineTables
         // when this one is empty.
         config.InitProductionListMap();
         config._furnitureToPackageItems = null;
+        // The coloured recipe lookups rebuild themselves when this is empty.
+        config._dyedRecipeToBase = null;
 
         var kinds = written.Select(done => done.Kind).ToList();
 
         Step("quest rewards", () => AddToRewards(tables.RewardSets, kinds));
         Step("quest text", () => AddToQuests(tables.Events, kinds, english, chinese));
         Step("shop lists", () => AddToShops(tables.Shops, written.Select(done => (done.Kind.Ids.Furniture, done.Settings.ShopStock)).ToList()));
-        ShopStock.Restock(written.Select(done => (done.Kind.Ids.Furniture, done.Settings.ShopStock)).ToList());
+        ShopStock.Restock();
         KeepReveals(recipes, kinds);
 
         foreach (var (kind, wanted, materials) in written)
@@ -155,6 +159,36 @@ internal sealed class TurbineTables
 
             _log($"{kind.Name} added: item {ids.Item}, furniture {ids.Furniture}, recipe {ids.Recipe}, power row {ids.Electrical}; rated {wanted.RatedPower}, materials {MaterialText(materials)}, price {wanted.ShopPrice}, stock {wanted.ShopStock}");
         }
+    }
+
+    /// <summary>
+    /// Writes a turbine's coloured packages, one for each dye whose solar panel rows are there to copy. A dye that
+    /// cannot be written is left out and the others still are: the plain turbine works without them.
+    /// </summary>
+    private void WriteDyed(TurbineKind kind, int[] materials, Dictionary<Table, ITableView> views, Il2CppDictionary.Dictionary<int, Config_ProductionList> recipes, Il2CppDictionary.Dictionary<string, string> english, Il2CppDictionary.Dictionary<string, string> chinese)
+    {
+        var skipped = new List<string>();
+
+        foreach (var dye in Dyes.All)
+        {
+            var plan = new TurbinePlan(Dyes.Rows(kind, dye, materials), Dyes.Texts(kind, dye));
+            var problems = TurbineRows.Problems(plan, (table, id) => views[table].SlotAt(id, _ours), list => RecipeUsing(recipes, list, recipe => _ours.Contains(recipe.Pointer)));
+
+            if (problems.Count > 0)
+            {
+                skipped.Add($"{dye.En} ({string.Join("; ", problems)})");
+
+                continue;
+            }
+
+            SetTexts(plan.Texts, english, chinese);
+
+            foreach (var row in plan.Rows)
+            foreach (var reason in views[row.Table].Write(row, _ours))
+                _log($"{dye.En} {kind.Name} field not set: {reason}");
+        }
+
+        if (skipped.Count > 0) _log($"the {kind.Name} cannot be crafted in these colours: {string.Join(", ", skipped)}");
     }
 
     /// <summary>

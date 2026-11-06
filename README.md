@@ -6,7 +6,7 @@ Adds three wind turbines to Survival Log. They make power day and night, more th
 - **Medium Wind Turbine**: an upright rotor of two half drums that catches the wind from any side. It fits a medium furniture spot.
 - **Large Wind Turbine**: three blades on a mast. Every so often a gust comes through, and the whole top swings round to meet it. It fits a large furniture spot.
 
-Each turbine has its own model and icon, and can be dyed like the game's own furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. The rotor speeds up and slows down smoothly with the wind and stands still in Heavy Smog. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The wind rises and falls over the hours, and the rotors follow it. The weather box on the screen shows the wind too, as a Wind Intensity line.
+Each turbine has its own model and icon, and can be dyed like the game's own furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. You can also craft one already coloured, by picking a dye on its recipe card at the workbench. The rotor speeds up and slows down smoothly with the wind and stands still in Heavy Smog. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The wind rises and falls over the hours, and the rotors follow it. The weather box on the screen shows the wind too, as a Wind Intensity line.
 
 ## Getting them
 
@@ -16,7 +16,7 @@ Each turbine has its own model and icon, and can be dyed like the game's own fur
 - Before the disaster, the Classic Furniture shop sells 2 of each: the Small Wind Turbine for 30, the Medium for 60 and the Large for 120.
 - Taking a turbine down gives back about half of what its package took. The `ReturnPercent` setting changes how much, and each turbine's `Returns` setting can name exactly what it gives back instead.
 - On the Mod Manager's Mods screen (0.14.0 or newer), each turbine's materials and what it gives back show as item cards you pick from every item in the game. The screen shows what the recipe is worth, warns when taking the turbine down would give back more than that, and says when the turbine cannot use a list, such as one with exactly the same materials as another recipe.
-- **Test buttons**: with Cheat Menu installed, its Mod tests tab shows the wind now and what each turbine makes, the wind for the next 12 hours, and what each turbine takes and gives back. It can also show all the recipes right away, and put one of each turbine package, or the materials for each, in your bag.
+- **Test buttons**: with Cheat Menu installed, its Mod tests tab shows the wind now and what each turbine makes, the wind for the next 12 hours, and what each turbine takes and gives back. It can also show all the recipes right away, and put one of each turbine package, the materials for each, or one of each dye in your bag.
 
 ## Power
 
@@ -53,7 +53,7 @@ The game saves each turbine as the solar panel of its size, and the mod turns it
 A turbine package in a bag or in storage would be lost without the mod, so do this first:
 
 1. Turn on `UninstallPrep` (on the Mods screen, or in the config file while the game is closed).
-2. Load your save. Every turbine package, wherever it is, becomes the solar panel package of its size, and the shops stop selling turbines. `BepInEx\LogOutput.log` says what was changed.
+2. Load your save. Every turbine package, wherever it is, becomes the solar panel package of its size and colour, and the shops stop selling turbines. `BepInEx\LogOutput.log` says what was changed.
 3. Save the game and quit.
 
 Then delete `WindPower.dll` from the `BepInEx\plugins` folder. For a clean slate, also delete `com.dev.survivallog.windpower.cfg` from `BepInEx\config`. Do this for each save you want to keep.

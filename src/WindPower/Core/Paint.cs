@@ -140,6 +140,36 @@ public static class Paint
         return (Out(red, level * ToLinear(dye.R), k), Out(green, level * ToLinear(dye.G), k), Out(blue, level * ToLinear(dye.B), k));
     }
 
+    /// <summary>
+    /// The icon as the dye shader would colour it: the paint made grey as on the dyed model, then the dye laid over it
+    /// through the paint mask. Everything else, and alpha, stays as it was.
+    /// </summary>
+    public static IEnumerable<Picture> DyedIcons(Picture icon, IEnumerable<DyeColour> dyes)
+    {
+        var grey = DyeBase(icon).Rgba;
+        var mask = Mask(icon).Rgba;
+
+        foreach (var dye in dyes) yield return Dyed(icon, grey, mask, dye);
+    }
+
+    private static Picture Dyed(Picture icon, byte[] grey, byte[] mask, DyeColour dye)
+    {
+        var result = (byte[])icon.Rgba.Clone();
+
+        for (var p = 0; p < icon.Width * icon.Height; p++)
+        {
+            if (mask[p * 4] == 0) continue;
+
+            var (r, g, b) = Shaded(grey[p * 4], grey[p * 4 + 1], grey[p * 4 + 2], mask[p * 4], dye);
+
+            result[p * 4] = r;
+            result[p * 4 + 1] = g;
+            result[p * 4 + 2] = b;
+        }
+
+        return icon with { Rgba = result };
+    }
+
     private static float Weight(byte[] rgba, int p) => PaintWeight(rgba[p * 4], rgba[p * 4 + 1], rgba[p * 4 + 2]);
 
     // Brightness in linear light, as the shader measures it.

@@ -11,13 +11,16 @@ namespace WindPower.Core;
 /// </summary>
 public static class Uninstall
 {
-    /// <summary>The solar panel package a turbine package becomes, or null for any other item.</summary>
+    /// <summary>
+    /// The solar panel package a turbine package becomes, a coloured one the solar panel's package of the same colour,
+    /// or null for any other item.
+    /// </summary>
     public static int? StockItem(int itemId, IReadOnlyList<TurbineKind> kinds)
     {
         for (var i = 0; i < kinds.Count; i++)
             if (kinds[i].Ids.Item == itemId) return kinds[i].Stock.Item;
 
-        return null;
+        return Dyes.OfPackage(itemId, kinds) is { } dyed ? Dyes.StockIds(dyed.Kind, dyed.Dye).Item : null;
     }
 
     /// <summary>The solar panel a turbine's furniture id becomes, or null for any other furniture.</summary>

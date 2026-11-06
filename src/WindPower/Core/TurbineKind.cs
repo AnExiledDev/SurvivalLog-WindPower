@@ -31,6 +31,12 @@ public sealed record TurbineKind
     /// <summary>The solar panel's rows each of ours is copied from.</summary>
     public RowIds Stock { get; init; } = new(0, 0, 0, 0, 0, 0);
 
+    /// <summary>The solar panel's first coloured package (slot 1); the other seven follow it in slot order.</summary>
+    public int StockDyedItem { get; init; }
+
+    /// <summary>The recipe of the solar panel's first coloured package; the other seven follow it in slot order.</summary>
+    public int StockDyedRecipe { get; init; }
+
     /// <summary>The prefab name the furniture row gives. The game has no such prefab: the mod builds it.</summary>
     public string ResName { get; init; } = "";
 

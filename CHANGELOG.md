@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.0
+
+- The turbines can be crafted in any of the game's 8 colours, like the solar panels: pick a dye on the turbine's recipe card at the workbench. The coloured package has its own icon and unpacks into a dyed turbine.
+- A dye can no longer be one of a turbine's Materials, since picking a colour adds one.
+- Raising a turbine's shop stock now reaches a shop that was saved before the change, counting the turbines you already bought there. Before, only a shop open at the time took a raise.
+- With Cheat Menu installed, its Mod tests tab has a Give 1 of each dye button.
+- Made for Survival Log 1.1.20719.
+
 ## 0.8.2
 
 - With Cheat Menu installed, its Mod tests tab has four more Wind Power buttons: Give 1 of each turbine, Give materials for each turbine, Show recipes and returns, and Show the wind for 12 hours.

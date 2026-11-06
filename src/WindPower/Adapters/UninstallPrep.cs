@@ -185,6 +185,10 @@ internal static class UninstallPrep
     {
         if (stock == null) return;
 
-        foreach (var kind in TurbineRows.All) stock.Remove(kind.Ids.Furniture);
+        foreach (var kind in TurbineRows.All)
+        {
+            stock.Remove(kind.Ids.Furniture);
+            stock.Remove(ShopMarks.Key(kind.Ids.Furniture));
+        }
     }
 }

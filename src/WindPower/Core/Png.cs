@@ -8,8 +8,9 @@ namespace WindPower.Core;
 public sealed record Picture(int Width, int Height, byte[] Rgba);
 
 /// <summary>
-/// Decodes the pngs three.js writes: 8 bits per channel, RGB or RGBA, not interlaced. Done here rather than with
-/// Unity's ImageConversion.LoadImage, which the game never calls itself, so it may not survive in the build.
+/// Decodes the pngs three.js writes: 8 bits per channel, RGB or RGBA, not interlaced, and writes the coloured icons.
+/// Done here rather than with Unity's ImageConversion, which the game never calls itself, so it may not survive in
+/// the build.
 /// </summary>
 public static class Png
 {
@@ -89,6 +90,72 @@ public static class Png
         }
 
         return new Picture(width, height, rgba);
+    }
+
+    /// <summary>Writes the picture as an 8-bit RGBA png, every row unfiltered.</summary>
+    public static byte[] Encode(Picture picture)
+    {
+        var stride = picture.Width * 4;
+        var raw = new byte[(stride + 1) * picture.Height];
+
+        for (var y = 0; y < picture.Height; y++) Buffer.BlockCopy(picture.Rgba, y * stride, raw, y * (stride + 1) + 1, stride);
+
+        using var compressed = new MemoryStream();
+
+        using (var deflate = new ZLibStream(compressed, CompressionLevel.Optimal, leaveOpen: true)) deflate.Write(raw, 0, raw.Length);
+
+        var header = new byte[13];
+
+        WriteBigEndian(header, 0, picture.Width);
+        WriteBigEndian(header, 4, picture.Height);
+        header[8] = 8;
+        header[9] = 6;
+
+        using var file = new MemoryStream();
+
+        file.Write(Signature, 0, Signature.Length);
+        Chunk(file, "IHDR", header);
+        Chunk(file, "IDAT", compressed.ToArray());
+        Chunk(file, "IEND", Array.Empty<byte>());
+
+        return file.ToArray();
+    }
+
+    private static void Chunk(Stream file, string type, byte[] data)
+    {
+        var body = new byte[4 + data.Length];
+        var length = new byte[4];
+        var crc = new byte[4];
+
+        System.Text.Encoding.ASCII.GetBytes(type, 0, 4, body, 0);
+        Buffer.BlockCopy(data, 0, body, 4, data.Length);
+        WriteBigEndian(length, 0, data.Length);
+        WriteBigEndian(crc, 0, (int)Crc32(body));
+        file.Write(length, 0, 4);
+        file.Write(body, 0, body.Length);
+        file.Write(crc, 0, 4);
+    }
+
+    private static uint Crc32(byte[] bytes)
+    {
+        var crc = 0xFFFFFFFFu;
+
+        foreach (var b in bytes)
+        {
+            crc ^= b;
+
+            for (var k = 0; k < 8; k++) crc = (crc & 1) != 0 ? 0xEDB88320u ^ (crc >> 1) : crc >> 1;
+        }
+
+        return ~crc;
+    }
+
+    private static void WriteBigEndian(byte[] bytes, int at, int value)
+    {
+        bytes[at] = (byte)(value >> 24);
+        bytes[at + 1] = (byte)(value >> 16);
+        bytes[at + 2] = (byte)(value >> 8);
+        bytes[at + 3] = (byte)value;
     }
 
     private static byte[] Unfilter(byte[] raw, int stride, int height, int bpp)
