@@ -16,7 +16,7 @@ namespace WindPower;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.9.2";
+    private const string Version = "0.9.3";
 
     public override void Load()
     {
@@ -50,6 +50,7 @@ public sealed class Plugin : BasePlugin
         var iconPlaced = false;
 
         WindPatches.Apply(harmony, message => Log.LogWarning(message));
+        WindBoosts.OnFailed = source => Log.LogWarning($"{source}'s wind multiplier failed, so it no longer counts");
         SavePatches.Apply(harmony, message => Log.LogWarning(message));
         ShopStock.Apply(harmony, message => Log.LogWarning(message));
         TurbineModel.Apply(harmony, message => Log.LogInfo(message));

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.3
+
+- Power Manager and New Loop Plus can now make the turbines stronger: Power Manager with its Wind setting, New Loop Plus with its wind loop rewards. With neither installed, nothing changes.
+- Made for Survival Log 1.1.20719.
+
 ## 0.9.2
 
 - The wind now reads as a word and a percent of full wind, such as Light (20%/100%), so it is clear that 100% is full wind and not a cap: a gust in Severe Cold can show Gale (130%/100%). The words are Calm, Light, Moderate, Strong and Gale. The weather box line is now called Wind, and a turbine's hover shows the same reading.

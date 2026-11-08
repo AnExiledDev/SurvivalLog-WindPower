@@ -46,6 +46,8 @@ A turbine's power setting is what it makes in full wind, the average wind in Sev
 
 These are averages. Within a weather the wind rises and falls over the hours, by up to 30% either way at the default, so a rainy afternoon might give a small turbine 2 one hour and 4 the next. Every turbine feels the same wind, and over several days it evens out to the numbers above. The `Variation` setting widens or narrows the swing, and 0 keeps the wind steady.
 
+With [Power Manager](https://www.nexusmods.com/survivallog/mods/126) 0.4.0 or newer, its `WindMultiplier` setting makes every turbine stronger or weaker, like its solar setting does for the panels. With New Loop Plus 0.11.0 or newer, the Wind Engineer and Wind Tuning loop rewards do the same. A turbine's hover then shows its power setting with them, and the wind reading stays as it is.
+
 ## Settings
 
 Settings live in `BepInEx\config\com.dev.survivallog.windpower.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. See [CONFIG.md](CONFIG.md) for every setting. Every setting takes effect at once, without restarting the game.

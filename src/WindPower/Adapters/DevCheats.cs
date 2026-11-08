@@ -36,7 +36,7 @@ public static class DevCheats
         {
             bool? shown = tool != null && recipes != null && recipes.ContainsKey(kind.Ids.Recipe) ? tool.IsProductionRevealedByRecord(recipes[kind.Ids.Recipe]) : null;
 
-            lines.Add(TurbineReport.Turbine(kind, WindSettings.Of(kind), share, shown));
+            lines.Add(TurbineReport.Turbine(kind, WindSettings.Of(kind) with { RatedPower = WindPatches.Rated(kind) }, share, shown));
         }
 
         return string.Join("\n", lines);

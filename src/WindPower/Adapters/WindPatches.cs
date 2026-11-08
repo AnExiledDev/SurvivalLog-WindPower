@@ -36,6 +36,7 @@ internal static class WindPatches
     private static string _weatherName = "";
     private static float _windReadAt = float.MinValue;
     private static int _gameSeconds;
+    private static float _boost = 1f;
 
     public static void Apply(Harmony harmony, Action<string> log)
     {
@@ -69,6 +70,7 @@ internal static class WindPatches
         _weatherId = -1;
         _weatherName = "";
         OnTerrace.Clear();
+        _boost = WindBoosts.Factor();
 
         var weather = GameSingleton.Existing<BattleLogicWorld>()?._WeatherManager;
 
@@ -98,7 +100,18 @@ internal static class WindPatches
     /// <summary>The wind as a whole percent of the rating, for the weather tooltip; -1 when there is no weather.</summary>
     public static int WindPercent() => WeatherId() < 0 ? -1 : WindOutput.Percent(Wind());
 
-    private static float Power(Furniture furniture, TurbineKind kind) => WindOutput.Power(WindSettings.Of(kind).RatedPower, Wind(), IsOnTerrace(furniture));
+    /// <summary>
+    /// The turbine's rating with every other mod's multiplier on it (see <see cref="WindBoosts"/>), read with the
+    /// weather once a second.
+    /// </summary>
+    internal static float Rated(TurbineKind kind)
+    {
+        WeatherId();
+
+        return WindSettings.Of(kind).RatedPower * _boost;
+    }
+
+    private static float Power(Furniture furniture, TurbineKind kind) => WindOutput.Power(Rated(kind), Wind(), IsOnTerrace(furniture));
 
     /// <summary>The turbine whose furniture row has this id, or null.</summary>
     private static TurbineKind? KindOf(int furnitureId)
@@ -171,7 +184,7 @@ internal static class WindPatches
         {
             if (kind == null || __result == null || __0 == null) return;
 
-            var rated = WindSettings.Of(kind).RatedPower;
+            var rated = Rated(kind);
             var share = Wind();
             var isOnTerrace = IsOnTerrace(__0);
             var note = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0} wind {1}"), Local(TurbineRows.TerraceNoteKey, "2F terrace +20%"), _weatherName, rated, share, StrengthWord(WindOutput.Percent(share)), isOnTerrace);
