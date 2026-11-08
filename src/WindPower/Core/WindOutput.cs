@@ -44,13 +44,41 @@ public static class WindOutput
     public static int Percent(float share) => (int)Math.Round(Math.Max(0f, share) * 100f);
 
     /// <summary>
+    /// The word for how hard the wind blows, by its percent of the rating. Smog is still air; clear and cloudy days
+    /// stay light; rain is moderate; the cold snaps and Heavy Rain are strong, and Severe Cold is a gale.
+    /// </summary>
+    public static readonly IReadOnlyList<(int From, Text Word)> Strengths = new[]
+    {
+        (0, new Text("WindPower_WindCalm", "Calm", "无风")),
+        (1, new Text("WindPower_WindLight", "Light", "微风")),
+        (30, new Text("WindPower_WindModerate", "Moderate", "和风")),
+        (50, new Text("WindPower_WindStrong", "Strong", "强风")),
+        (90, new Text("WindPower_WindGale", "Gale", "大风")),
+    };
+
+    /// <summary>The strongest word whose start the percent has reached.</summary>
+    public static Text Strength(int percent)
+    {
+        var word = Strengths[0].Word;
+
+        foreach (var (from, text) in Strengths)
+            if (percent >= from) word = text;
+
+        return word;
+    }
+
+    /// <summary>The wind as players read it: the word, then its percent of the rating out of the 100% of full wind.</summary>
+    public static string Reading(string word, int percent) =>
+        word + " (" + Math.Max(0, percent).ToString(CultureInfo.InvariantCulture) + "%/100%)";
+
+    /// <summary>
     /// The line under the turbine's output in the power hover, built like the solar panel's: the game's own
-    /// "Rated {0}" text, the weather and how hard the wind blows as a share of the rating, then the terrace's bonus
+    /// "Rated {0}" text, the weather and how hard the wind blows (its word and its share of the rating), then the terrace's bonus
     /// when the turbine stands there.
     /// </summary>
-    public static string Note(string ratedFormat, string windFormat, string terraceText, string weatherName, float rated, float share, bool isOnTerrace)
+    public static string Note(string ratedFormat, string windFormat, string terraceText, string weatherName, float rated, float share, string strength, bool isOnTerrace)
     {
-        var note = string.Format(CultureInfo.InvariantCulture, ratedFormat, Shown(rated)) + ", " + string.Format(CultureInfo.InvariantCulture, windFormat, weatherName, Percent(share) + "%");
+        var note = string.Format(CultureInfo.InvariantCulture, ratedFormat, Shown(rated)) + ", " + string.Format(CultureInfo.InvariantCulture, windFormat, weatherName, Reading(strength, Percent(share)));
 
         return isOnTerrace ? note + ", " + terraceText : note;
     }

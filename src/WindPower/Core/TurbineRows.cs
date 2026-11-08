@@ -52,7 +52,7 @@ public static class TurbineRows
 
     public const string WebIconFolder = "Res/Mods/WindPower";
 
-    /// <summary>The wind part of the power hover's note: {0} the weather, {1} the output as a share of the rating.</summary>
+    /// <summary>The wind part of the power hover's note: {0} the weather, {1} the wind's word and its share of the rating.</summary>
     public const string WindNoteKey = "WindPower_WindNote";
 
     /// <summary>Added to the power hover's note for a turbine on the 2F terrace.</summary>
@@ -61,12 +61,12 @@ public static class TurbineRows
     /// <summary>The wind row's label in the HUD's weather tooltip, next to the game's own Light Intensity.</summary>
     public const string WindLabelKey = "WindPower_WindLabel";
 
-    public static readonly IReadOnlyList<Text> SharedTexts = new[]
+    public static readonly IReadOnlyList<Text> SharedTexts = WindOutput.Strengths.Select(strength => strength.Word).Concat(new[]
     {
         new Text(WindNoteKey, "{0} wind {1}", "{0}风力 {1}"),
         new Text(TerraceNoteKey, "2F terrace +20%", "二楼露台 +20%"),
-        new Text(WindLabelKey, "Wind Intensity", "风力强度"),
-    };
+        new Text(WindLabelKey, "Wind", "风力"),
+    }).ToList();
 
     /// <summary>
     /// A Savonius rotor: two half drums on an upright shaft. It is revealed with the Medium Solar Panel, from the

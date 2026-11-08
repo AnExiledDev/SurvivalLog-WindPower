@@ -174,7 +174,7 @@ internal static class WindPatches
             var rated = WindSettings.Of(kind).RatedPower;
             var share = Wind();
             var isOnTerrace = IsOnTerrace(__0);
-            var note = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0} wind {1}"), Local(TurbineRows.TerraceNoteKey, "2F terrace +20%"), _weatherName, rated, share, isOnTerrace);
+            var note = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0} wind {1}"), Local(TurbineRows.TerraceNoteKey, "2F terrace +20%"), _weatherName, rated, share, StrengthWord(WindOutput.Percent(share)), isOnTerrace);
 
             __result.PowerCur = WindOutput.Shown(WindOutput.Power(rated, share, isOnTerrace));
             __result.NoteText = note;
@@ -262,6 +262,14 @@ internal static class WindPatches
     }
 
     /// <summary>The game's text for <paramref name="key"/> in the player's language, or <paramref name="fallback"/> when it has none.</summary>
+    /// <summary>The game-language word for a wind of this percent.</summary>
+    internal static string StrengthWord(int percent)
+    {
+        var word = WindOutput.Strength(percent);
+
+        return Local(word.Key, word.En);
+    }
+
     internal static string Local(string key, string fallback)
     {
         var text = string.IsNullOrEmpty(key) ? null : ConstantTextTools.GetLocalText(key);

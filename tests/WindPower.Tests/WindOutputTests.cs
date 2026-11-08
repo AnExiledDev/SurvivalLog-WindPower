@@ -61,19 +61,65 @@ public class WindOutputTests
     [Fact]
     public void TheNoteShowsThatTurbinesOwnRating()
     {
-        Assert.StartsWith("Rated 18,", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", 18f, WindOutput.Share(3), isOnTerrace: false));
+        Assert.StartsWith("Rated 18,", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", 18f, WindOutput.Share(3), "Moderate", isOnTerrace: false));
     }
 
     [Fact]
     public void TheNoteShowsTheRatingTheWeatherAndTheWindsShare()
     {
-        Assert.Equal("Rated 48, Rainy wind 35%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), isOnTerrace: false));
+        Assert.Equal("Rated 48, Rainy wind Moderate (35%/100%)", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), "Moderate", isOnTerrace: false));
     }
 
     [Fact]
     public void ATerraceTurbinesNoteAddsTheTerracesBonus()
     {
-        Assert.Equal("Rated 48, Rainy wind 35%, 2F terrace +20%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), isOnTerrace: true));
+        Assert.Equal("Rated 48, Rainy wind Moderate (35%/100%), 2F terrace +20%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), "Moderate", isOnTerrace: true));
+    }
+
+    // A player read a bare "30" as a wind speed and asked whether 30 was the most. The word says how strong the wind
+    // is, and the "/100%" says 100% is full wind, so a gust past it reads as one.
+    [Theory]
+    [InlineData(12, "Calm")]       // Heavy Smog makes nothing
+    [InlineData(1, "Light")]       // Clear
+    [InlineData(2, "Light")]       // Cloudy
+    [InlineData(3, "Moderate")]    // Rainy
+    [InlineData(11, "Moderate")]   // Continuous Rain
+    [InlineData(4, "Strong")]      // Mild Cold
+    [InlineData(10, "Strong")]     // Heavy Rain
+    [InlineData(5, "Strong")]      // Moderate Cold
+    [InlineData(6, "Gale")]        // Severe Cold: the full rating
+    public void EachWeathersAverageWindHasItsWord(int weatherId, string word)
+    {
+        Assert.Equal(word, WindOutput.Strength(WindOutput.Percent(WindOutput.Share(weatherId))).En);
+    }
+
+    [Theory]
+    [InlineData(0, "Calm")]
+    [InlineData(1, "Light")]
+    [InlineData(29, "Light")]
+    [InlineData(30, "Moderate")]
+    [InlineData(49, "Moderate")]
+    [InlineData(50, "Strong")]
+    [InlineData(89, "Strong")]
+    [InlineData(90, "Gale")]
+    [InlineData(130, "Gale")]
+    public void TheWordChangesAtEachBandsStart(int percent, string word)
+    {
+        Assert.Equal(word, WindOutput.Strength(percent).En);
+    }
+
+    [Fact]
+    public void TheReadingGivesTheWordAndThePercentOutOfFullWind()
+    {
+        Assert.Equal("Light (30%/100%)", WindOutput.Reading("Light", 30));
+        Assert.Equal("Gale (130%/100%)", WindOutput.Reading("Gale", 130));
+    }
+
+    [Fact]
+    public void EveryStrengthWordHasChinese()
+    {
+        Assert.All(WindOutput.Strengths, strength => Assert.False(string.IsNullOrWhiteSpace(strength.Word.Zh)));
+        Assert.All(WindOutput.Strengths, strength => Assert.Contains(strength.Word, TurbineRows.SharedTexts));
     }
 
     private const string Panel =

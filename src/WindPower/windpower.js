@@ -1,4 +1,4 @@
-// Wind Power: a Wind Intensity row in the HUD's weather tooltip (the CoreUI1 page), drawn with the game's own row
+// Wind Power: a Wind row in the HUD's weather tooltip (the CoreUI1 page), drawn with the game's own row
 // classes so it sits with Light Intensity and Cold Intensity, above the Tomorrow line. The plugin hands it the
 // weather's wind every couple of seconds through apply. Reads and draws only; nothing the game keeps is changed.
 (function () {
@@ -68,7 +68,7 @@
         if (!row) row = makeRow();
 
         setText(row.children[0], String(reading.label));
-        setText(row.children[1], reading.pct + '%');
+        setText(row.children[1], String(reading.value));
 
         var next = tip.querySelector('.weather-tt-next');
         var before = next && next.parentElement === tip ? next : null;

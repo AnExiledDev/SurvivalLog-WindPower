@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.2
+
+- The wind now reads as a word and a percent of full wind, such as Light (20%/100%), so it is clear that 100% is full wind and not a cap: a gust in Severe Cold can show Gale (130%/100%). The words are Calm, Light, Moderate, Strong and Gale. The weather box line is now called Wind, and a turbine's hover shows the same reading.
+- Made for Survival Log 1.1.20719.
+
 ## 0.9.1
 
 - With UninstallPrep on, a shop that loads no longer gets the mod's stock records put back in it, so a save made right after holds none of them. Shops that never sell a turbine get none either.

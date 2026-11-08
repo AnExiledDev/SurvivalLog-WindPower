@@ -26,9 +26,12 @@ public static class PageCalls
     public static string Install(string script, string reading) =>
         Wrap($"w.eval({Quote(script)});if(!{Api})return '{PageAnswer.InstallLeftNothing}';{Apply(reading)}");
 
-    /// <summary>The reading as the page script takes it: the wind as a whole percent, or -1 with no weather, and the row's label.</summary>
-    public static string Reading(int percent, string label) =>
-        $"{{pct:{percent.ToString(CultureInfo.InvariantCulture)},label:{Quote(label)}}}";
+    /// <summary>
+    /// The reading as the page script takes it: the wind as a whole percent, or -1 with no weather, the row's label,
+    /// and the row's value, the strength word with the percent out of 100%.
+    /// </summary>
+    public static string Reading(int percent, string label, string word) =>
+        $"{{pct:{percent.ToString(CultureInfo.InvariantCulture)},label:{Quote(label)},value:{Quote(WindOutput.Reading(word, percent))}}}";
 
     /// <summary>A JavaScript string literal that no quote, backslash or line break in the text can end early.</summary>
     public static string Quote(string text)

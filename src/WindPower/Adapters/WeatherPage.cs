@@ -34,7 +34,8 @@ internal sealed class WeatherPage
 
         if (turn.Send == PageSend.Nothing) return;
 
-        var reading = PageCalls.Reading(WindPatches.WindPercent(), WindPatches.Local(TurbineRows.WindLabelKey, "Wind Intensity"));
+        var percent = WindPatches.WindPercent();
+        var reading = PageCalls.Reading(percent, WindPatches.Local(TurbineRows.WindLabelKey, "Wind"), WindPatches.StrengthWord(percent));
         var javaScript = turn.Send == PageSend.Install ? PageCalls.Install(Script(), reading) : PageCalls.Check(reading);
 
         if (Run(javaScript, now) is { } line) _log(line);

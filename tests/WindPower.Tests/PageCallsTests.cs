@@ -29,15 +29,15 @@ public class PageCallsTests
     {
         const string script = "(function(){window.__slwind={apply:function(){return \"ok\";}};})();\n// last line";
 
-        Assert.Contains(PageCalls.Quote(script), PageCalls.Install(script, PageCalls.Reading(35, "Wind")));
+        Assert.Contains(PageCalls.Quote(script), PageCalls.Install(script, PageCalls.Reading(35, "Wind", "Moderate")));
     }
 
     [Fact]
     public void EveryCallHandsThePageTheReading()
     {
-        var reading = PageCalls.Reading(35, "Wind \"Intensity\"");
+        var reading = PageCalls.Reading(35, "Wind \"Now\"", "Moderate");
 
-        Assert.Equal("{pct:35,label:\"Wind \\\"Intensity\\\"\"}", reading);
+        Assert.Equal("{pct:35,label:\"Wind \\\"Now\\\"\",value:\"Moderate (35%/100%)\"}", reading);
         Assert.Contains(reading, PageCalls.Check(reading));
         Assert.Contains(reading, PageCalls.Install("", reading));
     }
