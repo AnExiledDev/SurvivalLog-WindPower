@@ -39,6 +39,9 @@ public static class WeatherWinds
 
     public static readonly int ClearIndex = IndexOf("Clear");
 
+    /// <summary>Heavy Smog, the one weather another mod's smog setting gives wind to.</summary>
+    public static readonly int SmogIndex = IndexOf("HeavySmog");
+
     /// <summary>Where the weather's setting sits in <see cref="All"/>; a weather the list does not know counts as cloudy.</summary>
     public static int IndexOfWeather(int weatherId)
     {

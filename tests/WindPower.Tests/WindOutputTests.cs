@@ -118,14 +118,14 @@ public class WindOutputTests
         Assert.Equal(0.20f, WindOutput.Share(12, With("Clear", 40), 0.5f), 4);
     }
 
-    // Setting any weather to 0 makes it still air, which a calm share then fills like Heavy Smog's.
+    // Power Manager's setting is for Heavy Smog only: another weather the player sets to 0 stays still.
     [Fact]
-    public void AnyWeatherSetToZeroTakesCalmWind()
+    public void AnotherWeatherSetToZeroStaysStillWithSmogWind()
     {
         var percents = With("Cloudy", 0);
 
-        Assert.Equal(0f, WindOutput.Share(2, percents));
-        Assert.Equal(WindOutput.Share(1) * 0.5f, WindOutput.Share(2, percents, 0.5f), 4);
+        Assert.Equal(0f, WindOutput.Share(2, percents, 1f));
+        Assert.Equal(WindOutput.Share(1, percents), WindOutput.Share(12, percents, 1f), 4);
     }
 
     // The defaults are the table the earlier versions shipped, so no player's wind changes on update.

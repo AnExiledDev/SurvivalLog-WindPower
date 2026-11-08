@@ -3,7 +3,7 @@
 ## 0.9.4
 
 - New Weather settings: how hard the wind blows in each weather, as a percent of full wind. The defaults keep the wind as it was.
-- Power Manager 0.5.0 or newer can now give Heavy Smog some wind with its CalmOutput setting, so the turbines turn and make power there. Without it, Heavy Smog stays still as before.
+- Power Manager 0.5.0 or newer can now give Heavy Smog some wind with its SmogOutput setting, so the turbines turn and make power there. Without it, Heavy Smog stays still as before.
 - Made for Survival Log 1.1.20719.
 
 ## 0.9.3

@@ -30,19 +30,19 @@ public static class WindOutput
         return index < percents.Count ? Math.Clamp(percents[index], 0, WeatherWinds.MostPercent) / 100f : 0f;
     }
 
-    /// <summary>The weather's share at the default settings, with still air given <paramref name="calm"/> of a clear day's wind.</summary>
+    /// <summary>The weather's share at the default settings, with Heavy Smog given <paramref name="calm"/> of a clear day's wind.</summary>
     public static float Share(int weatherId, float calm) => Share(weatherId, WeatherWinds.Defaults, calm);
 
     /// <summary>
-    /// The weather's share with these settings, and a weather set to still air given <paramref name="calm"/> (0 to 1)
-    /// of a clear day's wind (another mod's calm setting, see <see cref="WindBoosts.AddCalm"/>). Every other weather
-    /// keeps its own.
+    /// The weather's share with these settings, and Heavy Smog, while its own setting is 0, given <paramref name="calm"/>
+    /// (0 to 1) of a clear day's wind (another mod's smog setting, see <see cref="WindBoosts.AddCalm"/>). Every other
+    /// weather keeps its own, 0 included.
     /// </summary>
     public static float Share(int weatherId, IReadOnlyList<int> percents, float calm)
     {
         var share = Share(weatherId, percents);
 
-        if (share > 0f) return share;
+        if (share > 0f || WeatherWinds.IndexOfWeather(weatherId) != WeatherWinds.SmogIndex) return share;
 
         var clear = WeatherWinds.ClearIndex < percents.Count ? Math.Clamp(percents[WeatherWinds.ClearIndex], 0, WeatherWinds.MostPercent) / 100f : 0f;
 

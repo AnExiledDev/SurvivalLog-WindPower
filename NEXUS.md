@@ -53,7 +53,7 @@ What each word means, and the weather you'll usually see it in:
 [/list]
 Hover over a turbine to see what it's making right now, with its power setting and the same wind reading below it, such as [i]Rated 36, Rainy wind Moderate (35%/100%)[/i].
 
-With [url=https://www.nexusmods.com/survivallog/mods/126]Power Manager[/url] 0.4.0 or newer, its Wind setting makes every turbine stronger or weaker, like its solar setting does for the panels. The hover's rating then shows the turbine's power with it, and the wind reading stays as it is. With Power Manager 0.5.0 or newer, its CalmOutput setting can also give Heavy Smog some wind, as a share of a Clear day's, so the turbines turn and make power there too.
+With [url=https://www.nexusmods.com/survivallog/mods/126]Power Manager[/url] 0.4.0 or newer, its Wind setting makes every turbine stronger or weaker, like its solar setting does for the panels. The hover's rating then shows the turbine's power with it, and the wind reading stays as it is. With Power Manager 0.5.0 or newer, its SmogOutput setting can also give Heavy Smog some wind, as a share of a Clear day's, so the turbines turn and make power there too.
 
 [size=5]Known issues[/size]
 UninstallPrep only changes the save you load while it's on, so load and save each save you want to keep before you remove the mod.
@@ -143,7 +143,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [/list]
 鼠标悬停在风力发电机上，能看到它现在的发电量，下面写着它的发电量设置和同样的风力，例如「额定 36, 雨天风力 和风 (35%/100%)」。
 
-装了 [url=https://www.nexusmods.com/survivallog/mods/126]Power Manager[/url] 0.4.0 或更新版本时，它的 Wind 设置能让所有风力发电机变强或变弱，就像它的太阳能设置对太阳能发电板一样。这时悬停显示的额定值会算上这个设置，风力显示不变。装了 Power Manager 0.5.0 或更新版本时，它的 CalmOutput 设置还能让「大雾霾天」也有风（为晴天风力的一部分），风力发电机在那时也会转动发电。
+装了 [url=https://www.nexusmods.com/survivallog/mods/126]Power Manager[/url] 0.4.0 或更新版本时，它的 Wind 设置能让所有风力发电机变强或变弱，就像它的太阳能设置对太阳能发电板一样。这时悬停显示的额定值会算上这个设置，风力显示不变。装了 Power Manager 0.5.0 或更新版本时，它的 SmogOutput 设置还能让「大雾霾天」也有风（为晴天风力的一部分），风力发电机在那时也会转动发电。
 
 [size=5]已知问题[/size]
 「UninstallPrep」只处理开启时读取的那个存档，所以每个想保留的存档，在移除模组前都要各自读取一次并保存。
