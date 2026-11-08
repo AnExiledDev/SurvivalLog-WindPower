@@ -6,7 +6,7 @@ Adds three wind turbines to Survival Log. They keep making power after dark, and
 - **Medium Wind Turbine**: an upright rotor of two half drums that catches the wind from any side. It fits a medium furniture spot.
 - **Large Wind Turbine**: three blades on a mast. Every so often a gust comes through, and the whole top swings round to meet it. It fits a large furniture spot.
 
-Each turbine has its own model and icon, and can be dyed like the game's own furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. You can also craft one already coloured, by picking a dye on its recipe card at the workbench. The rotor speeds up and slows down smoothly with the wind and stands still in Heavy Smog. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The wind rises and falls over the hours, and the rotors follow it. The weather box on the screen shows the wind too, as a Wind line. The wind reads as a word and its percent of full wind, such as Moderate (35%/100%): Calm in Heavy Smog, Light on clear and cloudy days, Moderate in rain, Strong in the cold snaps and Heavy Rain, and Gale in Severe Cold. A gust can take it past 100%, up to Gale (130%/100%) at the default Variation.
+Each turbine has its own model and icon, and can be dyed like the game's own furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. You can also craft one already coloured, by picking a dye on its recipe card at the workbench. The rotor speeds up and slows down smoothly with the wind and stands still in Heavy Smog. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The wind rises and falls over the hours, and the rotors follow it. The weather box on the screen shows the wind too, as a Wind line. The wind reads as a word and its percent of full wind, such as Moderate (35%/100%): Calm in Heavy Smog, Light on clear and cloudy days, Moderate in rain, Strong in the cold snaps and Heavy Rain, and Gale in Severe Cold. A gust can take it past 100%, up to Gale (130%/100%) at the default settings.
 
 ## Getting them
 
@@ -36,7 +36,7 @@ A turbine makes less than the solar panel of its size, since it keeps going at n
 
 A Medium or Large turbine on the 2F terrace stands higher in the wind and makes 20% more: up to 22 for the medium and 43 for the large. The terrace has no small spots.
 
-A turbine's power setting is what it makes in full wind, the average wind in Severe Cold. The Wind line in the weather box shows how hard the wind blows compared to that, such as Moderate (35%/100%), and a turbine makes its power setting times that percent: a Large set to 36 makes about 13 at 35%. 100% isn't the top, since a gust can push it past 100%. What each word means, and the weather you'll usually see it in:
+A turbine's power setting is what it makes in full wind, the average wind in Severe Cold at the default settings. The Wind line in the weather box shows how hard the wind blows compared to that, such as Moderate (35%/100%), and a turbine makes its power setting times that percent: a Large set to 36 makes about 13 at 35%. 100% isn't the top, since a gust can push it past 100%. What each word means, and the weather you'll usually see it in:
 
 - **Calm** (0%): Heavy Smog. The turbines stand still.
 - **Light** (1-29%): clear and cloudy days.

@@ -84,9 +84,14 @@ public sealed class Plugin : BasePlugin
         {
             var index = i;
             var weather = WeatherWinds.All[i];
+            var (note, chineseNote) = i == WeatherWinds.SmogIndex
+                ? (" While this is 0, Power Manager's SmogOutput setting can give Heavy Smog some wind.", "此项为 0 时，Power Manager 的「SmogOutput」设置可以让「大雾霾天」有些风。")
+                : i == WeatherWinds.UnknownIndex
+                    ? (" Any weather a game update adds uses this too.", "游戏更新新增的天气也使用此项。")
+                    : ("", "");
             var entry = Config.Bind("Weather", weather.Key, weather.DefaultPercent, new ConfigDescription(
-                $"How hard the wind blows in {weather.Name}, as a percent of full wind: a turbine makes its RatedPower times this. 100 is full wind; Variation moves it up and down over the hours. 0 is still air, where the turbines stand still.\n" +
-                $"{weather.Chinese}的风力，按满风力的百分比计：风力发电机的发电量为 RatedPower 乘以这个数。100 为满风力；「Variation」会让它随时间上下浮动。0 为无风，风力发电机不转。",
+                $"How hard the wind blows in {weather.Name}, as a percent of full wind: a turbine makes its RatedPower times this. 100 is full wind; Variation moves it up and down over the hours. 0 is still air, where the turbines stand still.{note}\n" +
+                $"{weather.Chinese}的风力，按满风力的百分比计：风力发电机的发电量为「RatedPower」乘以这个数。100 为满风力；「Variation」会让它随时间上下浮动。0 为无风，风力发电机不转。{chineseNote}",
                 new AcceptableValueRange<int>(0, WeatherWinds.MostPercent)));
 
             LiveSettings.Watch(entry, percent => WindSettings.SetWeather(index, percent));
@@ -103,8 +108,8 @@ public sealed class Plugin : BasePlugin
         var listTags = new[] { "ModManager.Control=ItemCounts", $"ModManager.MaxKinds={MaterialList.MostKinds}", $"ModManager.MaxCount={MaterialList.MostOfOne}" };
 
         var rated = Config.Bind(section, "RatedPower", defaults.RatedPower, new ConfigDescription(
-            $"Power the {name} makes on average in the strongest wind. Calmer weather gives a share of it, the wind rises and falls around that (see Variation), and a turbine on the 2F terrace makes 20% more.\n" +
-            $"{chinese}在风最大的天气里的平均发电量。风小的天气只发出其中一部分，风力会在此上下起伏（见 Variation），装在二楼露台的多发 20%。",
+            $"Power the {name} makes on average in full wind (100%, the wind in Severe Cold at the default Weather settings). Calmer weather gives a share of it, the wind rises and falls around that (see Variation), and a turbine on the 2F terrace makes 20% more.\n" +
+            $"{chinese}在满风力（100%，默认 Weather 设置下为「重度寒潮」的风力）时的平均发电量。风小的天气只发出其中一部分，风力会在此上下起伏（见 Variation），装在二楼露台的多发 20%。",
             new AcceptableValueRange<float>(1f, 200f)));
         var materials = Config.Bind(section, TurbineChoices.MaterialsKey, defaults.Materials, new ConfigDescription(
             $"What crafting a {name} Package takes, written as item id:count pairs split by commas. 20004 is Scrap Metal, 20104 Wire, 20210 Electronic Components and 20373 Stainless Steel Plate. Up to {MaterialList.MostKinds} different items, up to {MaterialList.MostOfOne} of each. A list the game cannot use (an unknown item, a dye, or the same materials as another recipe) falls back to the default, and LogOutput.log says why.\n" +

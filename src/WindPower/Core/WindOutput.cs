@@ -46,7 +46,7 @@ public static class WindOutput
 
         var clear = WeatherWinds.ClearIndex < percents.Count ? Math.Clamp(percents[WeatherWinds.ClearIndex], 0, WeatherWinds.MostPercent) / 100f : 0f;
 
-        return Math.Clamp(calm, 0f, 1f) * clear;
+        return float.IsNaN(calm) ? 0f : Math.Clamp(calm, 0f, 1f) * clear;
     }
 
     public static float Power(float rated, float share, bool isOnTerrace) => Math.Max(0f, rated) * Math.Max(0f, share) * (isOnTerrace ? TerraceBonus : 1f);

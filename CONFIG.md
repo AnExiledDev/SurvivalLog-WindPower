@@ -8,7 +8,7 @@ Each turbine has its own section, `[SmallTurbine]`, `[MediumTurbine]` and `[Larg
 
 | Setting | Small default | Medium default | Large default | What it does |
 | --- | --- | --- | --- | --- |
-| `RatedPower` | `9` | `18` | `36` | The power the turbine makes on average in Severe Cold, the windiest weather, before `Variation` moves it up and down. Calmer weather gives a share of it: none in Heavy Smog, about a third in rain. A turbine on the 2F terrace makes 20% more. Any value from `1` to `200`. |
+| `RatedPower` | `9` | `18` | `36` | The power the turbine makes on average in full wind (100%, the wind in Severe Cold at the default Weather settings), before `Variation` moves it up and down. Calmer weather gives a share of it: none in Heavy Smog, about a third in rain. A turbine on the 2F terrace makes 20% more. Any value from `1` to `200`. |
 | `Materials` | `20004:3, 20104:1, 20210:1` | `20004:4, 20104:2, 20210:2` | `20004:5, 20104:3, 20210:3, 20373:1` | What crafting the turbine's package takes, written as item id:count pairs split by commas. 20004 is Scrap Metal, 20104 Wire, 20210 Electronic Components and 20373 Stainless Steel Plate. Up to 7 different items and up to 99 of each. A list the game cannot use (one it cannot read, an item that does not exist, a dye, or the same materials as another recipe, another turbine's included) falls back to the default, with a line in `BepInEx\LogOutput.log` saying why. Taking the turbine down gives back a share of these (see `Returns` and `ReturnPercent`). |
 | `Returns` | blank | blank | blank | What taking the turbine down gives back, written like `Materials`. Blank gives back the `ReturnPercent` share of its materials. `none` gives nothing back. A list gives back exactly that, and may name any items, not only the recipe's. Up to 7 different items and up to 99 of each. A list the game cannot use (one it cannot read, or an item that does not exist) gives back the `ReturnPercent` share instead, with a line in `BepInEx\LogOutput.log` saying why. |
 | `ShopPrice` | `30` | `60` | `120` | What the Classic Furniture shop asks for the turbine before the disaster. The Small Solar Panel costs 20 there, the Medium 40 and the Large 80. Any value from `0` to `9999`. |
@@ -26,7 +26,7 @@ How hard the wind blows in each weather, as a percent of full wind. A turbine ma
 
 | Setting | Default | Weather |
 | --- | --- | --- |
-| `HeavySmog` | `0` | Heavy Smog |
+| `HeavySmog` | `0` | Heavy Smog. While this is 0, Power Manager's `SmogOutput` setting can give it some wind. |
 | `ColdClear` | `10` | Frosty/Clear, Cold/Clear and Chilly/Clear |
 | `Clear` | `12` | Clear |
 | `Cloudy` | `20` | Cloudy, and any weather a game update adds |

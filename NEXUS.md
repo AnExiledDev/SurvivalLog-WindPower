@@ -9,7 +9,7 @@ Wind Power adds three wind turbines to Survival Log, a Small, a Medium and a Lar
 [size=5]Main features[/size]
 [list]
 [*][b]Three turbines[/b]: the Small has three blades and a tail on a pole, and turns itself to face the wind. The Medium is an upright rotor made of two half drums, so it catches wind from any side. The Large has three blades on a tall mast, and every so often a gust comes through and swings the whole top around. Each one has its own model and icon.[/*]
-[*][b]Power day and night[/b]: Heavy Smog stops them completely, and Severe Cold is the windiest weather, where they average 9, 18 and 36. Every weather's numbers are in the table below.[/*]
+[*][b]Power day and night[/b]: at the default settings Heavy Smog stops them completely, and Severe Cold is the windiest weather, where they average 9, 18 and 36. Every weather's numbers are in the table below.[/*]
 [*][b]The wind changes[/b]: the wind picks up and dies down over the hours, by up to 30% either way, and the turbines and their blades follow it. It averages out over a few days. The Variation setting controls how much it swings, and 0 turns it off.[/*]
 [*][b]2F terrace bonus[/b]: the Medium and Large make 20% more on the 2F terrace than in the yard. The Small only fits the yard, since the terrace has no small spots.[/*]
 [*][b]Outdoors only[/b]: each turbine goes in an outdoor furniture spot of its size, never indoors.[/*]
@@ -39,7 +39,7 @@ What each turbine makes on average at the default settings (power 9, 18 and 36),
 [/list]
 
 [size=5]Reading the wind[/size]
-The weather box has a Wind line, such as [b]Moderate (35%/100%)[/b]. The word tells you how strong the wind is. The percent tells you how hard it's blowing compared to full wind, which is the average wind in Severe Cold. 100% isn't the top: a gust can push it past 100%, up to 130% with the Variation setting at its default of 30.
+The weather box has a Wind line, such as [b]Moderate (35%/100%)[/b]. The word tells you how strong the wind is. The percent tells you how hard it's blowing compared to full wind, which is the average wind in Severe Cold at the default settings. 100% isn't the top: a gust can push it past 100%, up to 130% at the default settings.
 
 A turbine makes its power setting times that percent. The Large is set to 36, so at 35% it makes about 13, at 100% it makes 36, and in a 130% gust it makes about 47. On the 2F terrace it makes 20% more on top of that.
 
@@ -99,7 +99,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [size=5]主要功能[/size]
 [list]
 [*][b]三种风力发电机[/b]：小型是杆子上装着三片叶片和一个尾翼，会自己转向迎风。中型是一根竖轴配两片半圆筒，哪个方向来的风都能接住。大型是高桅杆上的三片叶片，时不时来一阵风，整个机头会跟着转过去。每种都有自己的模型和图标。[/*]
-[*][b]白天晚上都发电[/b]：「大雾霾天」完全不转，「重度寒潮」风最大，三种平均分别发 9、18 和 36。每种天气的数字见下面的表。[/*]
+[*][b]白天晚上都发电[/b]：默认设置下「大雾霾天」完全不转，「重度寒潮」风最大，三种平均分别发 9、18 和 36。每种天气的数字见下面的表。[/*]
 [*][b]风会变[/b]：风会随时间时大时小，上下最多浮动 30%，发电量和叶片转速也跟着变，几天下来会平均回来。「Variation」设置控制浮动幅度，设为 0 就没有浮动。[/*]
 [*][b]二楼露台加成[/b]：中型和大型装在二楼露台，比装在屋外空地多发 20% 的电。露台没有小型家具位，所以小型只能装在屋外空地。[/*]
 [*][b]只能装在户外[/b]：每种都要装在户外同尺寸的家具位上，室内装不了。[/*]
@@ -129,7 +129,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [/list]
 
 [size=5]怎么看风力[/size]
-天气框里有一行「风力」，例如「和风 (35%/100%)」。前面的词告诉你风有多大，后面的百分比是现在的风相当于满风力的多少，满风力就是「重度寒潮」里的平均风力。100% 不是上限：阵风时会超过 100%，「Variation」设置保持默认的 30 时，最高到 130%。
+天气框里有一行「风力」，例如「和风 (35%/100%)」。前面的词告诉你风有多大，后面的百分比是现在的风相当于满风力的多少，满风力就是默认设置下「重度寒潮」里的平均风力。100% 不是上限：阵风时会超过 100%，默认设置下最高到 130%。
 
 风力发电机的发电量，就是它的发电量设置乘以这个百分比。大型默认是 36，风力 35% 时大约发 13，100% 时发 36，130% 的阵风里大约发 47。装在二楼露台上还会再多发 20%。
 

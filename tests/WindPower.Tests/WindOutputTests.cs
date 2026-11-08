@@ -118,6 +118,13 @@ public class WindOutputTests
         Assert.Equal(0.20f, WindOutput.Share(12, With("Clear", 40), 0.5f), 4);
     }
 
+    // A smog share that is not a number counts as none, so a bad value from another mod cannot break the power total.
+    [Fact]
+    public void ASmogShareThatIsNotANumberGivesNoWind()
+    {
+        Assert.Equal(0f, WindOutput.Share(12, float.NaN));
+    }
+
     // Power Manager's setting is for Heavy Smog only: another weather the player sets to 0 stays still.
     [Fact]
     public void AnotherWeatherSetToZeroStaysStillWithSmogWind()
