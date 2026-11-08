@@ -36,6 +36,14 @@ A turbine makes less than the solar panel of its size, since it keeps going at n
 
 A Medium or Large turbine on the 2F terrace stands higher in the wind and makes 20% more: up to 22 for the medium and 43 for the large. The terrace has no small spots.
 
+A turbine's power setting is what it makes in full wind, the average wind in Severe Cold. The Wind line in the weather box shows how hard the wind blows compared to that, such as Moderate (35%/100%), and a turbine makes its power setting times that percent: a Large set to 36 makes about 13 at 35%. 100% isn't the top, since a gust can push it past 100%. What each word means, and the weather you'll usually see it in:
+
+- **Calm** (0%): Heavy Smog. The turbines stand still.
+- **Light** (1-29%): clear and cloudy days.
+- **Moderate** (30-49%): Rainy and Continuous Rain.
+- **Strong** (50-89%): Mild Cold, Moderate Cold and Heavy Rain.
+- **Gale** (90% and up): Severe Cold.
+
 These are averages. Within a weather the wind rises and falls over the hours, by up to 30% either way at the default, so a rainy afternoon might give a small turbine 2 one hour and 4 the next. Every turbine feels the same wind, and over several days it evens out to the numbers above. The `Variation` setting widens or narrows the swing, and 0 keeps the wind steady.
 
 ## Settings

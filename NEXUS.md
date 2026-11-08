@@ -24,7 +24,7 @@ Wind Power adds three wind turbines to Survival Log, a Small, a Medium and a Lar
 [/list]
 
 [size=5]Power output[/size]
-What each turbine makes on average at the default settings (power 9, 18 and 36), by weather. The wind moves these up and down by up to 30% over the hours.
+What each turbine makes on average at the default settings (power 9, 18 and 36), by weather. A turbine makes its full power setting in Severe Cold, and the wind moves these up and down by up to 30% over the hours. How to read the wind in game is under Reading the wind below.
 [list]
 [*][b]Heavy Smog[/b]: 0, the turbines stand still.[/*]
 [*][b]Frosty/Clear, Cold/Clear and Chilly/Clear[/b]: Small 1, Medium 2, Large 4. On the 2F terrace, Medium 2 and Large 4.[/*]
@@ -37,6 +37,21 @@ What each turbine makes on average at the default settings (power 9, 18 and 36),
 [*][b]Moderate Cold and Moderate Cold Rain[/b]: Small 7, Medium 14, Large 29. On the 2F terrace, Medium 17 and Large 35.[/*]
 [*][b]Severe Cold and Severe Cold Rain[/b]: Small 9, Medium 18, Large 36. On the 2F terrace, Medium 22 and Large 43.[/*]
 [/list]
+
+[size=5]Reading the wind[/size]
+The weather box has a Wind line, such as [b]Moderate (35%/100%)[/b]. The word tells you how strong the wind is. The percent tells you how hard it's blowing compared to full wind, which is the average wind in Severe Cold. 100% isn't the top: a gust can push it past 100%, up to 130% with the Variation setting at its default of 30.
+
+A turbine makes its power setting times that percent. The Large is set to 36, so at 35% it makes about 13, at 100% it makes 36, and in a 130% gust it makes about 47. On the 2F terrace it makes 20% more on top of that.
+
+What each word means, and the weather you'll usually see it in:
+[list]
+[*][b]Calm[/b] (0%): Heavy Smog. The turbines stand still.[/*]
+[*][b]Light[/b] (1-29%): clear and cloudy days.[/*]
+[*][b]Moderate[/b] (30-49%): Rainy and Continuous Rain.[/*]
+[*][b]Strong[/b] (50-89%): Mild Cold, Moderate Cold and Heavy Rain.[/*]
+[*][b]Gale[/b] (90% and up): Severe Cold.[/*]
+[/list]
+Hover over a turbine to see what it's making right now, with its power setting and the same wind reading below it, such as [i]Rated 36, Rainy wind Moderate (35%/100%)[/i].
 
 [size=5]Known issues[/size]
 UninstallPrep only changes the save you load while it's on, so load and save each save you want to keep before you remove the mod.
@@ -97,7 +112,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [/list]
 
 [size=5]发电量[/size]
-默认设置下（发电量 9、18 和 36），各种天气里每种风力发电机的平均发电量。风会让这些数字随时间上下浮动，最多 30%。
+默认设置下（发电量 9、18 和 36），各种天气里每种风力发电机的平均发电量。在「重度寒潮」里风力发电机发出它的全部发电量，风会让这些数字随时间上下浮动，最多 30%。游戏里怎么看风力，见下面的「怎么看风力」。
 [list]
 [*][b]大雾霾天[/b]：0，风力发电机不转。[/*]
 [*][b]霜晴、寒晴和凛晴[/b]：小型 1，中型 2，大型 4。二楼露台上中型 2，大型 4。[/*]
@@ -110,6 +125,21 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [*][b]中度寒潮和中度寒雨[/b]：小型 7，中型 14，大型 29。二楼露台上中型 17，大型 35。[/*]
 [*][b]重度寒潮和重度寒雨[/b]：小型 9，中型 18，大型 36。二楼露台上中型 22，大型 43。[/*]
 [/list]
+
+[size=5]怎么看风力[/size]
+天气框里有一行「风力」，例如「和风 (35%/100%)」。前面的词告诉你风有多大，后面的百分比是现在的风相当于满风力的多少，满风力就是「重度寒潮」里的平均风力。100% 不是上限：阵风时会超过 100%，「Variation」设置保持默认的 30 时，最高到 130%。
+
+风力发电机的发电量，就是它的发电量设置乘以这个百分比。大型默认是 36，风力 35% 时大约发 13，100% 时发 36，130% 的阵风里大约发 47。装在二楼露台上还会再多发 20%。
+
+每个词的意思，以及通常在什么天气里看到：
+[list]
+[*][b]无风[/b]（0%）：大雾霾天，风力发电机不转。[/*]
+[*][b]微风[/b]（1-29%）：晴天和阴天。[/*]
+[*][b]和风[/b]（30-49%）：雨天和持续阴雨。[/*]
+[*][b]强风[/b]（50-89%）：轻度寒潮、中度寒潮和暴雨。[/*]
+[*][b]大风[/b]（90% 以上）：重度寒潮。[/*]
+[/list]
+鼠标悬停在风力发电机上，能看到它现在的发电量，下面写着它的发电量设置和同样的风力，例如「额定 36, 雨天风力 和风 (35%/100%)」。
 
 [size=5]已知问题[/size]
 「UninstallPrep」只处理开启时读取的那个存档，所以每个想保留的存档，在移除模组前都要各自读取一次并保存。
