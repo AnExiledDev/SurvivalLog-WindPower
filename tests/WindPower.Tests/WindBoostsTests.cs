@@ -31,6 +31,29 @@ public class WindBoostsTests
         }
     }
 
+    // A mod that adds or removes a multiplier from inside its own one still leaves the turbines working.
+    [Fact]
+    public void AMultiplierThatAddsAnotherDoesNotBreakTheRead()
+    {
+        WindBoosts.Add("Power Manager", () =>
+        {
+            WindBoosts.Add("Late Mod", () => 3f);
+
+            return 2f;
+        });
+
+        try
+        {
+            Assert.Equal(2f, WindBoosts.Factor(), 4);
+            Assert.Equal(6f, WindBoosts.Factor(), 4);
+        }
+        finally
+        {
+            WindBoosts.Remove("Power Manager");
+            WindBoosts.Remove("Late Mod");
+        }
+    }
+
     // A setting changed in game applies at the next read, without the mod adding itself again.
     [Fact]
     public void ALiveSettingIsReadAgainEachTime()

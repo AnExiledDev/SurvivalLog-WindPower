@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace WindPower;
 
@@ -40,35 +41,39 @@ public static class WindBoosts
     public static float Factor()
     {
         var factor = 1f;
-        List<string>? failed = null;
+        List<KeyValuePair<string, Func<float>>>? failed = null;
+        KeyValuePair<string, Func<float>>[] sources;
 
-        lock (Sources)
+        // The multipliers run on a copy, so one that adds or removes a multiplier cannot break the read.
+        lock (Sources) sources = Sources.ToArray();
+
+        foreach (var pair in sources)
         {
-            foreach (var pair in Sources)
+            float value;
+
+            try
             {
-                float value;
-
-                try
-                {
-                    value = pair.Value();
-                }
-                catch (Exception)
-                {
-                    (failed ??= new List<string>()).Add(pair.Key);
-                    continue;
-                }
-
-                if (float.IsNaN(value) || float.IsInfinity(value)) continue;
-
-                factor *= Math.Max(0f, value);
+                value = pair.Value();
+            }
+            catch (Exception)
+            {
+                (failed ??= new List<KeyValuePair<string, Func<float>>>()).Add(pair);
+                continue;
             }
 
-            if (failed != null)
-                foreach (var name in failed) Sources.Remove(name);
+            if (float.IsNaN(value) || float.IsInfinity(value)) continue;
+
+            factor *= Math.Max(0f, value);
         }
 
-        if (failed != null)
-            foreach (var name in failed) OnFailed(name);
+        if (failed == null) return factor;
+
+        // A source added again since the copy keeps its new multiplier.
+        lock (Sources)
+            foreach (var pair in failed)
+                if (Sources.TryGetValue(pair.Key, out var current) && current == pair.Value) Sources.Remove(pair.Key);
+
+        foreach (var pair in failed) OnFailed(pair.Key);
 
         return factor;
     }

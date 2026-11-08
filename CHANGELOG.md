@@ -2,7 +2,7 @@
 
 ## 0.9.3
 
-- Power Manager and New Loop Plus can now make the turbines stronger: Power Manager with its Wind setting, New Loop Plus with its wind loop rewards. With neither installed, nothing changes.
+- Power Manager 0.4.0 or newer can now make the turbines stronger or weaker with its Wind setting. Without it, nothing changes.
 - Made for Survival Log 1.1.20719.
 
 ## 0.9.2
