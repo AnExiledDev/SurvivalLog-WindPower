@@ -24,7 +24,7 @@ public static class WindOutput
     public static float Share(int weatherId) => weatherId switch
     {
         12 => 0f,
-        1 => 0.12f,
+        1 => ClearShare,
         7 or 8 or 9 => 0.10f,
         2 => 0.20f,
         3 => 0.35f,
@@ -35,6 +35,20 @@ public static class WindOutput
         6 or 17 => 1.0f,
         _ => UnknownShare,
     };
+
+    /// <summary>The share a clear day gives, which another mod's calm setting is a part of (see <see cref="WindBoosts.AddCalm"/>).</summary>
+    public const float ClearShare = 0.12f;
+
+    /// <summary>
+    /// The weather's share with calm air given <paramref name="calm"/> of a clear day's wind (0 to 1); every other
+    /// weather keeps its own.
+    /// </summary>
+    public static float Share(int weatherId, float calm)
+    {
+        var share = Share(weatherId);
+
+        return share > 0f ? share : Math.Clamp(calm, 0f, 1f) * ClearShare;
+    }
 
     public static float Power(float rated, float share, bool isOnTerrace) => Math.Max(0f, rated) * Math.Max(0f, share) * (isOnTerrace ? TerraceBonus : 1f);
 

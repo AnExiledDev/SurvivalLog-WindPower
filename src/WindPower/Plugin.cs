@@ -16,7 +16,7 @@ namespace WindPower;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.9.3";
+    private const string Version = "0.9.4";
 
     public override void Load()
     {

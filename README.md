@@ -46,7 +46,7 @@ A turbine's power setting is what it makes in full wind, the average wind in Sev
 
 These are averages. Within a weather the wind rises and falls over the hours, by up to 30% either way at the default, so a rainy afternoon might give a small turbine 2 one hour and 4 the next. Every turbine feels the same wind, and over several days it evens out to the numbers above. The `Variation` setting widens or narrows the swing, and 0 keeps the wind steady.
 
-With [Power Manager](https://www.nexusmods.com/survivallog/mods/126) 0.4.0 or newer, its `WindMultiplier` setting makes every turbine stronger or weaker, like its solar setting does for the panels. A turbine's hover then shows its power with that setting, and the wind reading stays as it is.
+With [Power Manager](https://www.nexusmods.com/survivallog/mods/126) 0.4.0 or newer, its `WindMultiplier` setting makes every turbine stronger or weaker, like its solar setting does for the panels. A turbine's hover then shows its power with that setting, and the wind reading stays as it is. With Power Manager 0.5.0 or newer, its `CalmOutput` setting can also give Heavy Smog some wind, as a share of a Clear day's, so the turbines turn and make power there too.
 
 ## Settings
 

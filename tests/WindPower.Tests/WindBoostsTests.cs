@@ -1,3 +1,4 @@
+using WindPower.Core;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -141,6 +142,89 @@ public class WindBoostsTests
         finally
         {
             WindBoosts.Remove("Power Manager");
+            WindBoosts.OnFailed = _ => { };
+        }
+    }
+
+    // Power Manager's calm setting is the only thing that stirs Heavy Smog, so with none the turbines stand still there.
+    [Fact]
+    public void WithNoCalmSettingCalmAirStaysStill()
+    {
+        Assert.Equal(0f, WindBoosts.CalmShare());
+        Assert.Equal(0f, WindOutput.Share(12, WindBoosts.CalmShare()));
+    }
+
+    [Fact]
+    public void ACalmSettingGivesHeavySmogThatShareOfAClearDay()
+    {
+        var setting = 0.5f;
+        WindBoosts.AddCalm("Power Manager", () => setting);
+
+        try
+        {
+            Assert.Equal(0.5f, WindBoosts.CalmShare());
+            Assert.Equal(0.06f, WindOutput.Share(12, WindBoosts.CalmShare()), 4);
+            setting = 1f;
+            Assert.Equal(WindOutput.Share(1), WindOutput.Share(12, WindBoosts.CalmShare()), 4);
+        }
+        finally
+        {
+            WindBoosts.RemoveCalm("Power Manager");
+        }
+    }
+
+    // Two mods giving calm air wind do not add up past a clear day; the stronger one counts.
+    [Fact]
+    public void TheStrongestCalmSettingCountsAndNoneGoesPastAClearDay()
+    {
+        WindBoosts.AddCalm("Power Manager", () => 0.3f);
+        WindBoosts.AddCalm("Other mod", () => 0.6f);
+
+        try
+        {
+            Assert.Equal(0.6f, WindBoosts.CalmShare());
+            WindBoosts.AddCalm("Other mod", () => 5f);
+            Assert.Equal(1f, WindBoosts.CalmShare());
+        }
+        finally
+        {
+            WindBoosts.RemoveCalm("Power Manager");
+            WindBoosts.RemoveCalm("Other mod");
+        }
+    }
+
+    // The calm setting is not a multiplier: it must not make the turbines stronger in any other weather.
+    [Fact]
+    public void ACalmSettingLeavesOtherWeathersAndTheMultipliersAlone()
+    {
+        WindBoosts.AddCalm("Power Manager", () => 1f);
+
+        try
+        {
+            Assert.Equal(1f, WindBoosts.Factor());
+            Assert.Equal(WindOutput.Share(3), WindOutput.Share(3, WindBoosts.CalmShare()));
+        }
+        finally
+        {
+            WindBoosts.RemoveCalm("Power Manager");
+        }
+    }
+
+    [Fact]
+    public void ACalmSettingThatThrowsIsDroppedAndReportedOnce()
+    {
+        var reported = new List<string>();
+        WindBoosts.OnFailed = reported.Add;
+        WindBoosts.AddCalm("Broken mod", () => throw new InvalidOperationException());
+
+        try
+        {
+            Assert.Equal(0f, WindBoosts.CalmShare());
+            Assert.Equal(0f, WindBoosts.CalmShare());
+            Assert.Equal(new[] { "Broken mod" }, reported);
+        }
+        finally
+        {
             WindBoosts.OnFailed = _ => { };
         }
     }

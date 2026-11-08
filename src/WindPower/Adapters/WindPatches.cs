@@ -37,6 +37,7 @@ internal static class WindPatches
     private static float _windReadAt = float.MinValue;
     private static int _gameSeconds;
     private static float _boost = 1f;
+    private static float _calm;
 
     public static void Apply(Harmony harmony, Action<string> log)
     {
@@ -56,7 +57,15 @@ internal static class WindPatches
     {
         var id = WeatherId();
 
-        return id < 0 ? 0f : WindVariation.Share(WindOutput.Share(id), WindSettings.VariationPercent, _gameSeconds);
+        return id < 0 ? 0f : WindVariation.Share(WeatherShare(id), WindSettings.VariationPercent, _gameSeconds);
+    }
+
+    /// <summary>The weather's average share, with any calm wind another mod gives (see <see cref="WindBoosts.AddCalm"/>).</summary>
+    internal static float WeatherShare(int weatherId)
+    {
+        WeatherId();
+
+        return WindOutput.Share(weatherId, _calm);
     }
 
     /// <summary>The weather's Config_Weather id and the game clock, read at most once a second; -1 when there is no weather.</summary>
@@ -71,6 +80,7 @@ internal static class WindPatches
         _weatherName = "";
         OnTerrace.Clear();
         _boost = WindBoosts.Factor();
+        _calm = WindBoosts.CalmShare();
 
         var weather = GameSingleton.Existing<BattleLogicWorld>()?._WeatherManager;
 

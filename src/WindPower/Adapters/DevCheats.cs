@@ -129,7 +129,7 @@ public static class DevCheats
 
         var lines = new List<string> { $"weather {name} ({id}), Variation {WindSettings.VariationPercent}%" };
 
-        lines.AddRange(TurbineReport.Forecast(WindOutput.Share(id), WindSettings.VariationPercent, WindPatches.GameSeconds(), ForecastHours));
+        lines.AddRange(TurbineReport.Forecast(WindPatches.WeatherShare(id), WindSettings.VariationPercent, WindPatches.GameSeconds(), ForecastHours));
 
         return string.Join("\n", lines);
     }

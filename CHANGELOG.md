@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.4
+
+- Power Manager 0.5.0 or newer can now give Heavy Smog some wind with its CalmOutput setting, so the turbines turn and make power there. Without it, Heavy Smog stays still as before.
+- Made for Survival Log 1.1.20719.
+
 ## 0.9.3
 
 - Power Manager 0.4.0 or newer can now make the turbines stronger or weaker with its Wind setting. Without it, nothing changes.
