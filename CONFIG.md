@@ -20,6 +20,23 @@ Each turbine has its own section, `[SmallTurbine]`, `[MediumTurbine]` and `[Larg
 | --- | --- | --- |
 | `Variation` | `30` | How far the wind rises and falls within one weather, as a percent of that weather's average. The wind swells and slackens over the hours, the same for every turbine, and over a day it averages out to the weather's own. `0` keeps the wind steady for as long as the weather lasts. Any value from `0` to `60`. |
 
+## Weather
+
+How hard the wind blows in each weather, as a percent of full wind. A turbine makes its `RatedPower` times this, and `Variation` moves it up and down over the hours. `100` is full wind and `0` is still air, where the turbines stand still. Weathers that differ only in rain share one setting. Each is any value from `0` to `200`.
+
+| Setting | Default | Weather |
+| --- | --- | --- |
+| `HeavySmog` | `0` | Heavy Smog |
+| `ColdClear` | `10` | Frosty/Clear, Cold/Clear and Chilly/Clear |
+| `Clear` | `12` | Clear |
+| `Cloudy` | `20` | Cloudy, and any weather a game update adds |
+| `Rainy` | `35` | Rainy |
+| `ContinuousRain` | `45` | Continuous Rain |
+| `MildCold` | `55` | Mild Cold and Mild Cold Rain |
+| `HeavyRain` | `75` | Heavy Rain |
+| `ModerateCold` | `80` | Moderate Cold and Moderate Cold Rain |
+| `SevereCold` | `100` | Severe Cold and Severe Cold Rain |
+
 ## Dismantle
 
 | Setting | Default | What it does |

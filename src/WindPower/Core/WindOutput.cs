@@ -6,48 +6,47 @@ using System.Text;
 namespace WindPower.Core;
 
 /// <summary>
-/// How much power a wind turbine makes. It turns day and night at a share of its rating that the weather sets: none
-/// in smog (smog forms in still air), a light breeze on clear days, more as fronts bring rain, and the most in cold
-/// snaps. Heavy Rain stops short of full, as a storm's wind is gusty rather than strong. The game's own
-/// Config_Weather.WindValue is read by nothing in the game, so the mod keeps its own table here. Each turbine's rating
-/// is a setting, set below its solar panel's since the wind never stops at night.
+/// How much power a wind turbine makes. It turns day and night at a share of its rating that the weather sets (see
+/// <see cref="WeatherWinds"/>, each weather's wind a setting). The game's own Config_Weather.WindValue is read by
+/// nothing in the game, so the mod keeps its own table. Each turbine's rating is a setting, set below its solar
+/// panel's since the wind never stops at night.
 /// </summary>
 public static class WindOutput
 {
     /// <summary>The 2F terrace stands higher and more open than the yard.</summary>
     public const float TerraceBonus = 1.2f;
 
-    /// <summary>A weather the table does not know (one a game update adds) gets a cloudy day's wind.</summary>
-    public const float UnknownShare = 0.2f;
-
-    /// <summary>The share of the rating each weather gives, by Config_Weather id.</summary>
-    public static float Share(int weatherId) => weatherId switch
-    {
-        12 => 0f,
-        1 => ClearShare,
-        7 or 8 or 9 => 0.10f,
-        2 => 0.20f,
-        3 => 0.35f,
-        11 or 14 => 0.45f,
-        10 or 13 => 0.75f,
-        4 or 15 => 0.55f,
-        5 or 16 => 0.80f,
-        6 or 17 => 1.0f,
-        _ => UnknownShare,
-    };
-
-    /// <summary>The share a clear day gives, which another mod's calm setting is a part of (see <see cref="WindBoosts.AddCalm"/>).</summary>
-    public const float ClearShare = 0.12f;
+    /// <summary>The share of the rating each weather gives at the default settings, by Config_Weather id.</summary>
+    public static float Share(int weatherId) => Share(weatherId, WeatherWinds.Defaults);
 
     /// <summary>
-    /// The weather's share with calm air given <paramref name="calm"/> of a clear day's wind (0 to 1); every other
-    /// weather keeps its own.
+    /// The share of the rating the weather gives with these settings (percents in the order of
+    /// <see cref="WeatherWinds.All"/>). A missing or negative setting counts as still air.
     /// </summary>
-    public static float Share(int weatherId, float calm)
+    public static float Share(int weatherId, IReadOnlyList<int> percents)
     {
-        var share = Share(weatherId);
+        var index = WeatherWinds.IndexOfWeather(weatherId);
 
-        return share > 0f ? share : Math.Clamp(calm, 0f, 1f) * ClearShare;
+        return index < percents.Count ? Math.Clamp(percents[index], 0, WeatherWinds.MostPercent) / 100f : 0f;
+    }
+
+    /// <summary>The weather's share at the default settings, with still air given <paramref name="calm"/> of a clear day's wind.</summary>
+    public static float Share(int weatherId, float calm) => Share(weatherId, WeatherWinds.Defaults, calm);
+
+    /// <summary>
+    /// The weather's share with these settings, and a weather set to still air given <paramref name="calm"/> (0 to 1)
+    /// of a clear day's wind (another mod's calm setting, see <see cref="WindBoosts.AddCalm"/>). Every other weather
+    /// keeps its own.
+    /// </summary>
+    public static float Share(int weatherId, IReadOnlyList<int> percents, float calm)
+    {
+        var share = Share(weatherId, percents);
+
+        if (share > 0f) return share;
+
+        var clear = WeatherWinds.ClearIndex < percents.Count ? Math.Clamp(percents[WeatherWinds.ClearIndex], 0, WeatherWinds.MostPercent) / 100f : 0f;
+
+        return Math.Clamp(calm, 0f, 1f) * clear;
     }
 
     public static float Power(float rated, float share, bool isOnTerrace) => Math.Max(0f, rated) * Math.Max(0f, share) * (isOnTerrace ? TerraceBonus : 1f);

@@ -30,6 +30,7 @@ public sealed class Plugin : BasePlugin
             new AcceptableValueRange<int>(0, WindVariation.MostPercent)));
 
         LiveSettings.Watch(variation, percent => WindSettings.VariationPercent = percent);
+        BindWeathers();
         _returnPercent = Config.Bind("Dismantle", "ReturnPercent", MaterialList.DefaultReturnPercent, new ConfigDescription(
             "How much of a turbine's materials taking it down gives back, as a percent of its recipe. 50 is about half, like the game's own furniture. 0 gives nothing back and 100 gives back everything. Each material's share is rounded down, then topped up one at a time to the right total. A turbine whose Returns list is filled in gives back that list instead.\n" +
             "拆除风力发电机时返还多少材料，按配方的百分比计。50 约为一半，和游戏自带的家具一样。0 什么都不返还，100 全部返还。每种材料按比例向下取整，再逐个补足到应有的总数。填了 Returns 清单的风力发电机按清单返还。",
@@ -74,6 +75,22 @@ public sealed class Plugin : BasePlugin
         };
         AddComponent<WindTicker>();
         Log.LogInfo($"Wind Power {Version} loaded");
+    }
+
+    /// <summary>Each weather's wind, one setting per weather in its own section. Every one applies live, within a second.</summary>
+    private void BindWeathers()
+    {
+        for (var i = 0; i < WeatherWinds.All.Count; i++)
+        {
+            var index = i;
+            var weather = WeatherWinds.All[i];
+            var entry = Config.Bind("Weather", weather.Key, weather.DefaultPercent, new ConfigDescription(
+                $"How hard the wind blows in {weather.Name}, as a percent of full wind: a turbine makes its RatedPower times this. 100 is full wind; Variation moves it up and down over the hours. 0 is still air, where the turbines stand still.\n" +
+                $"{weather.Chinese}的风力，按满风力的百分比计：风力发电机的发电量为 RatedPower 乘以这个数。100 为满风力；「Variation」会让它随时间上下浮动。0 为无风，风力发电机不转。",
+                new AcceptableValueRange<int>(0, WeatherWinds.MostPercent)));
+
+            LiveSettings.Watch(entry, percent => WindSettings.SetWeather(index, percent));
+        }
     }
 
     /// <summary>One section of settings per turbine. Every one applies live: the turbine's rows are rewritten when one changes.</summary>

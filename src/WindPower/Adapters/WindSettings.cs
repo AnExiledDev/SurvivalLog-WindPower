@@ -18,6 +18,19 @@ internal static class WindSettings
     /// <summary>How far the wind swings above and below the weather's average, in percent of it.</summary>
     public static int VariationPercent { get; set; } = WindVariation.DefaultPercent;
 
+    private static int[] _weatherPercents = WeatherWinds.Defaults.ToArray();
+
+    /// <summary>Each weather's wind in percent of full wind, in the order of <see cref="WeatherWinds.All"/>.</summary>
+    public static IReadOnlyList<int> WeatherPercents => _weatherPercents;
+
+    public static void SetWeather(int index, int percent)
+    {
+        var next = (int[])_weatherPercents.Clone();
+
+        next[index] = percent;
+        _weatherPercents = next;
+    }
+
     public static TurbineSettings Of(TurbineKind kind) => _current[IndexOf(kind)];
 
     public static void Set(TurbineKind kind, TurbineSettings settings)

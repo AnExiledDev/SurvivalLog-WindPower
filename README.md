@@ -20,7 +20,7 @@ Each turbine has its own model and icon, and can be dyed like the game's own fur
 
 ## Power
 
-A turbine makes less than the solar panel of its size, since it keeps going at night. You set each turbine's power, materials, shop price and shop stock yourself (see Settings). At the default power of 9, 18 and 36, a turbine in the yard makes:
+A turbine makes less than the solar panel of its size, since it keeps going at night. You set each turbine's power, materials, shop price and shop stock yourself, and how hard the wind blows in each weather (see Settings). At the default power of 9, 18 and 36, a turbine in the yard makes:
 
 | Weather | Small | Medium | Large |
 | --- | --- | --- | --- |

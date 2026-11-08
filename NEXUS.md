@@ -24,7 +24,7 @@ Wind Power adds three wind turbines to Survival Log, a Small, a Medium and a Lar
 [/list]
 
 [size=5]Power output[/size]
-What each turbine makes on average at the default settings (power 9, 18 and 36), by weather. A turbine makes its full power setting in Severe Cold, and the wind moves these up and down by up to 30% over the hours. How to read the wind in game is under Reading the wind below.
+What each turbine makes on average at the default settings (power 9, 18 and 36), by weather. A turbine makes its full power setting in Severe Cold, and the wind moves these up and down by up to 30% over the hours. Each weather's wind is a setting too, in the Weather section. How to read the wind in game is under Reading the wind below.
 [list]
 [*][b]Heavy Smog[/b]: 0, the turbines stand still.[/*]
 [*][b]Frosty/Clear, Cold/Clear and Chilly/Clear[/b]: Small 1, Medium 2, Large 4. On the 2F terrace, Medium 2 and Large 4.[/*]
@@ -114,7 +114,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [/list]
 
 [size=5]发电量[/size]
-默认设置下（发电量 9、18 和 36），各种天气里每种风力发电机的平均发电量。在「重度寒潮」里风力发电机发出它的全部发电量，风会让这些数字随时间上下浮动，最多 30%。游戏里怎么看风力，见下面的「怎么看风力」。
+默认设置下（发电量 9、18 和 36），各种天气里每种风力发电机的平均发电量。在「重度寒潮」里风力发电机发出它的全部发电量，风会让这些数字随时间上下浮动，最多 30%。每种天气的风力也是一个设置，在 Weather 部分。游戏里怎么看风力，见下面的「怎么看风力」。
 [list]
 [*][b]大雾霾天[/b]：0，风力发电机不转。[/*]
 [*][b]霜晴、寒晴和凛晴[/b]：小型 1，中型 2，大型 4。二楼露台上中型 2，大型 4。[/*]

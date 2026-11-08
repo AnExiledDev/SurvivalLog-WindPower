@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using WindPower.Core;
 using Xunit;
 
@@ -56,6 +58,89 @@ public class WindOutputTests
 
         Assert.Equal(WindOutput.Power(36f, share, isOnTerrace: false) / 2f, WindOutput.Power(18f, share, isOnTerrace: false), 4);
         Assert.Equal(0f, WindOutput.Power(-5f, share, isOnTerrace: false));
+    }
+
+    private static int[] With(string key, int percent)
+    {
+        var percents = WeatherWinds.Defaults.ToArray();
+
+        percents[Array.FindIndex(WeatherWinds.All.ToArray(), weather => weather.Key == key)] = percent;
+
+        return percents;
+    }
+
+    // Each weather's wind is the player's setting: Rainy at 70 makes twice its default, and leaves the others alone.
+    [Fact]
+    public void AWeathersSettingSetsItsWind()
+    {
+        var percents = With("Rainy", 70);
+
+        Assert.Equal(0.70f, WindOutput.Share(3, percents), 4);
+        Assert.Equal(WindOutput.Share(2), WindOutput.Share(2, percents));
+        Assert.Equal(0.70f, WindOutput.Share(6, With("SevereCold", 70)), 4);
+    }
+
+    // Weathers that differ only in rain share one setting.
+    [Fact]
+    public void ASettingCoversEveryWeatherInItsGroup()
+    {
+        var percents = With("ModerateCold", 90);
+
+        Assert.Equal(0.90f, WindOutput.Share(5, percents), 4);
+        Assert.Equal(0.90f, WindOutput.Share(16, percents), 4);
+    }
+
+    [Fact]
+    public void AWeatherAGameUpdateAddsFollowsTheCloudySetting()
+    {
+        Assert.Equal(0.50f, WindOutput.Share(99, With("Cloudy", 50)), 4);
+    }
+
+    // A setting past the range BepInEx enforces (a hand-edited table) is held to it.
+    [Fact]
+    public void ASettingOutsideItsRangeIsHeldToIt()
+    {
+        Assert.Equal(0f, WindOutput.Share(3, With("Rainy", -20)));
+        Assert.Equal(2f, WindOutput.Share(3, With("Rainy", 500)), 4);
+    }
+
+    // Heavy Smog given its own wind no longer counts as still air, so another mod's calm share leaves it alone.
+    [Fact]
+    public void ASmogSettingAboveZeroTakesOverFromCalmWind()
+    {
+        Assert.Equal(0.30f, WindOutput.Share(12, With("HeavySmog", 30), 1f), 4);
+    }
+
+    // Calm wind is a share of the Clear setting, not of the default: Clear at 40 and half calm give 20.
+    [Fact]
+    public void CalmWindFollowsTheClearSetting()
+    {
+        Assert.Equal(0.20f, WindOutput.Share(12, With("Clear", 40), 0.5f), 4);
+    }
+
+    // Setting any weather to 0 makes it still air, which a calm share then fills like Heavy Smog's.
+    [Fact]
+    public void AnyWeatherSetToZeroTakesCalmWind()
+    {
+        var percents = With("Cloudy", 0);
+
+        Assert.Equal(0f, WindOutput.Share(2, percents));
+        Assert.Equal(WindOutput.Share(1) * 0.5f, WindOutput.Share(2, percents, 0.5f), 4);
+    }
+
+    // The defaults are the table the earlier versions shipped, so no player's wind changes on update.
+    [Fact]
+    public void TheDefaultsKeepTheOldTable()
+    {
+        Assert.Equal(new[] { 0, 10, 12, 20, 35, 45, 55, 75, 80, 100 }, WeatherWinds.Defaults);
+    }
+
+    // Every weather id 1 to 17 belongs to exactly one setting.
+    [Fact]
+    public void EveryKnownWeatherHasOneSetting()
+    {
+        for (var id = 1; id <= 17; id++)
+            Assert.Single(WeatherWinds.All, weather => Array.IndexOf(weather.Ids, id) >= 0);
     }
 
     [Fact]
