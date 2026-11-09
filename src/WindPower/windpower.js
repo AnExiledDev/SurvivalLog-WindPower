@@ -1,4 +1,4 @@
-// Wind Power: a Wind row in the HUD's weather tooltip (the CoreUI1 page), drawn with the game's own row
+// Wind Power: a Wind row in the HUD's weather tooltip (the CoreUI1 page), drawn with the game's row
 // classes so it sits with Light Intensity and Cold Intensity, above the Tomorrow line. The plugin hands it the
 // weather's wind every couple of seconds through apply. Reads and draws only; nothing the game keeps is changed.
 (function () {

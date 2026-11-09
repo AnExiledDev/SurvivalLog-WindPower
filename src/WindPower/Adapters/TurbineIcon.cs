@@ -11,7 +11,7 @@ namespace WindPower.Adapters;
 
 /// <summary>
 /// Puts each turbine's icon, and one for each of its colours, where the game's web UI looks for pictures, next to the
-/// game's own furniture icons. The coloured ones are made from the plain icon the way the dye shader colours the model.
+/// game's furniture icons. The coloured ones are made from the plain icon the way the dye shader colours the model.
 /// An icon is written only when the file there is missing or differs, so a mod update brings its new icon.
 /// </summary>
 internal static class TurbineIcon

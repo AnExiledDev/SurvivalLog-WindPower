@@ -113,7 +113,7 @@ public static class MaterialList
         if (recipeUsing(materials) is int other)
         {
             var made = recipeName?.Invoke(other);
-            var english = made is { } name ? $"The game's own {name.English} recipe takes exactly these materials. " : "A recipe the game already has takes exactly these materials. ";
+            var english = made is { } name ? $"The game's {name.English} recipe takes exactly these materials. " : "A recipe the game already has takes exactly these materials. ";
             var chinese = made is { } same ? $"游戏自带的{same.Chinese}配方用的正是这些材料。" : "游戏里已有配方用的正是这些材料。";
 
             return (standard, Problem($"recipe {other} already uses them", english + noSharing, chinese + noSharingZh));
@@ -161,7 +161,7 @@ public static class MaterialList
     /// <summary>Pieces written back the way the settings hold them, "20004:3,20104:2", in the order they first appear.</summary>
     public static string Pairs(IEnumerable<int> pieces) => string.Join(",", pieces.GroupBy(id => id).Select(group => group.Key.ToString(CultureInfo.InvariantCulture) + ":" + group.Count().ToString(CultureInfo.InvariantCulture)));
 
-    /// <summary>The share of its materials a turbine gives back when taken down by default, about what the game's own furniture gives.</summary>
+    /// <summary>The share of its materials a turbine gives back when taken down by default, about what the game's furniture gives.</summary>
     public const int DefaultReturnPercent = 50;
 
     /// <summary>

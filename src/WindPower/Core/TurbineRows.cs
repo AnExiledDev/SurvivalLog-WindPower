@@ -58,7 +58,7 @@ public static class TurbineRows
     /// <summary>Added to the power hover's note for a turbine on the 2F terrace.</summary>
     public const string TerraceNoteKey = "WindPower_TerraceNote";
 
-    /// <summary>The wind row's label in the HUD's weather tooltip, next to the game's own Light Intensity.</summary>
+    /// <summary>The wind row's label in the HUD's weather tooltip, next to the game's Light Intensity.</summary>
     public const string WindLabelKey = "WindPower_WindLabel";
 
     public static readonly IReadOnlyList<Text> SharedTexts = WindOutput.Strengths.Select(strength => strength.Word).Concat(new[]
@@ -76,7 +76,7 @@ public static class TurbineRows
     {
         Name = "Medium Wind Turbine",
         Size = "Medium",
-        // Far above the game's own ids (1.1.20151: item 70152, furniture 90291, recipe 1703, power row 19), so an
+        // Far above the game's ids (1.1.20151: item 70152, furniture 90291, recipe 1703, power row 19), so an
         // update is unlikely to reach them.
         Ids = new RowIds(Item: 910002, Furniture: 910002, Electrical: 911, Recipe: 9102, Action: 100910002, Effect: 100910002),
         Stock = new RowIds(Item: 14010, Furniture: 40001, Electrical: 5, Recipe: 309, Action: 100014010, Effect: 100014010),

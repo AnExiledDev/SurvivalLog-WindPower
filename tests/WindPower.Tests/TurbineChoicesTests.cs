@@ -99,7 +99,7 @@ public class TurbineChoicesTests
         var stock = MaterialList.Standard("20004:4");
         var choices = TurbineChoices.Of(Settings((kind, s) => kind == TurbineRows.Large ? s with { Materials = "20004:4" } : s), AnyItem, list => TurbineRows.MaterialKey(list) == TurbineRows.MaterialKey(stock) ? 309 : null, id => id == 309 ? ("Medium Solar Panel Package", "中型太阳能发电板包裹") : null);
 
-        Assert.StartsWith("The game's own Medium Solar Panel Package recipe takes exactly these materials.", TurbineChoices.Problem(choices, "LargeTurbine", "Materials"));
+        Assert.StartsWith("The game's Medium Solar Panel Package recipe takes exactly these materials.", TurbineChoices.Problem(choices, "LargeTurbine", "Materials"));
     }
 
     [Fact]

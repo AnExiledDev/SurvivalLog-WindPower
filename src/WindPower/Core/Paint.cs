@@ -7,7 +7,7 @@ namespace WindPower.Core;
 public readonly record struct DyeColour(float R, float G, float B);
 
 /// <summary>
-/// Gets a turbine's olive paint ready for the game's own dye shader, SL/LitDye (game 1.1.20151). That shader takes the
+/// Gets a turbine's olive paint ready for the game's dye shader, SL/LitDye (game 1.1.20151). That shader takes the
 /// albedo (base map times base colour, in linear light), a mask (its red channel, 1 = dyed) and the dye colour, and
 /// draws <c>lerp(albedo, saturate(2 * luma(albedo)) * dye, mask * dye.a)</c>, where luma weighs red, green and blue
 /// 0.299, 0.587 and 0.114. So a dyed part needs a grey base: its brightness, doubled, is how bright the dye shows.

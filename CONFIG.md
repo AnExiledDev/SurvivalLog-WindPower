@@ -41,7 +41,7 @@ How hard the wind blows in each weather, as a percent of full wind. A turbine ma
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `ReturnPercent` | `50` | How much of a turbine's materials taking it down gives back, as a percent of its recipe. `50` is about half, like the game's own furniture: the Large Wind Turbine gives back 3 Scrap Metal, 2 Wire and 1 Electronic Components. `0` gives nothing back and `100` gives back everything. Each material's share is rounded down, then topped up one at a time to the right total. A turbine whose `Returns` list is filled in gives back that list instead. Any value from `0` to `100`. |
+| `ReturnPercent` | `50` | How much of a turbine's materials taking it down gives back, as a percent of its recipe. `50` is about half, like the game's furniture: the Large Wind Turbine gives back 3 Scrap Metal, 2 Wire and 1 Electronic Components. `0` gives nothing back and `100` gives back everything. Each material's share is rounded down, then topped up one at a time to the right total. A turbine whose `Returns` list is filled in gives back that list instead. Any value from `0` to `100`. |
 
 ## Uninstall
 

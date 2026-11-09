@@ -5,7 +5,7 @@ using System.Linq;
 namespace WindPower.Core;
 
 /// <summary>
-/// The edits to the game's own rows that bring the turbines into a run: the quest rewards that show recipes, the
+/// The edits to the game's rows that bring the turbines into a run: the quest rewards that show recipes, the
 /// pre-disaster shops' stock lists, and the quest text. Each edit can run again on rows it already changed and leaves
 /// them as they are.
 /// </summary>

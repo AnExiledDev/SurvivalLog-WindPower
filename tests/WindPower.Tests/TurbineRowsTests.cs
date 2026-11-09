@@ -233,7 +233,7 @@ public class TurbineRowsTests
         Assert.Equal(keys.Count, keys.Distinct().Count());
     }
 
-    // Taking a turbine down gives back about half of what it was made from, like the game's own furniture, so the
+    // Taking a turbine down gives back about half of what it was made from, like the game's furniture, so the
     // solar panel's leftovers never come out of a turbine.
     [Theory]
     [InlineData("Medium")]

@@ -16,7 +16,7 @@ namespace WindPower.Adapters;
 /// in the power panel, the power hover and the name hover. The power hover is moved down to the turbine's foot, since
 /// the game puts it over the top, which is off screen when zoomed in on a tall turbine. The game's sunlight sum (CalcSolarOutput) is left alone, since
 /// Power Manager already hooks it. Every target was checked in GameAssembly.dll: no relative jump or call in its first
-/// 14 bytes. A hook that fails reports once and lets the game's own answer through.
+/// 14 bytes. A hook that fails reports once and lets the game's answer through.
 /// </summary>
 internal static class WindPatches
 {
@@ -218,7 +218,7 @@ internal static class WindPatches
         }
     }
 
-    /// <summary>Where the game's own sum puts the hover, measured from the turbine's foot instead of its head bar.</summary>
+    /// <summary>Where the game's sum puts the hover, measured from the turbine's foot instead of its head bar.</summary>
     private static void PointHoverAtFoot(Furniture furniture, SolarFloatData hover)
     {
         var model = GameSingleton.Existing<BattleShowWorld>()?._AgentModelManager?.GetAgentModelByLogicInstanceId(furniture.InstanceId);

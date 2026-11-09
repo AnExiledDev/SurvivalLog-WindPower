@@ -7,7 +7,7 @@ namespace WindPower.Core;
 
 /// <summary>
 /// How much power a wind turbine makes. It turns day and night at a share of its rating that the weather sets (see
-/// <see cref="WeatherWinds"/>, each weather's wind a setting). The game's own Config_Weather.WindValue is read by
+/// <see cref="WeatherWinds"/>, each weather's wind a setting). The game's Config_Weather.WindValue is read by
 /// nothing in the game, so the mod keeps its own table. Each turbine's rating is a setting, set below its solar
 /// panel's since the wind never stops at night.
 /// </summary>
@@ -85,7 +85,7 @@ public static class WindOutput
         word + " (" + Math.Max(0, percent).ToString(CultureInfo.InvariantCulture) + "%/100%)";
 
     /// <summary>
-    /// The line under the turbine's output in the power hover, built like the solar panel's: the game's own
+    /// The line under the turbine's output in the power hover, built like the solar panel's: the game's
     /// "Rated {0}" text, the weather and how hard the wind blows (its word and its share of the rating), then the terrace's bonus
     /// when the turbine stands there.
     /// </summary>

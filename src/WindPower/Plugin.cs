@@ -32,7 +32,7 @@ public sealed class Plugin : BasePlugin
         LiveSettings.Watch(variation, percent => WindSettings.VariationPercent = percent);
         BindWeathers();
         _returnPercent = Config.Bind("Dismantle", "ReturnPercent", MaterialList.DefaultReturnPercent, new ConfigDescription(
-            "How much of a turbine's materials taking it down gives back, as a percent of its recipe. 50 is about half, like the game's own furniture. 0 gives nothing back and 100 gives back everything. Each material's share is rounded down, then topped up one at a time to the right total. A turbine whose Returns list is filled in gives back that list instead.\n" +
+            "How much of a turbine's materials taking it down gives back, as a percent of its recipe. 50 is about half, like the game's furniture. 0 gives nothing back and 100 gives back everything. Each material's share is rounded down, then topped up one at a time to the right total. A turbine whose Returns list is filled in gives back that list instead.\n" +
             "拆除风力发电机时返还多少材料，按配方的百分比计。50 约为一半，和游戏自带的家具一样。0 什么都不返还，100 全部返还。每种材料按比例向下取整，再逐个补足到应有的总数。填了 Returns 清单的风力发电机按清单返还。",
             new AcceptableValueRange<int>(0, 100)));
         BindSettings(TurbineRows.Small, "Small Solar Panel", "小型太阳能发电板", 20);
