@@ -1,8 +1,7 @@
 using System;
 using System.IO;
-using GameCore.HotUpdate.ReduxUI;
-using ExiledToolkit.Game;
 using ExiledToolkit.Kit;
+using ExiledToolkit.Web;
 using WindPower.Core;
 
 namespace WindPower.Adapters;
@@ -44,22 +43,9 @@ internal sealed class WeatherPage
     /// <summary>Sends the call; returns a line for the log when it could not leave.</summary>
     private string? Run(string javaScript, double now)
     {
-        var webView = GameSingleton.Existing<ReduxUISystem>()?.GetWebUILayer()?.canvasWebViewPrefab?.WebView;
+        if (WebUi.TryRun(javaScript, _replies, out var failure)) return null;
 
-        if (webView == null) return _watch.NotSent(now);
-
-        var call = _replies.Open();
-
-        try
-        {
-            webView.ExecuteJavaScript(javaScript, (Action<string>)(result => _replies.Offer(call, result ?? "")));
-
-            return null;
-        }
-        catch (Exception ex)
-        {
-            return _watch.RunFailed(now, ex.Message);
-        }
+        return failure == null ? _watch.NotSent(now) : _watch.RunFailed(now, failure.Message);
     }
 
     /// <summary>Read on first need: most launches send it once, and some never reach a page that wants it.</summary>

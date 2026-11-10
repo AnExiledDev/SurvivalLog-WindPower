@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.5
+
+- Now needs Exiled's Toolkit 0.20.0 or newer.
+- If a game update stops part of the mod from working, the Mod Manager now shows that Wind Power may need an update.
+- Made for Survival Log 1.1.20719.
+
 ## 0.9.4
 
 - New Weather settings: how hard the wind blows in each weather, as a percent of full wind. The defaults keep the wind as it was.

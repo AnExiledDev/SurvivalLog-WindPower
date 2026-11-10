@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
-using HarmonyLib;
 using ExiledToolkit.Game;
 using WindPower.Core;
 
@@ -21,15 +20,16 @@ internal static class ShopStock
     /// <summary>The shops in the world now, by pointer. A shop that is taken down has its id set to 0.</summary>
     private static readonly Dictionary<IntPtr, BuildShopComponent> Live = new();
 
-    private static readonly HashSet<string> Failed = new();
-    private static Action<string> _log = _ => { };
+    private const string IfMissed = "a run already going may not see the turbines in its shops";
 
-    public static void Apply(Harmony harmony, Action<string> log)
+    private static PatchKit? _hooks;
+
+    public static void Apply(PatchKit hooks)
     {
-        _log = log;
+        _hooks = hooks;
 
-        Hook(harmony, "OnInit");
-        Hook(harmony, "LoadGame");
+        hooks.Patch(typeof(ShopStock), typeof(BuildShopComponent), "OnInit", postfix: nameof(Fill), consequence: IfMissed);
+        hooks.Patch(typeof(ShopStock), typeof(BuildShopComponent), "LoadGame", postfix: nameof(Fill), consequence: IfMissed);
     }
 
     /// <summary>Moves each open shop's turbines to the stock settings, after the shops' lists were changed to match.</summary>
@@ -57,7 +57,7 @@ internal static class ShopStock
         }
         catch (Exception ex)
         {
-            Fail("restock", ex);
+            _hooks?.Fail("restocking the turbines in the open shops", ex);
         }
     }
 
@@ -111,7 +111,7 @@ internal static class ShopStock
         }
         catch (Exception ex)
         {
-            Fail("shop stock", ex);
+            _hooks?.Fail("stocking a shop with the turbines", ex);
         }
     }
 
@@ -162,31 +162,5 @@ internal static class ShopStock
         }
 
         return isChanged;
-    }
-
-    private static void Hook(Harmony harmony, string method)
-    {
-        try
-        {
-            var target = AccessTools.Method(typeof(BuildShopComponent), method);
-
-            if (target == null)
-            {
-                _log($"cannot find BuildShopComponent.{method}, so a run already going may not see the turbines in its shops");
-
-                return;
-            }
-
-            harmony.Patch(target, postfix: new HarmonyMethod(typeof(ShopStock), nameof(Fill)));
-        }
-        catch (Exception ex)
-        {
-            _log($"cannot hook BuildShopComponent.{method}: {ex.Message}");
-        }
-    }
-
-    private static void Fail(string where, Exception ex)
-    {
-        if (Failed.Add(where)) _log($"the turbines' {where} step failed (reported once): {ex}");
     }
 }

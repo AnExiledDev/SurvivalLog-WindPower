@@ -6,7 +6,7 @@ using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle;
 using GameCore.HotUpdate.Battle.Show;
 using GameCore.Scripts;
-using HarmonyLib;
+using ExiledToolkit.Game;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -42,14 +42,17 @@ internal static class TurbineModel
     private static Action<string> _log = _ => { };
     private static GameObject? _holder;
 
-    public static void Apply(Harmony harmony, Action<string> log)
+    /// <param name="log">For the model's own lines; a hook that cannot be placed is logged by <paramref name="hooks"/>.</param>
+    public static void Apply(PatchKit hooks, Action<string> log)
     {
+        const string ifMissed = "the wind turbines may look like solar panels";
+
         _log = log;
 
-        Patch(harmony, AccessTools.Method(typeof(BattleResource), "LoadPrefabWithFallback", new[] { typeof(string) }), prefix: nameof(GiveOurModel));
-        Patch(harmony, AccessTools.Method(typeof(PreLoaderDataExtension), "AddChild"), prefix: nameof(SkipPreloadingOurModel));
-        Patch(harmony, AccessTools.Method(typeof(BattleResource), "LoadGameObject", new[] { typeof(string) }), postfix: nameof(FindRotor));
-        Patch(harmony, AccessTools.Method(typeof(BattleResource), "LoadGameObject", new[] { typeof(string), typeof(GameObject), typeof(bool) }), postfix: nameof(FindRotorParented));
+        hooks.Patch(typeof(TurbineModel), typeof(BattleResource), "LoadPrefabWithFallback", new[] { typeof(string) }, prefix: nameof(GiveOurModel), consequence: ifMissed);
+        hooks.Patch(typeof(TurbineModel), typeof(PreLoaderDataExtension), "AddChild", prefix: nameof(SkipPreloadingOurModel), consequence: ifMissed);
+        hooks.Patch(typeof(TurbineModel), typeof(BattleResource), "LoadGameObject", new[] { typeof(string) }, postfix: nameof(FindRotor), consequence: ifMissed);
+        hooks.Patch(typeof(TurbineModel), typeof(BattleResource), "LoadGameObject", new[] { typeof(string), typeof(GameObject), typeof(bool) }, postfix: nameof(FindRotorParented), consequence: ifMissed);
     }
 
     /// <summary>Called every frame on the main thread: moves every turbine that is still in the world.</summary>
@@ -545,24 +548,5 @@ internal static class TurbineModel
         stream.CopyTo(copy);
 
         return copy.ToArray();
-    }
-
-    private static void Patch(Harmony harmony, System.Reflection.MethodInfo? target, string? prefix = null, string? postfix = null)
-    {
-        if (target == null)
-        {
-            _log("cannot find a model loading method; the wind turbines may look like solar panels");
-
-            return;
-        }
-
-        try
-        {
-            harmony.Patch(target, prefix: prefix == null ? null : new HarmonyMethod(typeof(TurbineModel), prefix), postfix: postfix == null ? null : new HarmonyMethod(typeof(TurbineModel), postfix));
-        }
-        catch (Exception ex)
-        {
-            _log($"cannot hook {target.DeclaringType?.Name}.{target.Name}: {ex.Message}");
-        }
     }
 }

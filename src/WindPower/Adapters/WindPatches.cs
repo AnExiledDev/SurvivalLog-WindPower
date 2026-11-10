@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using GameCore.HotUpdate.Battle.Show;
-using HarmonyLib;
 using ExiledToolkit.Game;
 using WindPower.Core;
 using Il2CppFurnitures = Il2CppSystem.Collections.Generic.List<GameCore.HotUpdate.Battle.Logic.Furniture>;
@@ -26,12 +25,12 @@ internal static class WindPatches
     /// <summary>How far above the turbine's foot the power hover points: about a person's chest.</summary>
     private const float HoverAboveFoot = 1.2f;
 
-    private static readonly HashSet<string> Failed = new();
+    private const string IfMissed = "the turbine's wind power is missing from one place";
 
     /// <summary>Whether each turbine stands on the 2F terrace, by instance id; emptied with every weather read.</summary>
     private static readonly Dictionary<long, bool> OnTerrace = new();
 
-    private static Action<string> _log = _ => { };
+    private static PatchKit? _hooks;
     private static int _weatherId = -1;
     private static string _weatherName = "";
     private static float _windReadAt = float.MinValue;
@@ -39,14 +38,14 @@ internal static class WindPatches
     private static float _boost = 1f;
     private static float _calm;
 
-    public static void Apply(Harmony harmony, Action<string> log)
+    public static void Apply(PatchKit hooks)
     {
-        _log = log;
+        _hooks = hooks;
 
-        Hook(harmony, typeof(PowerManager), "CalculateGeneration", nameof(AddWindPower));
-        Hook(harmony, typeof(PowerManager), "BuildSolarFloatData", nameof(ShowWindInPowerHover));
-        Hook(harmony, typeof(PowerManager), "CollectFacilitiesJson", nameof(ShowWindInPowerPanel));
-        Hook(harmony, typeof(Furniture), "GetElectricalHoverText", nameof(ShowWindInNameHover));
+        hooks.Patch(typeof(WindPatches), typeof(PowerManager), "CalculateGeneration", postfix: nameof(AddWindPower), consequence: IfMissed);
+        hooks.Patch(typeof(WindPatches), typeof(PowerManager), "BuildSolarFloatData", postfix: nameof(ShowWindInPowerHover), consequence: IfMissed);
+        hooks.Patch(typeof(WindPatches), typeof(PowerManager), "CollectFacilitiesJson", postfix: nameof(ShowWindInPowerPanel), consequence: IfMissed);
+        hooks.Patch(typeof(WindPatches), typeof(Furniture), "GetElectricalHoverText", postfix: nameof(ShowWindInNameHover), consequence: IfMissed);
     }
 
     /// <summary>
@@ -172,7 +171,7 @@ internal static class WindPatches
         }
         catch (Exception ex)
         {
-            Fail("power supply", ex);
+            _hooks?.Fail("adding the turbines' wind power to the power supply", ex);
         }
     }
 
@@ -186,7 +185,7 @@ internal static class WindPatches
         }
         catch (Exception ex)
         {
-            Fail("power hover", ex);
+            _hooks?.Fail("showing a turbine's wind power in the power hover", ex);
             return;
         }
 
@@ -205,7 +204,7 @@ internal static class WindPatches
         }
         catch (Exception ex)
         {
-            Fail("power hover", ex);
+            _hooks?.Fail("showing a turbine's wind power in the power hover", ex);
         }
 
         try
@@ -214,7 +213,7 @@ internal static class WindPatches
         }
         catch (Exception ex)
         {
-            Fail("power hover's position", ex);
+            _hooks?.Fail("moving the power hover to a turbine's foot", ex);
         }
     }
 
@@ -266,7 +265,7 @@ internal static class WindPatches
         }
         catch (Exception ex)
         {
-            Fail("power panel", ex);
+            _hooks?.Fail("showing the turbines' wind power in the power panel", ex);
         }
     }
 
@@ -280,7 +279,7 @@ internal static class WindPatches
         }
         catch (Exception ex)
         {
-            Fail("name hover", ex);
+            _hooks?.Fail("showing a turbine's wind power in the name hover", ex);
         }
     }
 
@@ -298,31 +297,5 @@ internal static class WindPatches
         var text = string.IsNullOrEmpty(key) ? null : ConstantTextTools.GetLocalText(key);
 
         return string.IsNullOrEmpty(text) || text == key ? fallback : text;
-    }
-
-    private static void Hook(Harmony harmony, Type type, string method, string postfix)
-    {
-        try
-        {
-            var target = AccessTools.Method(type, method);
-
-            if (target == null)
-            {
-                _log($"cannot find {type.Name}.{method}, so the turbine's wind power is missing from one place");
-
-                return;
-            }
-
-            harmony.Patch(target, postfix: new HarmonyMethod(typeof(WindPatches), postfix));
-        }
-        catch (Exception ex)
-        {
-            _log($"cannot hook {type.Name}.{method}: {ex.Message}");
-        }
-    }
-
-    private static void Fail(string where, Exception ex)
-    {
-        if (Failed.Add(where)) _log($"the turbine's wind power in the {where} failed (reported once): {ex}");
     }
 }

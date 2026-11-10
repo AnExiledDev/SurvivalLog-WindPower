@@ -70,13 +70,13 @@ Then delete `WindPower.dll` from the `BepInEx\plugins` folder. For a clean slate
 
 - Survival Log 1.1.20719.
 - BepInEx for Survival Log.
-- [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.19.0 or newer. Wind Power does not load without it. It lets settings changed on the Mod Manager's Mods screen take effect without restarting the game.
+- [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.20.0 or newer. Wind Power does not load without it. It lets settings changed on the Mod Manager's Mods screen take effect without restarting the game.
 - Optional: [Mod Manager](https://www.nexusmods.com/survivallog/mods/73). With it, you can change every setting in game on its Mods screen and see what each one does, without opening the config file. Each turbine's materials and what it gives back when taken down show as item cards with the item's picture and name: pick an item from a list and set how many, with no item ids to look up.
 
 ## Install
 
 1. Install the [BepInEx Pack for Survival Log](https://www.nexusmods.com/survivallog/mods/12) (if no other mods were installed before, start the game once so BepInEx finishes setup, then quit).
-2. Install Exiled's Toolkit 0.19.0 or newer. Download `ExiledToolkit-x.y.z.zip` from [its latest release](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/61), and extract it into the game folder (the folder with `SurvivalLog.exe`).
+2. Install Exiled's Toolkit 0.20.0 or newer. Download `ExiledToolkit-x.y.z.zip` from [its latest release](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/61), and extract it into the game folder (the folder with `SurvivalLog.exe`).
 3. Download `WindPower-x.y.z.zip` from the [latest release](https://github.com/AnExiledDev/SurvivalLog-WindPower/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/136).
 4. Extract the zip into the game folder. It holds a `BepInEx` folder, so the DLL lands in the right place. When asked, merge the folders. The result should be:
    `C:\Program Files (x86)\Steam\steamapps\common\Survival Log\BepInEx\plugins\WindPower.dll`

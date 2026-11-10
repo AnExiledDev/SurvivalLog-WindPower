@@ -5,6 +5,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using ExiledToolkit;
+using ExiledToolkit.Game;
 using HarmonyLib;
 using WindPower.Adapters;
 using WindPower.Core;
@@ -12,11 +13,11 @@ using WindPower.Core;
 namespace WindPower;
 
 [BepInPlugin(Guid, "Wind Power", Version)]
-[BepInDependency("com.dev.survivallog.exiledtoolkit", ">=0.19.0")]
+[BepInDependency("com.dev.survivallog.exiledtoolkit", ">=0.20.0")]
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.9.4";
+    private const string Version = "0.9.5";
 
     public override void Load()
     {
@@ -47,14 +48,14 @@ public sealed class Plugin : BasePlugin
 
         var tables = new TurbineTables(message => Log.LogInfo(message));
         var weatherPage = new WeatherPage(message => Log.LogInfo(message));
-        var harmony = new Harmony(Guid);
+        var hooks = new PatchKit(new Harmony(Guid), Warn);
         var iconPlaced = false;
 
-        WindPatches.Apply(harmony, message => Log.LogWarning(message));
+        WindPatches.Apply(hooks);
         WindBoosts.OnFailed = source => Log.LogWarning($"{source}'s wind multiplier failed, so it no longer counts");
-        SavePatches.Apply(harmony, message => Log.LogWarning(message));
-        ShopStock.Apply(harmony, message => Log.LogWarning(message));
-        TurbineModel.Apply(harmony, message => Log.LogInfo(message));
+        SavePatches.Apply(hooks);
+        ShopStock.Apply(hooks);
+        TurbineModel.Apply(hooks, message => Log.LogInfo(message));
 
         WindTicker.Log = message => Log.LogError(message);
         UninstallPrep.Log = message => Log.LogInfo(message);
@@ -75,6 +76,13 @@ public sealed class Plugin : BasePlugin
         };
         AddComponent<WindTicker>();
         Log.LogInfo($"Wind Power {Version} loaded");
+    }
+
+    /// <summary>A hook that could not be placed is an error, so the Mod Manager can show the mod may need an update.</summary>
+    private void Warn(string message)
+    {
+        if (HookFailure.Is(message)) Log.LogError(message);
+        else Log.LogWarning(message);
     }
 
     /// <summary>Each weather's wind, one setting per weather in its own section. Every one applies live, within a second.</summary>
