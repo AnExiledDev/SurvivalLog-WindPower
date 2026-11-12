@@ -153,19 +153,19 @@ public class WindOutputTests
     [Fact]
     public void TheNoteShowsThatTurbinesOwnRating()
     {
-        Assert.StartsWith("Rated 18,", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", 18f, WindOutput.Share(3), "Moderate", isOnTerrace: false));
+        Assert.StartsWith("Rated 18,", WindOutput.Note("Rated {0}", "{0}, wind {1}", "2F terrace +20%", "Rainy", 18f, WindOutput.Share(3), "Moderate", isOnTerrace: false));
     }
 
     [Fact]
     public void TheNoteShowsTheRatingTheWeatherAndTheWindsShare()
     {
-        Assert.Equal("Rated 48, Rainy wind Moderate (35%/100%)", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), "Moderate", isOnTerrace: false));
+        Assert.Equal("Rated 48, Rainy, wind Moderate (35%/100%)", WindOutput.Note("Rated {0}", "{0}, wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), "Moderate", isOnTerrace: false));
     }
 
     [Fact]
     public void ATerraceTurbinesNoteAddsTheTerracesBonus()
     {
-        Assert.Equal("Rated 48, Rainy wind Moderate (35%/100%), 2F terrace +20%", WindOutput.Note("Rated {0}", "{0} wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), "Moderate", isOnTerrace: true));
+        Assert.Equal("Rated 48, Rainy, wind Moderate (35%/100%), 2F terrace +20%", WindOutput.Note("Rated {0}", "{0}, wind {1}", "2F terrace +20%", "Rainy", Rated, WindOutput.Share(3), "Moderate", isOnTerrace: true));
     }
 
     // A player read a bare "30" as a wind speed and asked whether 30 was the most. The word says how strong the wind

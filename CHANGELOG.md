@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.6
+
+- Clearer wording in the settings and on screen.
+- Made for Survival Log 1.1.20719.
+
 ## 0.9.5
 
 - Now needs Exiled's Toolkit 0.20.0 or newer.
@@ -8,31 +13,34 @@
 
 ## 0.9.4
 
-- New Weather settings: how hard the wind blows in each weather, as a percent of full wind. The defaults keep the wind as it was.
+- New Weather settings set how hard the wind blows in each weather, as a percent of full wind. The defaults keep the wind as it was.
 - Power Manager 0.5.0 or newer can now give Heavy Smog some wind with its SmogOutput setting, so the turbines turn and make power there. Without it, Heavy Smog stays still as before.
 - Made for Survival Log 1.1.20719.
 
 ## 0.9.3
 
-- Power Manager 0.4.0 or newer can now make the turbines stronger or weaker with its Wind setting. Without it, nothing changes.
+- Power Manager 0.4.0 or newer can now make the turbines stronger or weaker with its WindMultiplier setting. Without it, nothing changes.
 - Made for Survival Log 1.1.20719.
 
 ## 0.9.2
 
-- The wind now reads as a word and a percent of full wind, such as Light (20%/100%), so it is clear that 100% is full wind and not a cap: a gust in Severe Cold can show Gale (130%/100%). The words are Calm, Light, Moderate, Strong and Gale. The weather box line is now called Wind, and a turbine's hover shows the same reading.
+- The wind now shows as a word and a percent of full wind, such as Light (20%/100%). The words are Calm, Light, Moderate, Strong and Gale.
+- 100% is full wind, and a gust can go past it, so Severe Cold can show Gale (130%/100%).
+- The line in the weather box is now called Wind, and a turbine's hover shows the same reading.
 - Made for Survival Log 1.1.20719.
 
 ## 0.9.1
 
-- With UninstallPrep on, a shop that loads no longer gets the mod's stock records put back in it, so a save made right after holds none of them. Shops that never sell a turbine get none either.
-- If writing the turbines' rows fails partway, the mod tries again a few seconds later instead of leaving them half written.
+- Fixed: with UninstallPrep on, a shop could get its turbine entries back when it loaded. Now a save made with UninstallPrep on has no turbine entries left in any shop.
+- Shops that never sell a turbine no longer get turbine entries added to them.
+- If setting up the turbines fails partway through, the mod now tries again a few seconds later instead of leaving them half set up.
 - Made for Survival Log 1.1.20719.
 
 ## 0.9.0
 
 - The turbines can be crafted in any of the game's 8 colours, like the solar panels: pick a dye on the turbine's recipe card at the workbench. The coloured package has its own icon and unpacks into a dyed turbine.
 - A dye can no longer be one of a turbine's Materials, since picking a colour adds one.
-- Raising a turbine's shop stock now reaches a shop that was saved before the change, counting the turbines you already bought there. Before, only a shop open at the time took a raise.
+- Raising a turbine's ShopStock now also reaches a shop that wasn't loaded when you changed it, and the turbines you already bought there still count. Before, only a shop that was loaded at the time got the raise.
 - With Cheat Menu installed, its Mod tests tab has a Give 1 of each dye button.
 - Made for Survival Log 1.1.20719.
 
@@ -48,7 +56,7 @@
 
 ## 0.8.0
 
-- New setting for each turbine: Returns. It names exactly what taking that turbine down gives back, any items you like. Left blank, the turbine gives back its ReturnPercent share as before; set to none, it gives back nothing.
+- New setting for each turbine: Returns. It sets exactly what taking the turbine down gives back, and it can be any items you like. Left blank, the turbine gives back its ReturnPercent share as before. Set to none, it gives back nothing.
 - With Mod Manager 0.14.0 or newer, each turbine's Materials and Returns show as item cards you pick from every item in the game, with what the recipe is worth and a warning when taking the turbine down would give back more than that.
 - The Mods screen now says why a turbine cannot use a materials list, such as one with exactly the same materials as one of the game's recipes or another turbine's.
 - Made for Survival Log 1.1.20151.
@@ -60,8 +68,8 @@
 
 ## 0.7.0
 
-- The wind now rises and falls within a weather instead of blowing at one strength all day. It swells and slackens over the hours, by up to 30% either way, and every turbine and the rotors follow it. Over a day it evens out to the same power as before.
-- New setting: Variation, under Wind. It sets how far the wind swings; 0 keeps it steady as before.
+- The wind now rises and falls within a weather instead of blowing at one strength all day. It picks up and dies down over the hours, by up to 30% either way at the default setting, and every turbine and its rotor follow it. Over a few days it evens out to the same power as before.
+- New setting: Variation, under Wind. It sets how far the wind swings, and 0 keeps it steady like before.
 - Made for Survival Log 1.1.20151.
 
 ## 0.6.2
@@ -71,21 +79,21 @@
 
 ## 0.6.1
 
-- Dyed turbines are coloured the way the game colours its own furniture, so they match a dyed solar panel next to them.
+- Dyed turbines now take the colour the same way the game's furniture does, so they match a dyed solar panel next to them.
 - Made for Survival Log 1.1.20151.
 
 ## 0.6.0
 
-- The turbines can be dyed, like the game's furniture, in any of its 8 colours. The olive paint takes the colour; the orange stripes, the blades and the rust stay as they are.
+- The turbines can be dyed, like the game's furniture, in any of its 8 colours. The olive paint takes the colour, and the orange stripes, the blades and the rust stay as they are.
 - Made for Survival Log 1.1.20151.
 
 ## 0.5.0
 
-- New: a Small Wind Turbine. Three blades and a tail vane on a pole, for a small furniture spot in the yard outside or on the 2F terrace. Its head turns to face the wind.
+- New: a Small Wind Turbine. Three blades and a tail vane on a pole, for a small furniture spot in the yard outside. Its head turns to face the wind.
 - The Small Wind Turbine makes up to 9 power. Its recipe shows up with the Medium Solar Panel's, when [Main Quest] Assemble Solar Panels begins, and its package takes 3 Scrap Metal, 1 Wire and 1 Electronic Components. The Classic Furniture shop sells 2 before the disaster, for 30 each.
 - Taking a turbine down now gives back about half of what its package took, following its Materials setting. Before, it gave back the solar panel's parts.
 - New setting: UninstallPrep, under Uninstall. Turn it on before you remove the mod and load your save: turbine packages in bags, in storage and on the floor become solar panel packages of the same size, and the shops stop selling turbines. Then save, quit and remove WindPower.dll, and nothing is lost.
-- The Cheat Menu button Show both recipes now is now Show all recipes now.
+- The Cheat Menu button Show both recipes now is renamed to Show all recipes now.
 - Made for Survival Log 1.1.20151.
 
 ## 0.4.1

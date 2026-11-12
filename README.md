@@ -6,14 +6,14 @@ Adds three wind turbines to Survival Log. They keep making power after dark, and
 - **Medium Wind Turbine**: an upright rotor of two half drums that catches the wind from any side. It fits a medium furniture spot.
 - **Large Wind Turbine**: three blades on a mast. Every so often a gust comes through, and the whole top swings round to meet it. It fits a large furniture spot.
 
-Each turbine has its own model and icon, and can be dyed like the game's furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. You can also craft one already coloured, by picking a dye on its recipe card at the workbench. The rotor speeds up and slows down smoothly with the wind and stands still in Heavy Smog. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The wind rises and falls over the hours, and the rotors follow it. The weather box on the screen shows the wind too, as a Wind line. The wind reads as a word and its percent of full wind, such as Moderate (35%/100%): Calm in Heavy Smog, Light on clear and cloudy days, Moderate in rain, Strong in the cold snaps and Heavy Rain, and Gale in Severe Cold. A gust can take it past 100%, up to Gale (130%/100%) at the default settings.
+Each turbine has its own model and icon, and can be dyed like the game's furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. You can also craft one already coloured, by picking a dye on its recipe card at the workbench. The wind picks up and dies down over the hours, and the rotors speed up and slow down smoothly with it. In Heavy Smog there's no wind at the default settings, so they stand still. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The weather box on the screen gets a Wind line too, such as Moderate (35%/100%). The word tells you how strong the wind is, and the percent is how hard it blows compared to full wind. A gust can push it past 100%, up to Gale (130%/100%) at the default settings. What each word means is under Power below.
 
 ## Getting them
 
-- The Small and Medium Wind Turbines' recipes show up with the Medium Solar Panel's, when [Main Quest] Assemble Solar Panels begins. The Small Wind Turbine Package takes 3 Scrap Metal, 1 Wire and 1 Electronic Components; the Medium takes 4 Scrap Metal, 2 Wire and 2 Electronic Components.
-- The Large Wind Turbine's recipe shows up with the Lead-Acid Battery Pack's, when [Main Quest] Store the Electricity begins. Its package takes 5 Scrap Metal, 3 Wire, 3 Electronic Components and 1 Stainless Steel Plate.
+- The Small and Medium Wind Turbines' recipes show up with the Medium Solar Panel's, when [Main Quest] Assemble Solar Panels begins. By default the Small Wind Turbine Package takes 3 Scrap Metal, 1 Wire and 1 Electronic Components, and the Medium takes 4 Scrap Metal, 2 Wire and 2 Electronic Components.
+- The Large Wind Turbine's recipe shows up with the Lead-Acid Battery Pack's, when [Main Quest] Store the Electricity begins. By default its package takes 5 Scrap Metal, 3 Wire, 3 Electronic Components and 1 Stainless Steel Plate.
 - A save that is already past those quests gets the recipes when it loads.
-- Before the disaster, the Classic Furniture shop sells 2 of each: the Small Wind Turbine for 30, the Medium for 60 and the Large for 120.
+- Before the disaster, the Classic Furniture shop sells the turbines too. By default it has 2 of each, the Small Wind Turbine for 30, the Medium for 60 and the Large for 120.
 - Taking a turbine down gives back about half of what its package took. The `ReturnPercent` setting changes how much, and each turbine's `Returns` setting can name exactly what it gives back instead.
 - On the Mod Manager's Mods screen (0.14.0 or newer), each turbine's materials and what it gives back show as item cards you pick from every item in the game. The screen shows what the recipe is worth, warns when taking the turbine down would give back more than that, and says when the turbine cannot use a list, such as one with exactly the same materials as another recipe.
 - **Test buttons**: with Cheat Menu installed, its Mod tests tab shows the wind now and what each turbine makes, the wind for the next 12 hours, and what each turbine takes and gives back. It can also show all the recipes right away, and put one of each turbine package, the materials for each, or one of each dye in your bag.
@@ -34,9 +34,9 @@ A turbine makes less than the solar panel of its size, since it keeps going at n
 | Moderate Cold | 7 | 14 | 29 |
 | Severe Cold | 9 | 18 | 36 |
 
-A Medium or Large turbine on the 2F terrace stands higher in the wind and makes 20% more: up to 22 for the medium and 43 for the large. The terrace has no small spots.
+A Medium or Large turbine on the 2F terrace stands higher in the wind and makes 20% more, so in Severe Cold the Medium makes 22 there and the Large makes 43. The terrace has no small spots.
 
-A turbine's power setting is what it makes in full wind, the average wind in Severe Cold at the default settings. The Wind line in the weather box shows how hard the wind blows compared to that, such as Moderate (35%/100%), and a turbine makes its power setting times that percent: a Large set to 36 makes about 13 at 35%. 100% isn't the top, since a gust can push it past 100%. What each word means, and the weather you'll usually see it in:
+A turbine's power setting is what it makes in full wind, which is the average wind in Severe Cold at the default settings. The Wind line in the weather box shows how hard the wind blows compared to that, such as Moderate (35%/100%). A turbine makes its power setting times that percent, so a Large set to 36 makes about 13 at 35%. 100% isn't the top, since a gust can push it past 100%. Here's what each word means, and the weather you'll usually see it in at the default settings:
 
 - **Calm** (0%): Heavy Smog. The turbines stand still.
 - **Light** (1-29%): clear and cloudy days.
@@ -44,7 +44,7 @@ A turbine's power setting is what it makes in full wind, the average wind in Sev
 - **Strong** (50-89%): Mild Cold, Moderate Cold and Heavy Rain.
 - **Gale** (90% and up): Severe Cold.
 
-These are averages. Within a weather the wind rises and falls over the hours, by up to 30% either way at the default, so a rainy afternoon might give a small turbine 2 one hour and 4 the next. Every turbine feels the same wind, and over several days it evens out to the numbers above. The `Variation` setting widens or narrows the swing, and 0 keeps the wind steady.
+These are averages. Within a weather the wind rises and falls over the hours, by up to 30% either way at the default setting, so a rainy afternoon might give a small turbine 2 one hour and 4 the next. Every turbine feels the same wind, and over several days it evens out to the numbers above. The `Variation` setting widens or narrows the swing, and 0 keeps the wind steady.
 
 With [Power Manager](https://www.nexusmods.com/survivallog/mods/126) 0.4.0 or newer, its `WindMultiplier` setting makes every turbine stronger or weaker, like its solar setting does for the panels. A turbine's hover then shows its power with that setting, and the wind reading stays as it is. With Power Manager 0.5.0 or newer, its `SmogOutput` setting can also give Heavy Smog some wind, as a share of a Clear day's, so the turbines turn and make power there too.
 

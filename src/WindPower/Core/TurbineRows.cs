@@ -63,7 +63,7 @@ public static class TurbineRows
 
     public static readonly IReadOnlyList<Text> SharedTexts = WindOutput.Strengths.Select(strength => strength.Word).Concat(new[]
     {
-        new Text(WindNoteKey, "{0} wind {1}", "{0}风力 {1}"),
+        new Text(WindNoteKey, "{0}, wind {1}", "{0}风力 {1}"),
         new Text(TerraceNoteKey, "2F terrace +20%", "二楼露台 +20%"),
         new Text(WindLabelKey, "Wind", "风力"),
     }).ToList();

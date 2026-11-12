@@ -10,12 +10,12 @@ Wind Power adds three wind turbines to Survival Log, a Small, a Medium and a Lar
 [list]
 [*][b]Three turbines[/b]: the Small has three blades and a tail on a pole, and turns itself to face the wind. The Medium is an upright rotor made of two half drums, so it catches wind from any side. The Large has three blades on a tall mast, and every so often a gust comes through and swings the whole top around. Each one has its own model and icon.[/*]
 [*][b]Power day and night[/b]: at the default settings Heavy Smog stops them completely, and Severe Cold is the windiest weather, where they average 9, 18 and 36. Every weather's numbers are in the table below.[/*]
-[*][b]The wind changes[/b]: the wind picks up and dies down over the hours, by up to 30% either way, and the turbines and their blades follow it. It averages out over a few days. The Variation setting controls how much it swings, and 0 turns it off.[/*]
+[*][b]The wind changes[/b]: the wind picks up and dies down over the hours, by up to 30% either way at the default setting, and the turbines and their blades follow it. It averages out over a few days. The Variation setting controls how much it swings, and 0 turns it off.[/*]
 [*][b]2F terrace bonus[/b]: the Medium and Large make 20% more on the 2F terrace than in the yard. The Small only fits the yard, since the terrace has no small spots.[/*]
 [*][b]Outdoors only[/b]: each turbine goes in an outdoor furniture spot of its size, never indoors.[/*]
 [*][b]Unlocked by the story[/b]: the Small and Medium recipes unlock with the Medium Solar Panel's, when [Main Quest] Assemble Solar Panels starts. The Large unlocks with the Lead-Acid Battery Pack's, at [Main Quest] Store the Electricity. If your save is already past those quests, you get the recipes when it loads.[/*]
-[*][b]Crafting[/b]: the Small Wind Turbine Package takes 3 Scrap Metal, 1 Wire and 1 Electronic Components. The Medium takes 4 Scrap Metal, 2 Wire and 2 Electronic Components. The Large takes 5 Scrap Metal, 3 Wire, 3 Electronic Components and 1 Stainless Steel Plate. Taking one down gives you back about half.[/*]
-[*][b]Buying[/b]: before the disaster, the Classic Furniture shop sells 2 of each, the Small for 30, the Medium for 60 and the Large for 120.[/*]
+[*][b]Crafting[/b]: by default the Small Wind Turbine Package takes 3 Scrap Metal, 1 Wire and 1 Electronic Components. The Medium takes 4 Scrap Metal, 2 Wire and 2 Electronic Components. The Large takes 5 Scrap Metal, 3 Wire, 3 Electronic Components and 1 Stainless Steel Plate. Taking one down gives you back about half.[/*]
+[*][b]Buying[/b]: before the disaster, the Classic Furniture shop sells the turbines too. By default it has 2 of each, the Small for 30, the Medium for 60 and the Large for 120.[/*]
 [*][b]Dyeable[/b]: dye them in any of the game's 8 colours like your other furniture, or pick a dye on the recipe card to craft one already coloured. Only the olive paint changes colour, the orange stripes and blades stay the same.[/*]
 [*][b]Wind readout[/b]: the weather box shows a Wind line, such as Moderate (35%/100%), and hovering over a turbine shows what it's making right now and how strong the wind is. 100% is full wind, and a gust can go past it.[/*]
 [*][b]Fully configurable[/b]: you set each turbine's power, materials, what it gives back when taken down, shop price and shop stock, on the Mod Manager's Mods screen or in the config file. With Mod Manager 0.14.0 or newer you pick the materials from item cards, and the screen warns you if a turbine would give back more than its recipe costs.[/*]
@@ -24,7 +24,7 @@ Wind Power adds three wind turbines to Survival Log, a Small, a Medium and a Lar
 [/list]
 
 [size=5]Power output[/size]
-What each turbine makes on average at the default settings (power 9, 18 and 36), by weather. A turbine makes its full power setting in Severe Cold, and the wind moves these up and down by up to 30% over the hours. Each weather's wind is a setting too, in the Weather section. How to read the wind in game is under Reading the wind below.
+What each turbine makes on average at the default settings (power 9, 18 and 36), by weather. A turbine makes its full power setting in Severe Cold, and the wind moves these numbers up and down over the hours, by up to 30% at the default setting. Each weather's wind is a setting too, in the Weather section. How to read the wind in game is under Reading the wind below.
 [list]
 [*][b]Heavy Smog[/b]: 0, the turbines stand still.[/*]
 [*][b]Frosty/Clear, Cold/Clear and Chilly/Clear[/b]: Small 1, Medium 2, Large 4. On the 2F terrace, Medium 2 and Large 4.[/*]
@@ -51,9 +51,9 @@ What each word means, and the weather you'll usually see it in:
 [*][b]Strong[/b] (50-89%): Mild Cold, Moderate Cold and Heavy Rain.[/*]
 [*][b]Gale[/b] (90% and up): Severe Cold.[/*]
 [/list]
-Hover over a turbine to see what it's making right now, with its power setting and the same wind reading below it, such as [i]Rated 36, Rainy wind Moderate (35%/100%)[/i].
+Hover over a turbine to see what it's making right now, with its power setting and the same wind reading below it, such as [i]Rated 36, Rainy, wind Moderate (35%/100%)[/i].
 
-With [url=https://www.nexusmods.com/survivallog/mods/126]Power Manager[/url] 0.4.0 or newer, its Wind setting makes every turbine stronger or weaker, like its solar setting does for the panels. The hover's rating then shows the turbine's power with it, and the wind reading stays as it is. With Power Manager 0.5.0 or newer, its SmogOutput setting can also give Heavy Smog some wind, as a share of a Clear day's, so the turbines turn and make power there too.
+With [url=https://www.nexusmods.com/survivallog/mods/126]Power Manager[/url] 0.4.0 or newer, its WindMultiplier setting makes every turbine stronger or weaker, like its solar setting does for the panels. The hover's rating then shows the turbine's power with it, and the wind reading stays as it is. With Power Manager 0.5.0 or newer, its SmogOutput setting can also give Heavy Smog some wind, as a share of a Clear day's, so the turbines turn and make power there too.
 
 [size=5]Known issues[/size]
 UninstallPrep only changes the save you load while it's on, so load and save each save you want to keep before you remove the mod.
@@ -100,12 +100,12 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [list]
 [*][b]三种风力发电机[/b]：小型是杆子上装着三片叶片和一个尾翼，会自己转向迎风。中型是一根竖轴配两片半圆筒，哪个方向来的风都能接住。大型是高桅杆上的三片叶片，时不时来一阵风，整个机头会跟着转过去。每种都有自己的模型和图标。[/*]
 [*][b]白天晚上都发电[/b]：默认设置下「大雾霾天」完全不转，「重度寒潮」风最大，三种平均分别发 9、18 和 36。每种天气的数字见下面的表。[/*]
-[*][b]风会变[/b]：风会随时间时大时小，上下最多浮动 30%，发电量和叶片转速也跟着变，几天下来会平均回来。「Variation」设置控制浮动幅度，设为 0 就没有浮动。[/*]
+[*][b]风会变[/b]：风会随时间时大时小，默认上下最多浮动 30%，发电量和叶片转速也跟着变，几天下来会平均回来。「Variation」设置控制浮动幅度，设为 0 就没有浮动。[/*]
 [*][b]二楼露台加成[/b]：中型和大型装在二楼露台，比装在屋外空地多发 20% 的电。露台没有小型家具位，所以小型只能装在屋外空地。[/*]
 [*][b]只能装在户外[/b]：每种都要装在户外同尺寸的家具位上，室内装不了。[/*]
-[*][b]跟着剧情解锁[/b]：小型和中型的配方和中型太阳能板的一起出现，在主线任务「拼装太阳能板」开始时。大型和铅酸蓄电池包裹的一起出现，在主线任务「把电存下来」开始时。存档已经过了这两个任务的话，读档时就会拿到配方。[/*]
-[*][b]制作[/b]：小型风力发电机包裹需要 3 个铁皮、1 个铁丝和 1 个电器元件。中型需要 4 个铁皮、2 个铁丝和 2 个电器元件。大型需要 5 个铁皮、3 个铁丝、3 个电器元件和 1 个不锈钢板。拆掉时大约返还一半材料。[/*]
-[*][b]购买[/b]：灾难前，「经典家具综合」商店三种各卖 2 台，小型 30，中型 60，大型 120。[/*]
+[*][b]跟着剧情解锁[/b]：主线任务「拼装太阳能板」开始时，小型和中型的配方会和中型太阳能发电板的配方一起出现。主线任务「把电存下来」开始时，大型的配方会和铅酸蓄电池包裹的配方一起出现。存档已经过了这两个任务的话，读档时就会拿到配方。[/*]
+[*][b]制作[/b]：默认情况下，小型风力发电机包裹需要 3 个铁皮、1 个铁丝和 1 个电器元件。中型需要 4 个铁皮、2 个铁丝和 2 个电器元件。大型需要 5 个铁皮、3 个铁丝、3 个电器元件和 1 个不锈钢板。拆掉时大约返还一半材料。[/*]
+[*][b]购买[/b]：灾难前，「经典家具综合」商店也卖风力发电机。默认三种各 2 台，小型 30，中型 60，大型 120。[/*]
 [*][b]可以染色[/b]：和其他家具一样能染成游戏里的 8 种颜色，也可以在配方卡上选好染料，直接做出彩色的。只有橄榄绿的漆会变色，橙色条纹和叶片不变。[/*]
 [*][b]风力显示[/b]：天气框里多一行「风力」，例如「和风 (35%/100%)」，鼠标悬停在风力发电机上，能看到它现在的发电量和风有多大。100% 是满风力，阵风时可以超过。[/*]
 [*][b]全部可以设置[/b]：每台风力发电机的发电量、材料、拆除返还、商店价格和库存都由你决定，可以在 Mod Manager 的「模组」界面改，也可以改配置文件。用 Mod Manager 0.14.0 或更新版本时，材料用物品卡片来选，拆除返还比配方还值钱时界面会提醒你。[/*]
@@ -114,7 +114,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [/list]
 
 [size=5]发电量[/size]
-默认设置下（发电量 9、18 和 36），各种天气里每种风力发电机的平均发电量。在「重度寒潮」里风力发电机发出它的全部发电量，风会让这些数字随时间上下浮动，最多 30%。每种天气的风力也是一个设置，在 Weather 部分。游戏里怎么看风力，见下面的「怎么看风力」。
+默认设置下（发电量 9、18 和 36），各种天气里每种风力发电机的平均发电量。在「重度寒潮」里，风力发电机正好发出设置的发电量。风会让这些数字随时间上下浮动，默认最多 30%。每种天气的风力也是一个设置，在 Weather 部分。游戏里怎么看风力，见下面的「怎么看风力」。
 [list]
 [*][b]大雾霾天[/b]：0，风力发电机不转。[/*]
 [*][b]霜晴、寒晴和凛晴[/b]：小型 1，中型 2，大型 4。二楼露台上中型 2，大型 4。[/*]
@@ -143,7 +143,7 @@ Open source under MIT: [url=https://github.com/AnExiledDev/SurvivalLog-WindPower
 [/list]
 鼠标悬停在风力发电机上，能看到它现在的发电量，下面写着它的发电量设置和同样的风力，例如「额定 36, 雨天风力 和风 (35%/100%)」。
 
-装了 [url=https://www.nexusmods.com/survivallog/mods/126]Power Manager[/url] 0.4.0 或更新版本时，它的 Wind 设置能让所有风力发电机变强或变弱，就像它的太阳能设置对太阳能发电板一样。这时悬停显示的额定值会算上这个设置，风力显示不变。装了 Power Manager 0.5.0 或更新版本时，它的 SmogOutput 设置还能让「大雾霾天」也有风（为晴天风力的一部分），风力发电机在那时也会转动发电。
+装了 [url=https://www.nexusmods.com/survivallog/mods/126]Power Manager[/url] 0.4.0 或更新版本时，它的 WindMultiplier 设置能让所有风力发电机变强或变弱，就像它的太阳能设置对太阳能发电板一样。这时悬停显示的额定值会算上这个设置，风力显示不变。装了 Power Manager 0.5.0 或更新版本时，它的 SmogOutput 设置还能让「大雾霾天」也有风（为晴天风力的一部分），风力发电机在那时也会转动发电。
 
 [size=5]已知问题[/size]
 「UninstallPrep」只处理开启时读取的那个存档，所以每个想保留的存档，在移除模组前都要各自读取一次并保存。

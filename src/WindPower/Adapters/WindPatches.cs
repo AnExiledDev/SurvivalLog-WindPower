@@ -196,7 +196,7 @@ internal static class WindPatches
             var rated = Rated(kind);
             var share = Wind();
             var isOnTerrace = IsOnTerrace(__0);
-            var note = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0} wind {1}"), Local(TurbineRows.TerraceNoteKey, "2F terrace +20%"), _weatherName, rated, share, StrengthWord(WindOutput.Percent(share)), isOnTerrace);
+            var note = WindOutput.Note(Local(RatedKey, "Rated {0}"), Local(TurbineRows.WindNoteKey, "{0}, wind {1}"), Local(TurbineRows.TerraceNoteKey, "2F terrace +20%"), _weatherName, rated, share, StrengthWord(WindOutput.Percent(share)), isOnTerrace);
 
             __result.PowerCur = WindOutput.Shown(WindOutput.Power(rated, share, isOnTerrace));
             __result.NoteText = note;

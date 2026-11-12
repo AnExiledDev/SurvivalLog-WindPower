@@ -99,7 +99,7 @@ public class MaterialListTests
         Assert.Equal(new[] { 20004 }, materials);
         Assert.Contains("recipe 42", problem!.Log);
         Assert.StartsWith("The game's Table Saw recipe takes exactly these materials.", problem.English);
-        Assert.StartsWith("游戏自带的台锯配方", problem.Chinese);
+        Assert.StartsWith("游戏里台锯的配方", problem.Chinese);
     }
 
     [Fact]

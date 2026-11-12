@@ -114,7 +114,7 @@ public static class MaterialList
         {
             var made = recipeName?.Invoke(other);
             var english = made is { } name ? $"The game's {name.English} recipe takes exactly these materials. " : "A recipe the game already has takes exactly these materials. ";
-            var chinese = made is { } same ? $"游戏自带的{same.Chinese}配方用的正是这些材料。" : "游戏里已有配方用的正是这些材料。";
+            var chinese = made is { } same ? $"游戏里{same.Chinese}的配方用的正是这些材料。" : "游戏里已有配方用的正是这些材料。";
 
             return (standard, Problem($"recipe {other} already uses them", english + noSharing, chinese + noSharingZh));
         }
