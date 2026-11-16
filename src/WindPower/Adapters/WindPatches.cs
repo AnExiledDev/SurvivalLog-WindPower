@@ -88,9 +88,11 @@ internal static class WindPatches
         _weatherId = weather.GetWeatherConfigId();
         _gameSeconds = GameSingleton.Existing<BattleLogicWorld>()?._GameTimeManager?.GetTotalSeconds() ?? 0;
 
-        var row = GameSingleton.Existing<ConfigManager>()?.Get_Config_Weather(_weatherId);
+        // Read the table directly: Get_Config_Weather logs an error for an id it does not have, and the id is 0
+        // until the game picks a weather (and after GmResetWeather), so asking it once a second filled the console.
+        var table = GameSingleton.Existing<ConfigManager>()?._Config_Weather_Dict;
 
-        if (row != null) _weatherName = Local(row.Name, row.Name_Local ?? "");
+        if (table != null && table.TryGetValue(_weatherId, out var row) && row != null) _weatherName = Local(row.Name, row.Name_Local ?? "");
 
         return _weatherId;
     }
