@@ -2,7 +2,7 @@
 
 ## 0.9.7
 
-- Fixed a red "Get_Config_Weather:0" error that could fill the BepInEx console once a second while no weather was set.
+- Fixed a red "Get_Config_Weather:0" error that could fill the BepInEx console once a second before the game picks the weather.
 - Made for Survival Log 1.1.21271.
 
 ## 0.9.6
