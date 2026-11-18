@@ -6,6 +6,21 @@ namespace WindPower.Tests;
 public class UnlocksTests
 {
     [Fact]
+    public void TwoTurbinesThatShareAQuestBothListTheirLineUnderIt()
+    {
+        var lines = Unlocks.QuestLines(new[] { TurbineRows.Small, TurbineRows.Medium, TurbineRows.Large });
+
+        Assert.Equal(new[] { TurbineRows.Small.QuestLine.Zh, TurbineRows.Medium.QuestLine.Zh }, lines[40421]);
+        Assert.Equal(new[] { TurbineRows.Large.QuestLine.Zh }, lines[40422]);
+    }
+
+    [Fact]
+    public void AShopListsOnlyTheTurbinesWithStock()
+    {
+        Assert.Equal(new[] { (910003, 1), (910001, 2) }, Unlocks.Stocked(new[] { (910003, 1), (910002, 0), (910001, 2) }));
+    }
+
+    [Fact]
     public void AQuestRewardGainsTheTurbinesRecipeAtTheEnd()
     {
         Assert.Equal(new[] { 309, 310, 9102 }, Unlocks.WithRecipes(new[] { 309, 310 }, new[] { 9102 }));

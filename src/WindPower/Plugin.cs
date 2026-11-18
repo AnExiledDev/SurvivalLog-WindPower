@@ -13,11 +13,11 @@ using WindPower.Core;
 namespace WindPower;
 
 [BepInPlugin(Guid, "Wind Power", Version)]
-[BepInDependency("com.dev.survivallog.exiledtoolkit", ">=0.20.0")]
+[BepInDependency("com.dev.survivallog.exiledtoolkit", ">=0.28.0")]
 public sealed class Plugin : BasePlugin
 {
-    private const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.9.7";
+    internal const string Guid = "com.dev.survivallog.windpower";
+    private const string Version = "0.9.8";
 
     public override void Load()
     {

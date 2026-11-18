@@ -4,6 +4,7 @@ using System.Linq;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using Il2CppInterop.Runtime.InteropTypes;
+using ExiledToolkit;
 using ExiledToolkit.Game;
 using WindPower.Core;
 using Il2CppDictionary = Il2CppSystem.Collections.Generic;
@@ -16,7 +17,8 @@ namespace WindPower.Adapters;
 /// that were made from them, and brings the turbines into a run: the quest rewards that show the solar panels and
 /// batteries show the turbines too, the two quests say so, and the shops before the disaster sell them. It writes again
 /// when the game loads a table afresh or a setting changes, over its own rows where they already are. Every few
-/// seconds it also shows a turbine's recipe to a player who was already shown the recipe it comes with.
+/// seconds it also shows a turbine's recipe to a player who was already shown the recipe it comes with. Each write is
+/// reported to Exiled's Toolkit, so Mod Manager can tell which mod changed what.
 /// </summary>
 internal sealed class TurbineTables
 {
@@ -237,9 +239,12 @@ internal sealed class TurbineTables
             }
 
             var set = sets[setId];
-            var next = Unlocks.WithRecipes(ToArray(set.ShowProductionList), kinds.Where(kind => kind.RewardSets.Contains(setId)).Select(kind => kind.Ids.Recipe));
+            var recipes = kinds.Where(kind => kind.RewardSets.Contains(setId)).Select(kind => kind.Ids.Recipe).ToList();
+            var next = Unlocks.WithRecipes(ToArray(set.ShowProductionList), recipes);
 
             if (next != null) set.ShowProductionList = RowFields.ToList(next);
+
+            Claims.AddedTo(Plugin.Guid, nameof(Config_RewardSet), setId, nameof(Config_RewardSet.ShowProductionList), recipes);
         }
     }
 
@@ -247,6 +252,8 @@ internal sealed class TurbineTables
     private void AddToQuests(Il2CppDictionary.Dictionary<int, Config_Event>? events, IReadOnlyList<TurbineKind> kinds, Il2CppDictionary.Dictionary<string, string> english, Il2CppDictionary.Dictionary<string, string> chinese)
     {
         if (events == null || events.Count == 0) return;
+
+        var done = new List<TurbineKind>();
 
         foreach (var kind in kinds)
         {
@@ -265,7 +272,12 @@ internal sealed class TurbineTables
             if (chinese.ContainsKey(key) && Unlocks.WithLine(chinese[key], kind.QuestLine.Zh, "\n") is { } zh) chinese[key] = zh;
 
             if (Unlocks.WithLine(quest.EventDes_Local, kind.QuestLine.Zh, "\\n") is { } local) quest.EventDes_Local = local;
+
+            done.Add(kind);
         }
+
+        foreach (var (quest, lines) in Unlocks.QuestLines(done))
+            Claims.AddedTo(Plugin.Guid, nameof(Config_Event), quest, nameof(Config_Event.EventDes_Local), lines);
     }
 
     /// <summary>Lists each turbine in the shops before the disaster with its stock, or takes it off when its stock is 0.</summary>
@@ -286,10 +298,17 @@ internal sealed class TurbineTables
 
             var shop = shops[id];
 
-            if (Unlocks.Shop(ToArray(shop.ItemIdList), ToArray(shop.ItemCountList), ours, wanted) is not { } lists) continue;
+            if (Unlocks.Shop(ToArray(shop.ItemIdList), ToArray(shop.ItemCountList), ours, wanted) is { } lists)
+            {
+                shop.ItemIdList = RowFields.ToList(lists.Ids);
+                shop.ItemCountList = RowFields.ToList(lists.Counts);
+            }
 
-            shop.ItemIdList = RowFields.ToList(lists.Ids);
-            shop.ItemCountList = RowFields.ToList(lists.Counts);
+            // A turbine with no stock is not listed. An empty list here takes back what was reported before.
+            var stocked = Unlocks.Stocked(wanted);
+
+            Claims.AddedTo(Plugin.Guid, nameof(Config_ShopFurniture), id, nameof(Config_ShopFurniture.ItemIdList), stocked.Select(turbine => turbine.Id));
+            Claims.AddedTo(Plugin.Guid, nameof(Config_ShopFurniture), id, nameof(Config_ShopFurniture.ItemCountList), stocked.Select(turbine => turbine.Count));
         }
     }
 
@@ -491,6 +510,7 @@ internal sealed class TurbineTables
 
             _table[plan.Id] = row;
             ours.Add(row.Pointer);
+            Claims.AddedRows(Plugin.Guid, typeof(T).Name, new[] { plan.Id });
 
             return refused;
         }

@@ -37,7 +37,7 @@ public static class Unlocks
             keptCounts.Add(i < counts.Count ? counts[i] : 0);
         }
 
-        foreach (var (id, count) in wanted.Where(pair => pair.Count > 0))
+        foreach (var (id, count) in Stocked(wanted))
         {
             keptIds.Add(id);
             keptCounts.Add(count);
@@ -47,6 +47,16 @@ public static class Unlocks
 
         return isSame ? null : (keptIds.ToArray(), keptCounts.ToArray());
     }
+
+    /// <summary>The turbines a shop lists and their stock: each one wanted with a count above 0, in the same order.</summary>
+    public static IReadOnlyList<(int Id, int Count)> Stocked(IReadOnlyList<(int Id, int Count)> wanted) => wanted.Where(pair => pair.Count > 0).ToList();
+
+    /// <summary>
+    /// The line each quest gains in its row's Chinese text, by quest id. Two turbines can share a quest, so both of their
+    /// lines are listed under it.
+    /// </summary>
+    public static IReadOnlyDictionary<int, string[]> QuestLines(IEnumerable<TurbineKind> kinds) =>
+        kinds.GroupBy(kind => kind.Quest).ToDictionary(group => group.Key, group => group.Select(kind => kind.QuestLine.Zh).ToArray());
 
     /// <summary>
     /// The quest text with <paramref name="line"/> added as a paragraph of its own, or null when it is already there.

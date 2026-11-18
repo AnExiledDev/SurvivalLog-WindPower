@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.8
+
+- Mod Manager's Conflicts tab can now see what Wind Power adds to the game, like the turbines and their spots in the shops and quest rewards, so it can show when another mod changes the same things.
+- Now needs Exiled's Toolkit 0.28.0 or newer.
+- Made for Survival Log 1.1.21271.
+
 ## 0.9.7
 
 - Fixed a red "Get_Config_Weather:0" error that could fill the BepInEx console once a second before the game picks the weather.
