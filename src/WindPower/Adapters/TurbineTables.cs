@@ -33,6 +33,13 @@ internal sealed class TurbineTables
     private readonly IntPtr[] _applied = new IntPtr[Watched];
     private readonly List<Reveal> _reveals = new();
     private HashSet<IntPtr> _ours = new();
+
+    /// <summary>
+    /// The turbines whose rows the last write added. A save only turns back into these: a turbine whose rows were
+    /// skipped would have an id the game cannot create, so it stays the solar panel it was saved as and keeps its
+    /// marker until a later load can add it.
+    /// </summary>
+    public static IReadOnlyList<TurbineKind> Written { get; private set; } = Array.Empty<TurbineKind>();
     private IReadOnlyList<TurbineSettings>? _appliedSettings;
     private float _nextCheckAt;
     private float _nextRevealAt;
@@ -138,6 +145,8 @@ internal sealed class TurbineTables
             WriteDyed(kind, materials, views, recipes, english, chinese);
             written.Add((kind, wanted, materials));
         }
+
+        Written = written.Select(done => done.Kind).ToList();
 
         if (written.Count == 0) return;
 

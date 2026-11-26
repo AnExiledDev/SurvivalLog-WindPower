@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.9
+
+- Fixed: if a turbine could not be added to the game, for example because another mod uses the same id, loading a save with that turbine in it could go wrong. Now it stays a solar panel for that load and turns back into a turbine once it can be added again.
+- Made for Survival Log 1.1.21671.
+
 ## 0.9.8
 
 - Mod Manager's Conflicts tab can now see what Wind Power adds to the game, like the turbines and their spots in the shops and quest rewards, so it can show when another mod changes the same things.

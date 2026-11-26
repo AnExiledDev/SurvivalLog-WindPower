@@ -11,6 +11,24 @@ public class SaveTwinTests
 
     private static SaveTwin.Fields Placed(TurbineKind kind) => new() { AgentConfigId = kind.Ids.Furniture };
 
+    // A turbine whose rows were not added has an id the game cannot create, so its save must stay a solar panel and
+    // keep its marker for a later load.
+    [Fact]
+    public void ATurbineThatWasNotAddedStaysASolarPanelAndKeepsItsMarker()
+    {
+        var small = Kind("Small");
+        var save = Placed(small);
+
+        SaveTwin.ToStock(ref save, Kinds);
+        var marker = save.Name;
+
+        Assert.False(SaveTwin.FromStock(ref save, Kinds.Where(kind => kind != small).ToList()));
+        Assert.Equal(small.Stock.Furniture, save.AgentConfigId);
+        Assert.Equal(marker, save.Name);
+        Assert.False(SaveTwin.ToStock(ref save, Kinds));
+        Assert.Equal(marker, save.Name);
+    }
+
     // Without the mod the game must find an id it knows, or the save does not load.
     [Theory]
     [InlineData("Medium", 40001)]
