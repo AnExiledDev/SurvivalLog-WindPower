@@ -28,6 +28,7 @@ internal static class SavePatches
         hooks.Patch(typeof(SavePatches), typeof(BagFurniture), "SaveGame", postfix: nameof(SaveAsStock), consequence: IfMissed);
         hooks.Patch(typeof(SavePatches), typeof(AgentManager), "DeduplicateAgentSavesForLoad", prefix: nameof(LoadAsTurbine), consequence: IfMissed);
         hooks.Patch(typeof(SavePatches), typeof(GameSaveManager), "CloneAgentSave", postfix: nameof(KeepMarkerOnClone), consequence: IfMissed);
+        hooks.Patch(typeof(SavePatches), typeof(AgentManager), "SaveGame", new[] { typeof(SaveChildData), typeof(int) }, postfix: nameof(ChapterAsStock), consequence: IfMissed);
     }
 
     private static void SaveAsStock(AgentSave __0)
@@ -39,6 +40,27 @@ internal static class SavePatches
             var fields = Read(__0);
 
             if (SaveTwin.ToStock(ref fields, TurbineRows.All)) Write(__0, fields);
+        }
+        catch (Exception ex)
+        {
+            _hooks?.Fail("saving a turbine as its solar panel", ex);
+        }
+    }
+
+    /// <summary>
+    /// After a normal save every entry is a fresh one that is already a solar panel, so nothing changes. When SaveGame
+    /// kept the list from the last load instead, its turbines become solar panels here.
+    /// </summary>
+    private static void ChapterAsStock(SaveChildData __0, int __1)
+    {
+        try
+        {
+            Il2CppAgentSaves? list = null;
+
+            if (__0?._ChapterAgentMap_k__BackingField?.TryGetValue(__1, out list) != true || list == null) return;
+
+            for (var i = 0; i < list.Count; i++)
+                if (list[i] is { } save) SaveAsStock(save);
         }
         catch (Exception ex)
         {

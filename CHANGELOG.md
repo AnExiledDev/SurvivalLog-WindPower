@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.11
+
+- Small speed up: the mod no longer checks the turbine recipes every few seconds. It checks them only when the game shows or unlocks a recipe, or loads a save.
+- Small speed up: the power panel and the mod's timer do a little less work.
+- Fixed a rare case where a turbine could be saved as itself instead of as a solar panel.
+- Made for Survival Log 1.1.21671.
+
 ## 0.9.10
 
 - Mod Manager no longer shows a broken sentence when a dye is in a turbine's Materials list.

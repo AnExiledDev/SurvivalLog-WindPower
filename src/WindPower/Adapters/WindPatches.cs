@@ -31,6 +31,7 @@ internal static class WindPatches
     private static readonly Dictionary<long, bool> OnTerrace = new();
 
     private static PatchKit? _hooks;
+    private static readonly Dictionary<string, int> PowerById = new();
     private static int _weatherId = -1;
     private static string _weatherName = "";
     private static float _windReadAt = float.MinValue;
@@ -70,7 +71,7 @@ internal static class WindPatches
     /// <summary>The weather's Config_Weather id and the game clock, read at most once a second; -1 when there is no weather.</summary>
     private static int WeatherId()
     {
-        var now = UnityEngine.Time.realtimeSinceStartup;
+        var now = WindTicker.Now;
 
         if (now - _windReadAt < WindCheckSeconds && now >= _windReadAt) return _weatherId;
 
@@ -246,7 +247,9 @@ internal static class WindPatches
 
             if (agents == null) return;
 
-            var powerById = new Dictionary<string, int>();
+            var powerById = PowerById;
+
+            powerById.Clear();
 
             foreach (var kind in TurbineRows.All)
             {

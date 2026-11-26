@@ -16,14 +16,15 @@ namespace WindPower.Adapters;
 /// Writes the turbines' rows and text into the game's tables once they are loaded, then rebuilds the game's lookups
 /// that were made from them, and brings the turbines into a run: the quest rewards that show the solar panels and
 /// batteries show the turbines too, the two quests say so, and the shops before the disaster sell them. It writes again
-/// when the game loads a table afresh or a setting changes, over its own rows where they already are. Every few
-/// seconds it also shows a turbine's recipe to a player who was already shown the recipe it comes with. Each write is
+/// when the game loads a table afresh or a setting changes, over its own rows where they already are. When the game
+/// shows a recipe or loads a save, it also shows a turbine's recipe to a player who was already shown the recipe it
+/// comes with (see <see cref="RecipeWakes"/>). Each write is
 /// reported to Exiled's Toolkit, so Mod Manager can tell which mod changed what.
 /// </summary>
 internal sealed class TurbineTables
 {
     private const float CheckSeconds = 1f;
-    private const float RevealSeconds = 5f;
+    private const double RevealPollSeconds = 5;
 
     // The six row tables, the reward sets, the quests, the shop lists, and the two languages.
     private const int Watched = 11;
@@ -32,6 +33,7 @@ internal sealed class TurbineTables
     private readonly IntPtr[] _seen = new IntPtr[Watched];
     private readonly IntPtr[] _applied = new IntPtr[Watched];
     private readonly List<Reveal> _reveals = new();
+    private readonly RevealGate _revealGate = new(RevealPollSeconds);
     private HashSet<IntPtr> _ours = new();
 
     /// <summary>
@@ -42,7 +44,6 @@ internal sealed class TurbineTables
     public static IReadOnlyList<TurbineKind> Written { get; private set; } = Array.Empty<TurbineKind>();
     private IReadOnlyList<TurbineSettings>? _appliedSettings;
     private float _nextCheckAt;
-    private float _nextRevealAt;
 
     public TurbineTables(Action<string> log)
     {
@@ -51,11 +52,7 @@ internal sealed class TurbineTables
 
     public void Tick(float now)
     {
-        if (now >= _nextRevealAt)
-        {
-            _nextRevealAt = now + RevealSeconds;
-            ShowRecipes();
-        }
+        if (_revealGate.IsDue(now, RecipeWakes.Count, RecipeWakes.IsPolling)) ShowRecipes();
 
         if (now < _nextCheckAt) return;
 
@@ -324,6 +321,7 @@ internal sealed class TurbineTables
     private void KeepReveals(Il2CppDictionary.Dictionary<int, Config_ProductionList> recipes, IReadOnlyList<TurbineKind> kinds)
     {
         _reveals.Clear();
+        _revealGate.Again();
 
         foreach (var kind in kinds)
             if (recipes.ContainsKey(kind.Ids.Recipe) && recipes.ContainsKey(kind.RevealedWith)) _reveals.Add(new Reveal(kind, recipes[kind.Ids.Recipe], recipes[kind.RevealedWith]));

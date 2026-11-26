@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ExiledToolkit.Kit;
 using UnityEngine;
 
 namespace WindPower.Adapters;
@@ -12,6 +13,13 @@ public sealed class WindTicker : MonoBehaviour
     internal static Action<float> Check = _ => { };
     internal static Action<string> Log = _ => { };
     private static readonly HashSet<string> ReportedFailures = new();
+    private static readonly double LoadedAt = Clock.Now;
+
+    /// <summary>
+    /// Real seconds since the mod loaded, from the Toolkit clock. Counted from load so a float keeps its precision
+    /// however long the computer has been on.
+    /// </summary>
+    internal static float Now => (float)(Clock.Now - LoadedAt);
 
     public WindTicker(IntPtr pointer) : base(pointer)
     {
@@ -21,7 +29,7 @@ public sealed class WindTicker : MonoBehaviour
     {
         try
         {
-            Check(Time.realtimeSinceStartup);
+            Check(Now);
         }
         catch (Exception ex)
         {
