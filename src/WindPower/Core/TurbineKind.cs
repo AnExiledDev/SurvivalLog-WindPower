@@ -31,10 +31,10 @@ public sealed record TurbineKind
     /// <summary>The solar panel's rows each of ours is copied from.</summary>
     public RowIds Stock { get; init; } = new(0, 0, 0, 0, 0, 0);
 
-    /// <summary>The solar panel's first coloured package (slot 1); the other seven follow it in slot order.</summary>
+    /// <summary>The solar panel's first colored package (slot 1); the other seven follow it in slot order.</summary>
     public int StockDyedItem { get; init; }
 
-    /// <summary>The recipe of the solar panel's first coloured package; the other seven follow it in slot order.</summary>
+    /// <summary>The recipe of the solar panel's first colored package; the other seven follow it in slot order.</summary>
     public int StockDyedRecipe { get; init; }
 
     /// <summary>The prefab name the furniture row gives. The game has no such prefab: the mod builds it.</summary>
@@ -78,7 +78,7 @@ public sealed record TurbineKind
     /// <summary>The names and descriptions its rows point at.</summary>
     public IReadOnlyList<Text> Texts { get; init; } = Array.Empty<Text>();
 
-    /// <summary>Where the web UI finds the icon, written the way the game writes its own (from a page two folders below WebUI).</summary>
+    /// <summary>Where the web UI finds the icon, written the way the game writes the paths to its icons (from a page two folders below WebUI).</summary>
     public string WebIcon => "../../" + TurbineRows.WebIconFolder + "/" + IconFile;
 
     public string Key(string part) => $"WindPower_{Size}_{part}";

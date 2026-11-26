@@ -154,7 +154,7 @@ internal sealed class TurbineTables
         // when this one is empty.
         config.InitProductionListMap();
         config._furnitureToPackageItems = null;
-        // The coloured recipe lookups rebuild themselves when this is empty.
+        // The colored recipe lookups rebuild themselves when this is empty.
         config._dyedRecipeToBase = null;
 
         var kinds = written.Select(done => done.Kind).ToList();
@@ -174,7 +174,7 @@ internal sealed class TurbineTables
     }
 
     /// <summary>
-    /// Writes a turbine's coloured packages, one for each dye whose solar panel rows are there to copy. A dye that
+    /// Writes a turbine's colored packages, one for each dye whose solar panel rows are there to copy. A dye that
     /// cannot be written is left out and the others still are: the plain turbine works without them.
     /// </summary>
     private void WriteDyed(TurbineKind kind, int[] materials, Dictionary<Table, ITableView> views, Il2CppDictionary.Dictionary<int, Config_ProductionList> recipes, Il2CppDictionary.Dictionary<string, string> english, Il2CppDictionary.Dictionary<string, string> chinese)
@@ -200,7 +200,7 @@ internal sealed class TurbineTables
                 _log($"{dye.En} {kind.Name} field not set: {reason}");
         }
 
-        if (skipped.Count > 0) _log($"the {kind.Name} cannot be crafted in these colours: {string.Join(", ", skipped)}");
+        if (skipped.Count > 0) _log($"the {kind.Name} cannot be crafted in these colors: {string.Join(", ", skipped)}");
     }
 
     /// <summary>
@@ -358,7 +358,7 @@ internal sealed class TurbineTables
         catch (Exception ex)
         {
             _reveals.Clear();
-            _log($"cannot show the turbines' recipes in a run already going, so they wait for the quest: {ex}");
+            _log($"cannot show the turbines' recipes in a run you already started, so they wait for the quest: {ex}");
         }
     }
 

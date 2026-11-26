@@ -61,6 +61,17 @@ public class MaterialListTests
         Assert.Null(problem);
     }
 
+    // Picking a color adds a dye when crafting, so a list with a dye in it falls back to the default. The reason the
+    // player reads is one sentence.
+    [Fact]
+    public void ADyeInTheListFallsBackToTheDefaultAndSaysWhy()
+    {
+        var (materials, problem) = MaterialList.Choose("20004:2, 20363:1", Kind, AnyItem, NoOtherRecipe, NothingTaken);
+
+        Assert.Equal(new[] { 20004 }, materials);
+        Assert.Equal("A dye cannot be one of the materials: picking a color adds one when crafting, so the turbine keeps its default materials.\n染料不能作为材料：制作时选颜色会自动加上一份。风力发电机会改用默认材料。", problem!.Player);
+    }
+
     [Fact]
     public void AnUnreadableListFallsBackToTheDefault()
     {

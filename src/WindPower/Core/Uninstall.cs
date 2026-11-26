@@ -12,7 +12,7 @@ namespace WindPower.Core;
 public static class Uninstall
 {
     /// <summary>
-    /// The solar panel package a turbine package becomes, a coloured one the solar panel's package of the same colour,
+    /// The solar panel package a turbine package becomes, a colored one the solar panel's package of the same color,
     /// or null for any other item.
     /// </summary>
     public static int? StockItem(int itemId, IReadOnlyList<TurbineKind> kinds)

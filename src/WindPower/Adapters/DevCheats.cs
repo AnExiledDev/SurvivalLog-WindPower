@@ -20,7 +20,7 @@ public static class DevCheats
     private const string NotInGame = "load a save first";
 
     [DisplayName("Show turbines\n查看风力发电机")]
-    [Description("Shows the weather and the wind now, and for each turbine what it makes in the yard and on the 2F terrace, whether its recipe is shown, its ids and its shop settings.\n显示当前天气和风力，以及每种风力发电机在院子和二楼露台的发电量、配方是否已显示、编号和商店设置。")]
+    [Description("Shows the weather and the wind now, and for each turbine what it makes in the yard and on the 2F terrace, whether its recipe is shown, its ids and its shop settings.\n显示当前天气和风力，以及每种风力发电机在屋外空地和二楼露台的发电量、配方是否已显示、编号和商店设置。")]
     public static string ShowTurbines()
     {
         var (id, name) = WindPatches.Weather();
@@ -100,7 +100,7 @@ public static class DevCheats
     }
 
     [DisplayName("Give 1 of each dye\n给每种染料各 1 个")]
-    [Description("Puts one of each of the game's eight dyes in your bag, for crafting the coloured turbines.\n在背包里放入游戏中八种染料各 1 个，用来制作彩色风力发电机。")]
+    [Description("Puts one of each of the game's eight dyes in your bag, for crafting the colored turbines.\n在背包里放入游戏中八种染料各 1 个，用来制作彩色风力发电机。")]
     public static string GiveDyes()
     {
         if (Bag() is not { } bag) return NotInGame;

@@ -20,7 +20,7 @@ internal static class ShopStock
     /// <summary>The shops in the world now, by pointer. A shop that is taken down has its id set to 0.</summary>
     private static readonly Dictionary<IntPtr, BuildShopComponent> Live = new();
 
-    private const string IfMissed = "a run already going may not see the turbines in its shops";
+    private const string IfMissed = "the shops in a run you already started may not sell the turbines";
 
     private static PatchKit? _hooks;
 

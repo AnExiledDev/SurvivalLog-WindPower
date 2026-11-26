@@ -22,7 +22,7 @@ public class PaintTests
     private static Picture Pixels(params (byte R, byte G, byte B, byte A)[] pixels) =>
         new(pixels.Length, 1, pixels.SelectMany(p => new[] { p.R, p.G, p.B, p.A }).ToArray());
 
-    // What the game draws for a whole picture once it is dyed: our grey base and mask through the dye shader.
+    // What the game draws for a whole picture once it is dyed: our gray base and mask through the dye shader.
     private static Picture Dyed(Picture picture, DyeColour dye)
     {
         var greyBase = Paint.DyeBase(picture);
@@ -59,7 +59,7 @@ public class PaintTests
 
     // The solar panels' palettes hold eight dyes, and the game picks a variant by slot 1 to 8.
     [Fact]
-    public void ThereIsOneColourForEachOfTheGamesEightDyes()
+    public void ThereIsOneColorForEachOfTheGamesEightDyes()
     {
         Assert.Equal(8, Paint.GameDyes.Count);
         Assert.Equal(8, Paint.GameDyes.Distinct().Count());
@@ -105,7 +105,7 @@ public class PaintTests
         Assert.Equal(0, mask.Rgba[4]);
     }
 
-    // The dye shader's own formula: no mask leaves a pixel alone, and a mid grey (linear 0.5) shows the dye as it is.
+    // The dye shader's own formula: no mask leaves a pixel alone, and a mid gray (linear 0.5) shows the dye as it is.
     [Fact]
     public void TheShaderShowsTheDyeAtTwiceTheBasesBrightness()
     {
@@ -119,7 +119,7 @@ public class PaintTests
     }
 
     [Fact]
-    public void DyedPaintTakesTheDyesColourAtAboutItsBrightness()
+    public void DyedPaintTakesTheDyesColorAtAboutItsBrightness()
     {
         var olive = Texture(TurbineRows.Large, "Olive");
         var paint = new Func<int, bool>(p => Paint.PaintWeight(olive.Rgba[p * 4], olive.Rgba[p * 4 + 1], olive.Rgba[p * 4 + 2]) > 0.9f);
@@ -131,7 +131,7 @@ public class PaintTests
         Assert.InRange(b, DuskBlue.B * 255 * 0.8, DuskBlue.B * 255 * 1.05);
     }
 
-    // Even paint shows the dye at exactly the dye level: the grey is chosen for the shader's doubling, in linear light.
+    // Even paint shows the dye at exactly the dye level: the gray is chosen for the shader's doubling, in linear light.
     [Fact]
     public void EvenPaintShowsTheDyeAtTheDyeLevel()
     {
@@ -172,7 +172,7 @@ public class PaintTests
         Assert.True(dyed.Rgba[6] > dyed.Rgba[4], "the lighter paint should be blue now");
     }
 
-    // The grey base is grey: the dye shader takes only its brightness, so any colour left in it would be lost anyway.
+    // The gray base is gray: the dye shader takes only its brightness, so any color left in it would be lost anyway.
     [Fact]
     public void ThePaintInTheDyeBaseIsGrey()
     {

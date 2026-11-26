@@ -17,13 +17,13 @@ namespace WindPower;
 public sealed class Plugin : BasePlugin
 {
     internal const string Guid = "com.dev.survivallog.windpower";
-    private const string Version = "0.9.9";
+    private const string Version = "0.9.10";
 
     public override void Load()
     {
         _uninstallPrep = Config.Bind("Uninstall", "UninstallPrep", false,
-            "Turn this on before you remove Wind Power, then load your save. Every Wind Turbine Package in the save, whether it's in a bag, in storage or on the floor, becomes the Solar Panel Package of its size, and the shops stop selling the turbines. Placed and packed turbines are always saved as solar panels, so they need nothing. Then save the game, quit, and remove WindPower.dll. LogOutput.log lists what was changed. Turning this off again does not turn the packages back.\n" +
-            "移除风力发电模组之前请先打开此项，然后读取存档。存档里的每个风力发电机包裹，不管在背包、储物里还是地上，都会变成同尺寸的太阳能发电板包裹，商店也不再出售风力发电机。已安装和已打包的风力发电机本来就按太阳能发电板保存，不受影响。然后存档、退出游戏，再删除 WindPower.dll。改了哪些东西写在 LogOutput.log 里。再关掉此项，包裹也不会变回来。");
+            "Turn this on before you remove Wind Power, then load your save. Every Wind Turbine Package in the save, whether it's in a bag, in storage or on the floor, becomes the Solar Panel Package of its size and color, and the shops stop selling the turbines. Turbines you have placed, or packed back up where they stood, are already saved as solar panels, so they need nothing. Then save the game, quit, and remove WindPower.dll. LogOutput.log lists what was changed. Turning this off again does not turn the packages back.\n" +
+            "移除风力发电模组之前请先打开此项，然后读取存档。存档里的每个风力发电机包裹，不管在背包、储物里还是地上，都会变成同尺寸、同颜色的太阳能板包裹，商店也不再出售风力发电机。已安装的风力发电机，和原地打包起来的风力发电机，本来就按太阳能板保存，不受影响。然后存档、退出游戏，再删除 WindPower.dll。改了哪些东西写在 LogOutput.log 里。再关掉此项，包裹也不会变回来。");
 
         var variation = Config.Bind("Wind", "Variation", WindVariation.DefaultPercent, new ConfigDescription(
             "How far the wind rises and falls within one weather, as a percent of that weather's average. The wind picks up and dies down over the hours, the same for every turbine, and over a few days it averages out to that weather's setting. 0 keeps the wind steady for as long as the weather lasts.\n" +
@@ -36,7 +36,7 @@ public sealed class Plugin : BasePlugin
             "How much of a turbine's materials taking it down gives back, as a percent of its recipe. 50 is about half, like the game's furniture. 0 gives nothing back and 100 gives back everything. A turbine whose Returns list is filled in gives back that list instead.\n" +
             "拆除风力发电机时返还多少材料，按配方的百分比计。50 约为一半，和游戏里的家具一样。0 什么都不返还，100 全部返还。填了 Returns 清单的风力发电机按清单返还。",
             new AcceptableValueRange<int>(0, 100)));
-        BindSettings(TurbineRows.Small, "Small Solar Panel", "小型太阳能发电板", 20);
+        BindSettings(TurbineRows.Small, "Small Solar Panel", "小型太阳能电板", 20);
         BindSettings(TurbineRows.Medium, "Medium Solar Panel", "中型太阳能发电板", 40);
         BindSettings(TurbineRows.Large, "Large Solar Panel", "大型太阳能发电板", 80);
         ModManagerAnswers.Settings = () => TurbineRows.All.Select(kind => _reads[kind]()).ToList();
@@ -113,11 +113,13 @@ public sealed class Plugin : BasePlugin
         var name = kind.Name;
         var chinese = kind.ChineseName;
         var defaults = kind.Defaults;
+        var terrace = kind == TurbineRows.Small ? "" : ", and a turbine on the 2F terrace makes 20% more";
+        var terraceChinese = kind == TurbineRows.Small ? "" : "，装在二楼露台的多发 20%";
         var listTags = new[] { "ModManager.Control=ItemCounts", $"ModManager.MaxKinds={MaterialList.MostKinds}", $"ModManager.MaxCount={MaterialList.MostOfOne}" };
 
         var rated = Config.Bind(section, "RatedPower", defaults.RatedPower, new ConfigDescription(
-            $"The power the {name} makes on average in full wind (100%, which is the wind in Severe Cold at the default Weather settings). In calmer weather it makes a share of this, and a turbine on the 2F terrace makes 20% more. Variation moves the power up and down over the hours.\n" +
-            $"{chinese}在满风力（100%，默认 Weather 设置下就是「重度寒潮」的风力）时的平均发电量。风小的天气只发出其中一部分，装在二楼露台的多发 20%。「Variation」会让它随时间上下浮动。",
+            $"The power the {name} makes on average in full wind (100%, which is the wind in Severe Cold at the default Weather settings). In calmer weather it makes a share of this{terrace}. Variation moves the power up and down over the hours.\n" +
+            $"{chinese}在满风力（100%，默认 Weather 设置下就是「重度寒潮」的风力）时的平均发电量。风小的天气只发出其中一部分{terraceChinese}。「Variation」会让它随时间上下浮动。",
             new AcceptableValueRange<float>(1f, 200f)));
         var materials = Config.Bind(section, TurbineChoices.MaterialsKey, defaults.Materials, new ConfigDescription(
             $"What crafting a {name} Package takes, written as item id:count pairs split by commas. 20004 is Scrap Metal, 20104 Wire, 20210 Electronic Components and 20373 Stainless Steel Plate. Up to {MaterialList.MostKinds} different items, up to {MaterialList.MostOfOne} of each. A list the game cannot use (an unknown item, a dye, or the same materials as another recipe) falls back to the default, and LogOutput.log says why.\n" +

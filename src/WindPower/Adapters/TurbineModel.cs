@@ -22,7 +22,7 @@ namespace WindPower.Adapters;
 /// the head bar, the collider, the animator) with the panel's meshes swapped for the turbine's, built from the model
 /// file inside the DLL. The rotor's speed follows the turbine's output, and on the large turbine the whole top swings
 /// round into gusts (<see cref="TurbineMotion"/>). The panel's dye palette gets the turbine's own painted materials
-/// on the game's dye shader, so the game's dyes recolour it. If a model cannot be built, the game gets the solar panel's own
+/// on the game's dye shader, so the game's dyes recolor it. If a model cannot be built, the game gets the solar panel's own
 /// prefab, so the turbine still works, looking like a panel.
 /// </summary>
 internal static class TurbineModel
@@ -328,9 +328,9 @@ internal static class TurbineModel
 
     /// <summary>
     /// Fills the solar panel's dye palette with the turbine's own. Each painted material gets eight copies on the
-    /// game's dye shader (SL/LitDye, taken from the panel's own dyed materials), one per dye, sharing one grey base map
-    /// and one mask (<see cref="Paint"/>), so the game colours the turbine the way it colours its own furniture. The
-    /// game swaps them in when the player dyes the turbine. The colours come from the panel's own palette.
+    /// game's dye shader (SL/LitDye, taken from the panel's own dyed materials), one per dye, sharing one gray base map
+    /// and one mask (<see cref="Paint"/>), so the game colors the turbine the way it colors any other furniture. The
+    /// game swaps them in when the player dyes the turbine. The colors come from the panel's own palette.
     /// </summary>
     private static void SetDyes(GameObject copy, TurbineKind kind, Model model, Material[] materials, List<MeshRenderer> made)
     {
@@ -353,7 +353,7 @@ internal static class TurbineModel
 
             if (dyed == null || !dyed.HasProperty("_DyeColor"))
             {
-                _log($"the solar panel's dye {i + 1} has no colour, so the {kind.Name} cannot be dyed");
+                _log($"the solar panel's dye {i + 1} has no color, so the {kind.Name} cannot be dyed");
 
                 return;
             }
@@ -378,7 +378,7 @@ internal static class TurbineModel
 
             for (var slot = 0; slot < colours.Count; slot++)
             {
-                // Swapping the shader keeps every property both shaders share: our maps, colours and keywords.
+                // Swapping the shader keeps every property both shaders share: our maps, colors and keywords.
                 var variant = new Material(materials[m]) { name = $"{materials[m].name}_Dye{slot + 1:00}", shader = shader };
 
                 foreach (var map in new[] { "_BaseMap", "_MainTex" })
@@ -397,7 +397,7 @@ internal static class TurbineModel
 
         for (var i = 0; i < made.Count; i++) palette.Targets[i] = made[i];
 
-        _log($"{kind.Name} dyes: {entries.Count} painted materials on {shader.name}, {colours.Count} colours each");
+        _log($"{kind.Name} dyes: {entries.Count} painted materials on {shader.name}, {colours.Count} colors each");
     }
 
     private static Material MakeMaterial(Material stock, ModelMaterial source, IReadOnlyList<byte[]> images)
@@ -420,7 +420,7 @@ internal static class TurbineModel
             material.SetTextureOffset(map, UnityEngine.Vector2.zero);
         }
 
-        // glTF colours are linear; Unity takes material colours as sRGB and converts them itself.
+        // glTF colors are linear; Unity takes material colors as sRGB and converts them itself.
         var colour = new Color(source.BaseColor.X, source.BaseColor.Y, source.BaseColor.Z, source.BaseColor.W).gamma;
 
         foreach (var name in new[] { "_BaseColor", "_Color" })
@@ -440,7 +440,7 @@ internal static class TurbineModel
     /// </summary>
     private static Texture2D MakeTexture(string name, Picture picture, bool linear = false)
     {
-        // A mask is data, not colour, so it is stored linear; colour maps are sRGB.
+        // A mask is data, not color, so it is stored linear; color maps are sRGB.
         var texture = new Texture2D(picture.Width, picture.Height, TextureFormat.RGBA32, true, linear)
         {
             name = ModelName + "_" + name,

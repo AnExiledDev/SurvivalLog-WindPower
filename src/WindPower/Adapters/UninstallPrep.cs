@@ -67,8 +67,10 @@ internal static class UninstallPrep
         }
 
         if (packages + shops + bought + saved > 0)
-            Log($"Uninstall prep: {packages} turbine packages here and {saved} saved elsewhere turned into solar panel packages, {shops} shop entries removed, {bought} purchase records moved to the solar panels. Save the game, then remove WindPower.dll.");
+            Log($"Uninstall prep: {Count(packages, "turbine package", "turbine packages")} in this place and {saved} in your other places are now solar panel packages, {Count(shops, "turbine listing was", "turbine listings were")} taken out of the shops, and {Count(bought, "turbine you bought before the disaster now counts", "turbines you bought before the disaster now count")} as solar panels. Save the game, then remove WindPower.dll.");
     }
+
+    private static string Count(int count, string one, string many) => $"{count} {(count == 1 ? one : many)}";
 
     /// <summary>The turbine packages in the place loaded now, wherever they lie. Each bag's weight is kept right.</summary>
     private static int Packages(ItemManager items)

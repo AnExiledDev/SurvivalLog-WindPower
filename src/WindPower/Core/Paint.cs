@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 namespace WindPower.Core;
 
-/// <summary>A dye colour as the game stores it: red, green and blue from 0 to 1.</summary>
+/// <summary>A dye color as the game stores it: red, green and blue from 0 to 1.</summary>
 public readonly record struct DyeColour(float R, float G, float B);
 
 /// <summary>
 /// Gets a turbine's olive paint ready for the game's dye shader, SL/LitDye (game 1.1.20151). That shader takes the
-/// albedo (base map times base colour, in linear light), a mask (its red channel, 1 = dyed) and the dye colour, and
+/// albedo (base map times base color, in linear light), a mask (its red channel, 1 = dyed) and the dye color, and
 /// draws <c>lerp(albedo, saturate(2 * luma(albedo)) * dye, mask * dye.a)</c>, where luma weighs red, green and blue
-/// 0.299, 0.587 and 0.114. So a dyed part needs a grey base: its brightness, doubled, is how bright the dye shows.
-/// <see cref="Mask"/> marks the paint; <see cref="DyeBase"/> turns the paint grey, keeping its light and shade. The
-/// orange stripes, the rust and the pale chips are other colours, so they stay as they are.
+/// 0.299, 0.587 and 0.114. So a dyed part needs a gray base: its brightness, doubled, is how bright the dye shows.
+/// <see cref="Mask"/> marks the paint; <see cref="DyeBase"/> turns the paint gray, keeping its light and shade. The
+/// orange stripes, the rust and the pale chips are other colors, so they stay as they are.
 /// </summary>
 public static class Paint
 {
@@ -39,7 +39,7 @@ public static class Paint
     /// </summary>
     public const float DyeLevel = 0.9f;
 
-    /// <summary>How much of a pixel is olive paint, from 0 (none) to 1: yellow-green hues with some colour in them.</summary>
+    /// <summary>How much of a pixel is olive paint, from 0 (none) to 1: yellow-green hues with some color in them.</summary>
     public static float PaintWeight(byte r, byte g, byte b)
     {
         var (hue, saturation) = HueAndSaturation(r, g, b);
@@ -79,8 +79,8 @@ public static class Paint
     }
 
     /// <summary>
-    /// The base map for the dyed materials: the paint turned grey, as bright as <see cref="DyeLevel"/> asks on
-    /// average and lighter or darker where the paint was, and partly-paint pixels only partly grey. Everything else,
+    /// The base map for the dyed materials: the paint turned gray, as bright as <see cref="DyeLevel"/> asks on
+    /// average and lighter or darker where the paint was, and partly-paint pixels only partly gray. Everything else,
     /// and alpha, stays as it was. The picture is sRGB, as the game reads base maps.
     /// </summary>
     public static Picture DyeBase(Picture picture)
@@ -109,7 +109,7 @@ public static class Paint
 
             if (weight <= 0f) continue;
 
-            // The shader shows the dye at 2 * luma, so a grey of linear value level / 2 shows it at that level.
+            // The shader shows the dye at 2 * luma, so a gray of linear value level / 2 shows it at that level.
             var level = average > 0f ? Math.Min(1f, Luma(source, p) / average * DyeLevel) : DyeLevel;
             var grey = ToSrgb(level / 2f) * 255f;
 
@@ -136,12 +136,12 @@ public static class Paint
 
         static byte Out(float from, float to, float k) => (byte)Math.Clamp((int)MathF.Round(ToSrgb(from + (to - from) * k) * 255f), 0, 255);
 
-        // The dye colour is a material colour, which Unity turns from sRGB to linear before the shader sees it.
+        // The dye color is a material color, which Unity turns from sRGB to linear before the shader sees it.
         return (Out(red, level * ToLinear(dye.R), k), Out(green, level * ToLinear(dye.G), k), Out(blue, level * ToLinear(dye.B), k));
     }
 
     /// <summary>
-    /// The icon as the dye shader would colour it: the paint made grey as on the dyed model, then the dye laid over it
+    /// The icon as the dye shader would color it: the paint made gray as on the dyed model, then the dye laid over it
     /// through the paint mask. Everything else, and alpha, stays as it was.
     /// </summary>
     public static IEnumerable<Picture> DyedIcons(Picture icon, IEnumerable<DyeColour> dyes)

@@ -10,8 +10,8 @@ using WindPower.Core;
 namespace WindPower.Adapters;
 
 /// <summary>
-/// Puts each turbine's icon, and one for each of its colours, where the game's web UI looks for pictures, next to the
-/// game's furniture icons. The coloured ones are made from the plain icon the way the dye shader colours the model.
+/// Puts each turbine's icon, and one for each of its colors, where the game's web UI looks for pictures, next to the
+/// game's furniture icons. The colored ones are made from the plain icon the way the dye shader colors the model.
 /// An icon is written only when the file there is missing or differs, so a mod update brings its new icon.
 /// </summary>
 internal static class TurbineIcon
@@ -48,11 +48,11 @@ internal static class TurbineIcon
                 var dyed = Paint.DyedIcons(Png.Decode(icon), Dyes.All.Select(dye => dye.Colour)).ToList();
                 var written = Dyes.All.Where((dye, i) => Write(folder, Dyes.IconFile(kind, dye), Png.Encode(dyed[i]))).Count();
 
-                return $"the {kind.Name}'s icon is {(plain ? "written" : "in place")}, and {written} of its 8 coloured icons were written";
+                return $"the {kind.Name}'s icon is {(plain ? "written" : "in place")}, and {written} of its 8 colored icons were written";
             }
             catch (Exception ex)
             {
-                return $"the {kind.Name}'s icon is {(plain ? "written" : "in place")}, but its coloured icons could not be made, so its coloured packages show without one: {ex.Message}";
+                return $"the {kind.Name}'s icon is {(plain ? "written" : "in place")}, but its colored icons could not be made, so its colored packages show without one: {ex.Message}";
             }
         }
         catch (Exception ex)

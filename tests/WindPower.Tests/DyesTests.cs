@@ -3,7 +3,7 @@ using Xunit;
 
 namespace WindPower.Tests;
 
-// The crafting card offers a colour only when a recipe of the plain recipe's materials plus one dye crafts a package of
+// The crafting card offers a color only when a recipe of the plain recipe's materials plus one dye crafts a package of
 // the same furniture, so each turbine needs those rows, at ids nothing else uses, copied from the matching solar panel.
 public class DyesTests
 {
@@ -12,7 +12,7 @@ public class DyesTests
     private static Dictionary<string, object> Fields(RowPlan row) => row.Fields.ToDictionary(field => field.Name, field => field.Value);
 
     [Fact]
-    public void EachColourRecipeIsThePlainMaterialsPlusItsOneDye()
+    public void EachColorRecipeIsThePlainMaterialsPlusItsOneDye()
     {
         foreach (var kind in TurbineRows.All)
         foreach (var dye in Dyes.All)
@@ -26,7 +26,7 @@ public class DyesTests
     }
 
     [Fact]
-    public void EachColourPackageUnpacksIntoThePlainTurbineThroughItsOwnAction()
+    public void EachColorPackageUnpacksIntoThePlainTurbineThroughItsOwnAction()
     {
         foreach (var kind in TurbineRows.All)
         foreach (var dye in Dyes.All)
@@ -56,7 +56,7 @@ public class DyesTests
     // From the Data Dump (game 1.1.20719): recipe 1648 makes 14748, the Sage Green Small Solar Panel Package, and
     // recipe 1671 makes 14771, the Ochre Red Large one, which unpacks through action 100014771.
     [Fact]
-    public void TheRowsAreCopiedFromTheSolarPanelOfTheSameSizeAndColour()
+    public void TheRowsAreCopiedFromTheSolarPanelOfTheSameSizeAndColor()
     {
         var sageSmall = Dyes.StockIds(TurbineRows.Small, Dyes.All[0]);
         var ochreLarge = Dyes.StockIds(TurbineRows.Large, Dyes.All[7]);
@@ -67,7 +67,7 @@ public class DyesTests
     }
 
     [Fact]
-    public void APackageIsNamedForItsColour()
+    public void APackageIsNamedForItsColor()
     {
         var texts = Dyes.Texts(TurbineRows.Large, Dyes.All[3]);
 
@@ -77,7 +77,7 @@ public class DyesTests
     }
 
     [Fact]
-    public void AColourPackageIsFoundFromItsId()
+    public void AColorPackageIsFoundFromItsId()
     {
         var ids = Dyes.Ids(TurbineRows.Medium.Ids, Dyes.All[4]);
 
@@ -86,7 +86,7 @@ public class DyesTests
     }
 
     [Fact]
-    public void UninstallTurnsAColourPackageIntoTheSolarPanelPackageOfThatColour()
+    public void UninstallTurnsAColorPackageIntoTheSolarPanelPackageOfThatColor()
     {
         var ids = Dyes.Ids(TurbineRows.Large.Ids, Dyes.All[7]);
 
@@ -108,10 +108,10 @@ public class DyesTests
         foreach (var kind in TurbineRows.All) Assert.DoesNotContain(MaterialList.Standard(kind.Defaults.Materials), Dyes.IsDye);
     }
 
-    // The coloured icon is the plain one put through the dye shader: the olive paint takes the dye, and the rest of
+    // The colored icon is the plain one put through the dye shader: the olive paint takes the dye, and the rest of
     // the picture, and every pixel's transparency, stays as it was.
     [Fact]
-    public void AColourIconRecoloursOnlyThePaint()
+    public void AColorIconRecolorsOnlyThePaint()
     {
         var plain = Png.Decode(File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "assets", TurbineRows.Large.IconFile)));
         var mask = Paint.Mask(plain).Rgba;

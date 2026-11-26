@@ -25,7 +25,7 @@ internal static class WindPatches
     /// <summary>How far above the turbine's foot the power hover points: about a person's chest.</summary>
     private const float HoverAboveFoot = 1.2f;
 
-    private const string IfMissed = "the turbine's wind power is missing from one place";
+    private const string IfMissed = "a turbine's power may not count or may not show";
 
     /// <summary>Whether each turbine stands on the 2F terrace, by instance id; emptied with every weather read.</summary>
     private static readonly Dictionary<long, bool> OnTerrace = new();

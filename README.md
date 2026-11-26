@@ -2,11 +2,11 @@
 
 Adds three wind turbines to Survival Log. They keep making power after dark, and the stronger the wind, the more they make. They only go outdoors: the Small in the yard, the Medium and Large in the yard or on the 2F terrace.
 
-- **Small Wind Turbine**: three blades and a tail vane on a pole. Its head turns to face the wind. It fits a small furniture spot.
+- **Small Wind Turbine**: It has three blades and a tail vane on a pole. Its head turns to face the wind. It fits a small furniture spot.
 - **Medium Wind Turbine**: an upright rotor of two half drums that catches the wind from any side. It fits a medium furniture spot.
-- **Large Wind Turbine**: three blades on a mast. Every so often a gust comes through, and the whole top swings round to meet it. It fits a large furniture spot.
+- **Large Wind Turbine**: It has three blades on a mast. Every so often a gust comes through, and the whole top swings round to meet it. It fits a large furniture spot.
 
-Each turbine has its own model and icon, and can be dyed like the game's furniture: the olive paint takes the colour, and the orange stripes and blades stay as they are. You can also craft one already coloured, by picking a dye on its recipe card at the workbench. The wind picks up and dies down over the hours, and the rotors speed up and slow down smoothly with it. In Heavy Smog there's no wind at the default settings, so they stand still. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The weather box on the screen gets a Wind line too, such as Moderate (35%/100%). The word tells you how strong the wind is, and the percent is how hard it blows compared to full wind. A gust can push it past 100%, up to Gale (130%/100%) at the default settings. What each word means is under Power below.
+Each turbine has its own model and icon, and can be dyed like the game's furniture: the olive paint takes the color, and the orange stripes and blades stay as they are. You can also craft one already colored, by picking a dye on its recipe card at the workbench. The wind picks up and dies down over the hours, and the rotors speed up and slow down smoothly with it. In Heavy Smog there's no wind at the default settings, so they stand still. Hover over a turbine to see, at its base, what it makes now and how strong the wind is. The weather box on the screen gets a Wind line too, such as Moderate (35%/100%). The word tells you how strong the wind is, and the percent is how hard it blows compared to full wind. A gust can push it past 100%, up to Gale (130%/100%) at the default settings. What each word means is under Power below.
 
 ## Getting them
 
@@ -20,12 +20,12 @@ Each turbine has its own model and icon, and can be dyed like the game's furnitu
 
 ## Power
 
-A turbine makes less than the solar panel of its size, since it keeps going at night. You set each turbine's power, materials, shop price and shop stock yourself, and how hard the wind blows in each weather (see Settings). At the default power of 9, 18 and 36, a turbine in the yard makes:
+At the default settings, a turbine makes less than the solar panel of its size, since it keeps going at night. You set each turbine's power, materials, shop price and shop stock yourself, and how hard the wind blows in each weather (see Settings). At the default power of 9, 18 and 36, a turbine in the yard makes:
 
 | Weather | Small | Medium | Large |
 | --- | --- | --- | --- |
 | Heavy Smog | 0 | 0 | 0 |
-| Clear, and the cold clear days | 1 | 2 | 4 |
+| Clear, Frosty/Clear, Cold/Clear and Chilly/Clear | 1 | 2 | 4 |
 | Cloudy | 2 | 4 | 7 |
 | Rainy | 3 | 6 | 13 |
 | Continuous Rain | 4 | 8 | 16 |
@@ -36,7 +36,7 @@ A turbine makes less than the solar panel of its size, since it keeps going at n
 
 A Medium or Large turbine on the 2F terrace stands higher in the wind and makes 20% more, so in Severe Cold the Medium makes 22 there and the Large makes 43. The terrace has no small spots.
 
-A turbine's power setting is what it makes in full wind, which is the average wind in Severe Cold at the default settings. The Wind line in the weather box shows how hard the wind blows compared to that, such as Moderate (35%/100%). A turbine makes its power setting times that percent, so a Large set to 36 makes about 13 at 35%. 100% isn't the top, since a gust can push it past 100%. Here's what each word means, and the weather you'll usually see it in at the default settings:
+A turbine's `RatedPower` is what it makes in full wind, which is the average wind in Severe Cold at the default settings. The Wind line in the weather box shows how hard the wind blows compared to that, such as Moderate (35%/100%). A turbine makes its `RatedPower` times that percent, so a Large set to 36 makes about 13 at 35%. 100% isn't the top, since a gust can push it past 100%. Here's what each word means, and the weather you'll usually see it in at the default settings:
 
 - **Calm** (0%): Heavy Smog. The turbines stand still.
 - **Light** (1-29%): clear and cloudy days.
@@ -46,7 +46,7 @@ A turbine's power setting is what it makes in full wind, which is the average wi
 
 These are averages. Within a weather the wind rises and falls over the hours, by up to 30% either way at the default setting, so a rainy afternoon might give a small turbine 2 one hour and 4 the next. Every turbine feels the same wind, and over several days it evens out to the numbers above. The `Variation` setting widens or narrows the swing, and 0 keeps the wind steady.
 
-With [Power Manager](https://www.nexusmods.com/survivallog/mods/126) 0.4.0 or newer, its `WindMultiplier` setting makes every turbine stronger or weaker, like its solar setting does for the panels. A turbine's hover then shows its power with that setting, and the wind reading stays as it is. With Power Manager 0.5.0 or newer, its `SmogOutput` setting can also give Heavy Smog some wind, as a share of a Clear day's, so the turbines turn and make power there too.
+With [Power Manager](https://www.nexusmods.com/survivallog/mods/126) 0.4.0 or newer, its `WindMultiplier` setting makes every turbine stronger or weaker, like its `SolarMultiplier` setting does for the solar panels. Hovering over a turbine then shows its Rated number with that setting included, and the wind reading stays as it is. With Power Manager 0.5.0 or newer, its `SmogOutput` setting can also give Heavy Smog some wind, as a share of a Clear day's, so the turbines turn and make power there too.
 
 ## Settings
 
@@ -61,10 +61,10 @@ The game saves each turbine as the solar panel of its size, and the mod turns it
 A turbine package in a bag or in storage would be lost without the mod, so do this first:
 
 1. Turn on `UninstallPrep` (on the Mods screen, or in the config file while the game is closed).
-2. Load your save. Every turbine package, wherever it is, becomes the solar panel package of its size and colour, and the shops stop selling turbines. `BepInEx\LogOutput.log` says what was changed.
-3. Save the game and quit.
+2. Load your save. Every turbine package, wherever it is, becomes the solar panel package of its size and color, and the shops stop selling turbines. `BepInEx\LogOutput.log` says what was changed.
+3. Save the game. Do steps 2 and 3 for each save you want to keep, then quit.
 
-Then delete `WindPower.dll` from the `BepInEx\plugins` folder. For a clean slate, also delete `com.dev.survivallog.windpower.cfg` from `BepInEx\config`. Do this for each save you want to keep.
+Then delete `WindPower.dll` from the `BepInEx\plugins` folder. To remove its settings too, delete `com.dev.survivallog.windpower.cfg` from `BepInEx\config`.
 
 ## Requirements
 
@@ -91,7 +91,7 @@ Found a bug, have an idea, or something feels off? Come say hi in the [unofficia
 
 To reach me directly, message `exiled.dev` on Discord, you can find me in the [unofficial modding Discord](https://discord.gg/pDrQtqbZgb) and the [official Survival Log Discord](https://discord.gg/MZGg4gQAUe). I'm also on X as [@AnExiledDev](https://x.com/AnExiledDev).
 
-A Survival Log wiki with detailed documentation for all of my mods is coming soon.
+Check out my [Survival Log wiki](https://sldb.core-directive.com/en/) for items, crafting, maps and more.
 
 ## License
 

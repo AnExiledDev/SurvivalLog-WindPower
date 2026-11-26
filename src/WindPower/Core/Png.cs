@@ -8,7 +8,7 @@ namespace WindPower.Core;
 public sealed record Picture(int Width, int Height, byte[] Rgba);
 
 /// <summary>
-/// Decodes the pngs three.js writes: 8 bits per channel, RGB or RGBA, not interlaced, and writes the coloured icons.
+/// Decodes the pngs three.js writes: 8 bits per channel, RGB or RGBA, not interlaced, and writes the colored icons.
 /// Done here rather than with Unity's ImageConversion, which the game never calls itself, so it may not survive in
 /// the build.
 /// </summary>
@@ -43,7 +43,7 @@ public static class Png
 
                 channels = colour switch { 2 => 3, 6 => 4, _ => 0 };
 
-                if (depth != 8 || channels == 0 || interlace != 0) throw new FormatException($"png kind not supported (depth {depth}, colour type {colour}, interlace {interlace})");
+                if (depth != 8 || channels == 0 || interlace != 0) throw new FormatException($"png kind not supported (depth {depth}, color type {colour}, interlace {interlace})");
             }
             else if (type == "IDAT")
             {
